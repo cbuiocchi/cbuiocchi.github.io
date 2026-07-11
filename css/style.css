@@ -193,6 +193,10 @@ html, body {
 .download-note { margin-bottom: 12px; }
 .link-row { display: flex; gap: 10px; }
 
+.mobile-only { display: none; }
+
+button, .xp-button-link, a { touch-action: manipulation; }
+
 /* ============ TASKBAR ============ */
 #taskbar {
   position: absolute;
@@ -334,15 +338,27 @@ html, body {
 /* ============ RESPONSIVE / MOBILE ============ */
 @media (max-width: 760px) {
   html, body { overflow: auto; height: auto; }
-  #desktop { overflow: visible; height: auto; min-height: 100%; padding-bottom: 50px; }
+  #desktop {
+    overflow: visible;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .desktop-only { display: none; }
+  .mobile-only { display: block; }
 
   .desktop-icons {
     position: static;
     flex-direction: row;
     flex-wrap: wrap;
     padding: 14px;
-    gap: 14px;
+    gap: 18px;
   }
+
+  .desktop-icon { width: 84px; }
+  .desktop-icon span { font-size: 12.5px; }
 
   .xp-window {
     position: static !important;
@@ -355,9 +371,38 @@ html, body {
   .xp-window.open { display: flex; }
   .xp-window:not(.open) { display: none; }
 
+  .title-bar { height: 40px; padding: 4px 6px; }
+  .title-bar-controls button {
+    width: 30px;
+    height: 30px;
+  }
+  .title-bar-controls button[data-action="maximize"] { display: none; }
+
+  .window-body { font-size: 14px; }
+
   .game-embed-wrap { aspect-ratio: 4 / 3; }
+  .screenshot-strip img { height: 140px; }
 
   .resize-handle { display: none; }
 
-  #taskbar { position: fixed; }
+  #taskbar {
+    position: fixed;
+    height: 44px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #start-menu {
+    position: fixed;
+    left: 4px;
+    right: 4px;
+    width: auto;
+    bottom: calc(48px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 70px);
+    overflow-y: auto;
+  }
+
+  .start-menu-list button,
+  .start-menu-list a {
+    padding: 11px 14px;
+  }
 }

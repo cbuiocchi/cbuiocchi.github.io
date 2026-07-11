@@ -36,7 +36,11 @@
   // the real src on close and restore it on the next open/re-open.
   function restoreIframe(win) {
     var iframe = win.querySelector('iframe');
-    if (iframe && iframe.dataset.src && iframe.src !== iframe.dataset.src) {
+    if (!iframe || !iframe.dataset.src) return;
+    // On mobile the embed is swapped for a screenshot strip (desktop-only
+    // wrapper), so don't spend bandwidth loading a game nobody can see.
+    if (isMobile()) return;
+    if (iframe.src !== iframe.dataset.src) {
       iframe.src = iframe.dataset.src;
     }
   }
@@ -74,6 +78,12 @@
     restoreIframe(win);
     focusWindow(id);
     closeStartMenu();
+
+    if (isMobile()) {
+      setTimeout(function () {
+        win.scrollIntoView({ block: 'start' });
+      }, 100);
+    }
   }
 
   function closeWindow(id) {
