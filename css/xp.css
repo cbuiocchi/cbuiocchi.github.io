@@ -1,0 +1,169 @@
+/* ============================================================
+   xp.css — Windows XP "Luna" window-chrome look, built from
+   scratch for this site (colors/gradients matched to XP, not a
+   copy of any single third-party library).
+   ============================================================ */
+
+:root {
+  --xp-blue-dark:   #9689c9;
+  --xp-blue-mid:    #b8a9e6;
+  --xp-blue-light:  #e2d6f7;
+  --xp-blue-glow:   #f3ecfc;
+  --xp-taskbar-1:   #b8ecdf;
+  --xp-taskbar-2:   #7fcfc0;
+  --xp-face:        #f8f4fb;
+  --xp-face-dark:   #e5dcf0;
+  --xp-border-dark: #8577b8;
+  --xp-green-1:     #b6e8cc;
+  --xp-green-2:     #8fd4ac;
+  --xp-red-1:       #ffb8b0;
+  --xp-red-2:       #ff958b;
+  --xp-yellow-1:    #ffecb0;
+  --xp-yellow-2:    #ffd873;
+  --xp-font: Tahoma, Verdana, "Segoe UI", Arial, sans-serif;
+}
+
+.xp-window {
+  position: absolute;
+  min-width: 320px;
+  min-height: 200px;
+  background: var(--xp-face);
+  border: 1px solid var(--xp-border-dark);
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.45);
+  font-family: var(--xp-font);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.xp-window.open { display: flex; }
+.xp-window.minimized { display: none; }
+.xp-window.focused { z-index: 500; }
+
+/* ---- title bar ---- */
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  padding: 3px 4px 3px 6px;
+  background: linear-gradient(180deg, var(--xp-blue-mid) 0%, var(--xp-blue-dark) 8%, var(--xp-blue-dark) 40%, var(--xp-blue-mid) 86%, var(--xp-blue-light) 100%);
+  border-radius: 6px 6px 0 0;
+  color: #fff;
+  cursor: default;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.xp-window:not(.focused) .title-bar {
+  background: linear-gradient(180deg, #c3b8d9 0%, #b0a3cc 8%, #b0a3cc 40%, #c3b8d9 86%, #ded4ec 100%);
+}
+
+.title-bar-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title-bar-icon { width: 16px; height: 16px; }
+
+.title-bar-controls { display: flex; gap: 3px; }
+
+.title-bar-controls button {
+  width: 21px;
+  height: 21px;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #cabdf0, #9f8fd9);
+  position: relative;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.title-bar-controls button:hover { filter: brightness(1.15); }
+.title-bar-controls button:active { filter: brightness(0.9); }
+
+.title-bar-controls button[data-action="close"] {
+  background: linear-gradient(180deg, var(--xp-red-1), var(--xp-red-2));
+}
+
+.title-bar-controls button::before,
+.title-bar-controls button::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+}
+/* minimize: horizontal bar */
+.title-bar-controls button[data-action="minimize"]::before {
+  width: 8px; height: 2px; left: 50%; top: 62%; transform: translate(-50%,-50%);
+}
+/* maximize: square outline */
+.title-bar-controls button[data-action="maximize"]::before {
+  width: 8px; height: 7px; left: 50%; top: 48%; transform: translate(-50%,-50%);
+  background: transparent; border: 1.5px solid #fff;
+}
+/* close: X made of two rotated bars */
+.title-bar-controls button[data-action="close"]::before {
+  width: 10px; height: 1.6px; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(45deg);
+}
+.title-bar-controls button[data-action="close"]::after {
+  width: 10px; height: 1.6px; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(-45deg);
+}
+
+/* ---- body ---- */
+.window-body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 16px;
+  background: var(--xp-face);
+  color: #1a1a1a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.notepad-body {
+  background: #fff;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+.notepad-body p { margin: 0 0 12px; }
+.notepad-body a { color: #0a246a; }
+
+/* ---- buttons / links styled like XP buttons ---- */
+.xp-button-link,
+.xp-btn {
+  display: inline-block;
+  padding: 5px 14px;
+  background: var(--xp-face);
+  border: 1px solid #b8aed0;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #cfc4e3;
+  color: #000;
+  text-decoration: none;
+  font-family: var(--xp-font);
+  font-size: 12px;
+  cursor: pointer;
+}
+.xp-button-link:hover, .xp-btn:hover { background: #fdfbff; }
+.xp-button-link:active, .xp-btn:active {
+  box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #cfc4e3;
+}
+.xp-button-link.primary {
+  background: linear-gradient(180deg, #e3fbec, #c3ecd4);
+  border-color: var(--xp-green-2);
+  font-weight: bold;
+}
+
+/* resize handle */
+.resize-handle {
+  position: absolute;
+  right: 0; bottom: 0;
+  width: 16px; height: 16px;
+  cursor: nwse-resize;
+}

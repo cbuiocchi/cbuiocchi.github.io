@@ -1,0 +1,350 @@
+/* ============================================================
+   style.css — desktop layout, wallpaper, taskbar, start menu,
+   boot screen, and content-specific styling (screenshots, embed).
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--xp-font);
+}
+
+/* ============ BOOT SCREEN ============ */
+#boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  cursor: pointer;
+  transition: opacity 0.6s ease;
+}
+#boot-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.boot-flag {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+  width: 40px;
+  height: 40px;
+  animation: flag-wave 1.8s ease-in-out infinite;
+}
+.flag-sq { border-radius: 2px; }
+.flag-red { background: #ffb8b0; }
+.flag-green { background: #b6e8cc; }
+.flag-blue { background: #b8a9e6; }
+.flag-yellow { background: #ffecb0; }
+@keyframes flag-wave {
+  0%, 100% { transform: skewY(0deg); }
+  50% { transform: skewY(-4deg); }
+}
+.boot-title {
+  font-size: 34px;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+.boot-title strong { font-weight: 700; }
+
+.boot-bar {
+  width: 220px;
+  height: 12px;
+  border: 1px solid #4a6fa5;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #111;
+}
+.boot-bar-fill {
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--xp-blue-mid), var(--xp-blue-glow));
+  animation: boot-scan 1.4s ease-in-out infinite;
+}
+@keyframes boot-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+.boot-hint {
+  font-size: 12px;
+  color: #9fb3d8;
+  opacity: 0;
+  animation: boot-hint-in 0.4s ease 1.2s forwards;
+}
+@keyframes boot-hint-in { to { opacity: 1; } }
+
+/* ============ DESKTOP ============ */
+#desktop {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* full-height sky backdrop; the rolling-hills silhouette (::before) overlays
+     the bottom of it with transparent sky-peeking gaps above the ridgeline */
+  background: linear-gradient(180deg, #a9c9f0 0%, #cfe0f7 55%, #f6ecf9 100%);
+  overflow: hidden;
+}
+#desktop::before {
+  /* rolling hills silhouette, Bliss-esque without reproducing the photo */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 500' preserveAspectRatio='none'%3E%3Cpath d='M0,190 C240,90 520,40 760,95 C1000,150 1180,70 1440,120 L1440,500 L0,500 Z' fill='%23cbb8ec'/%3E%3Cpath d='M0,280 C260,190 480,150 720,195 C960,240 1200,165 1440,205 L1440,500 L0,500 Z' fill='%23b39ddc'/%3E%3Cpath d='M0,300 C260,210 480,165 720,215 C960,260 1200,180 1440,225 L1440,240 C1200,195 960,275 720,230 C480,180 260,225 0,315 Z' fill='%23f3ecfc' fill-opacity='0.55'/%3E%3Cpath d='M0,330 C280,260 560,300 860,270 C1120,245 1300,300 1440,280 L1440,500 L0,500 Z' fill='%2383679f'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 100% 65%;
+  z-index: 0;
+}
+
+.desktop-icons {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  z-index: 5;
+}
+
+.desktop-icon {
+  width: 76px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 2px;
+  cursor: pointer;
+  font-family: var(--xp-font);
+}
+.desktop-icon img { width: 40px; height: 40px; pointer-events: none; }
+.desktop-icon span {
+  font-size: 11.5px;
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+  line-height: 1.25;
+}
+.desktop-icon:hover,
+.desktop-icon:focus-visible {
+  background: rgba(51, 112, 210, 0.35);
+  border: 1px dotted rgba(255,255,255,0.6);
+  outline: none;
+}
+
+/* ============ WINDOW CONTENT EXTRAS ============ */
+.game-embed-wrap {
+  width: 100%;
+  aspect-ratio: 640 / 360;
+  background: #000;
+  border: 1px solid #666;
+  margin-bottom: 12px;
+}
+.game-embed-wrap iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.pitch { margin: 0 0 12px; }
+
+.screenshot-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.screenshot-strip img {
+  height: 160px;
+  border: 1px solid #999;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.download-note { margin-bottom: 12px; }
+.link-row { display: flex; gap: 10px; }
+
+/* ============ TASKBAR ============ */
+#taskbar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 40px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  background: linear-gradient(180deg, var(--xp-taskbar-1) 0%, var(--xp-taskbar-2) 100%);
+  border-top: 1px solid #cdf2ea;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
+}
+
+#start-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 14px 0 8px;
+  background: linear-gradient(180deg, #b6e8cc, var(--xp-green-2));
+  border: 1px solid #6bab85;
+  border-radius: 6px;
+  color: #2d4a3a;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  text-shadow: none;
+}
+#start-button img { width: 20px; height: 20px; }
+#start-button:active { filter: brightness(0.9); }
+
+#taskbar-windows {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  overflow: hidden;
+  height: 30px;
+}
+
+.taskbar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 180px;
+  height: 100%;
+  padding: 0 10px;
+  background: linear-gradient(180deg, #d9f7f0, #a8e0d4);
+  border: 1px solid #7cc9b8;
+  border-radius: 3px;
+  color: #1f4a42;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.taskbar-item img { width: 16px; height: 16px; flex-shrink: 0; }
+.taskbar-item.active {
+  background: linear-gradient(180deg, #7cc9b8, #5fb0a0);
+  color: #fff;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+#taskbar-clock {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: rgba(255,255,255,0.25);
+  border-left: 1px solid rgba(255,255,255,0.45);
+  color: #1f4a42;
+  font-size: 12px;
+}
+
+/* ============ START MENU ============ */
+#start-menu {
+  position: absolute;
+  left: 4px;
+  bottom: 44px;
+  width: 260px;
+  z-index: 1001;
+  background: var(--xp-face);
+  border: 1px solid var(--xp-border-dark);
+  border-radius: 6px 6px 4px 4px;
+  box-shadow: 3px 3px 14px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: none;
+}
+#start-menu.open { display: block; }
+
+.start-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, var(--xp-blue-mid), var(--xp-blue-dark));
+  color: #fff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.25);
+}
+.start-menu-header img { width: 34px; height: 34px; border-radius: 4px; border: 1px solid #fff; }
+.start-menu-header span { font-size: 13px; font-weight: bold; }
+.start-menu-header small { font-weight: normal; opacity: 0.85; }
+
+.start-menu-body { padding: 6px 0; }
+.start-menu-list { list-style: none; margin: 0; padding: 0; }
+.start-menu-list li { margin: 0; }
+.start-menu-list button,
+.start-menu-list a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 14px;
+  background: none;
+  border: none;
+  color: #000;
+  text-decoration: none;
+  font-family: var(--xp-font);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.start-menu-list img { width: 22px; height: 22px; }
+.start-menu-list button:hover,
+.start-menu-list a:hover {
+  background: linear-gradient(180deg, var(--xp-blue-mid), var(--xp-blue-dark));
+  color: #fff;
+}
+.start-menu-external {
+  border-top: 1px solid var(--xp-face-dark);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+/* ============ RESPONSIVE / MOBILE ============ */
+@media (max-width: 760px) {
+  html, body { overflow: auto; height: auto; }
+  #desktop { overflow: visible; height: auto; min-height: 100%; padding-bottom: 50px; }
+
+  .desktop-icons {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .xp-window {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 0 16px;
+    border-radius: 0;
+    transform: none !important;
+  }
+  .xp-window.open { display: flex; }
+  .xp-window:not(.open) { display: none; }
+
+  .game-embed-wrap { aspect-ratio: 4 / 3; }
+
+  .resize-handle { display: none; }
+
+  #taskbar { position: fixed; }
+}

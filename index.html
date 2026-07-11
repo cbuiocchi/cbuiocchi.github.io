@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clay Buiocchi - Game Designer</title>
+<meta name="description" content="Portfolio of Clay Buiocchi, game designer. Deckborn and Wrong Bird prototypes.">
+<link rel="icon" href="img/favicon.svg">
+<link rel="stylesheet" href="css/xp.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ BOOT SCREEN ============ -->
+<div id="boot-screen">
+  <div class="boot-logo">
+    <div class="boot-flag">
+      <span class="flag-sq flag-red"></span>
+      <span class="flag-sq flag-green"></span>
+      <span class="flag-sq flag-blue"></span>
+      <span class="flag-sq flag-yellow"></span>
+    </div>
+    <div class="boot-title">clay<strong>xp</strong></div>
+  </div>
+  <div class="boot-bar"><div class="boot-bar-fill"></div></div>
+  <div class="boot-hint">Click anywhere to continue</div>
+</div>
+
+<!-- ============ DESKTOP ============ -->
+<div id="desktop">
+
+  <div class="desktop-icons">
+    <button class="desktop-icon" data-window="win-deckborn">
+      <img src="img/icon-deckborn.svg" alt="">
+      <span>Deckborn.exe</span>
+    </button>
+    <button class="desktop-icon" data-window="win-wrongbird">
+      <img src="img/icon-wrongbird.svg" alt="">
+      <span>Wrong Bird.exe</span>
+    </button>
+    <button class="desktop-icon" data-window="win-about">
+      <img src="img/icon-about.svg" alt="">
+      <span>About Me</span>
+    </button>
+    <button class="desktop-icon" data-window="win-contact">
+      <img src="img/icon-contact.svg" alt="">
+      <span>Contact</span>
+    </button>
+  </div>
+
+  <!-- ===== Deckborn window ===== -->
+  <section class="xp-window" id="win-deckborn" data-title="Deckborn Prototype">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-deckborn.svg" alt="">
+        Deckborn Prototype.exe
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="game-embed-wrap">
+        <iframe
+          src="https://html-classic.itch.zone/html/18150834/index.html?v=1782816422"
+          allowfullscreen
+          allow="autoplay; fullscreen; gamepad"
+          title="Deckborn Prototype - playable build">
+        </iframe>
+      </div>
+      <p class="pitch">Deckborn is an RPG with deckbuilding combat &mdash; a bigger-scope take on the genre inspired by classic JRPGs like Final Fantasy 7. It's a solo project built in Godot, with a basic turn-based card combat system and a small overworld to explore. Currently in production, targeting a polished vertical slice by Fall 2026.</p>
+      <div class="link-row">
+        <a class="xp-button-link" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">View on itch.io &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wrong Bird window ===== -->
+  <section class="xp-window" id="win-wrongbird" data-title="Wrong Bird">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-wrongbird.svg" alt="">
+        Wrong Bird Training Loop.exe
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="screenshot-strip">
+        <img src="img/wrongbird-cover.jpeg" alt="Wrong Bird cover art">
+        <img src="img/wrongbird-1.png" alt="Wrong Bird screenshot 1">
+        <img src="img/wrongbird-2.png" alt="Wrong Bird screenshot 2">
+        <img src="img/wrongbird-3.png" alt="Wrong Bird screenshot 3">
+      </div>
+      <p class="pitch">&ldquo;Penguins can't fly&rdquo; &mdash; some idiot. Wrong Bird is a pet raising simulator with roguelite mechanics in which you train penguins to fly. Built to learn UI/UX and RNG-driven systems; the training-loop prototype was completed in May 2026, with a distance-launching loop and full vertical slice targeted for Fall 2026.</p>
+      <div class="download-note">
+        <p><strong>Windows &middot; 501 MB &middot; direct download on itch.io</strong></p>
+      </div>
+      <div class="link-row">
+        <a class="xp-button-link primary" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">Download on itch.io &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== About Me window ===== -->
+  <section class="xp-window" id="win-about" data-title="About Me">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-about.svg" alt="">
+        About Me.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>Hi, I'm Clay (they/them). I'm a game designer working on deckbuilders and creature-raising roguelites &mdash; the kind of games I'd want to play myself.</p>
+      <p>I'm currently finishing Circuit Stream's Game Design Bootcamp, where Deckborn and Wrong Bird both started as prototypes. Deckborn is a 3D deckbuilding JRPG, now being rebuilt in Unreal Engine 5. Wrong Bird is a penguin training-and-launching sim built in Unreal, Blueprint-only.</p>
+      <p>I code everything myself &mdash; Blueprints included &mdash; and I care a lot about making sure a game's systems actually feel good to play, not just work on paper.</p>
+      <p>Before this I studied music and psychology, and I currently work as an early education teacher. I live near Boston.</p>
+    </div>
+  </section>
+
+  <!-- ===== Contact window ===== -->
+  <section class="xp-window" id="win-contact" data-title="Contact">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-contact.svg" alt="">
+        Contact.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>itch.io &mdash; <a href="https://claybuiocchi.itch.io" target="_blank" rel="noopener">claybuiocchi.itch.io</a></p>
+      <p>Email &mdash; <a href="mailto:cmb9597@gmail.com">cmb9597@gmail.com</a></p>
+      <p>LinkedIn &mdash; <a href="https://www.linkedin.com/in/clay-buiocchi-080697358/" target="_blank" rel="noopener">linkedin.com/in/clay-buiocchi</a></p>
+    </div>
+  </section>
+
+  <!-- ============ TASKBAR ============ -->
+  <div id="taskbar">
+    <button id="start-button">
+      <img src="img/icon-start.svg" alt="">
+      <span>start</span>
+    </button>
+    <div id="taskbar-windows"></div>
+    <div id="taskbar-clock"></div>
+  </div>
+
+  <!-- ============ START MENU ============ -->
+  <div id="start-menu">
+    <div class="start-menu-header">
+      <img src="img/icon-user.svg" alt="">
+      <span>Clay Buiocchi<br><small>Game Designer</small></span>
+    </div>
+    <div class="start-menu-body">
+      <ul class="start-menu-list">
+        <li><button data-window="win-deckborn"><img src="img/icon-deckborn.svg" alt="">Deckborn.exe</button></li>
+        <li><button data-window="win-wrongbird"><img src="img/icon-wrongbird.svg" alt="">Wrong Bird.exe</button></li>
+        <li><button data-window="win-about"><img src="img/icon-about.svg" alt="">About Me</button></li>
+        <li><button data-window="win-contact"><img src="img/icon-contact.svg" alt="">Contact</button></li>
+      </ul>
+      <ul class="start-menu-list start-menu-external">
+        <li><a href="https://claybuiocchi.itch.io" target="_blank" rel="noopener"><img src="img/icon-itch.svg" alt="">itch.io profile</a></li>
+        <li><a href="https://www.linkedin.com/in/clay-buiocchi-080697358/" target="_blank" rel="noopener"><img src="img/icon-contact.svg" alt="">LinkedIn</a></li>
+        <li><a href="mailto:cmb9597@gmail.com"><img src="img/icon-contact.svg" alt="">Email Clay</a></li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
