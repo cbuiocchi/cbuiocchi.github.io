@@ -350,7 +350,8 @@ button, .xp-button-link, a { touch-action: manipulation; }
   .mobile-only { display: block; }
 
   .desktop-icons {
-    position: static;
+    position: relative;
+    z-index: 1;
     flex-direction: row;
     flex-wrap: wrap;
     padding: 14px;
@@ -361,7 +362,8 @@ button, .xp-button-link, a { touch-action: manipulation; }
   .desktop-icon span { font-size: 12.5px; }
 
   .xp-window {
-    position: static !important;
+    position: relative !important;
+    z-index: 1;
     width: 100% !important;
     height: auto !important;
     margin: 0 0 16px;
