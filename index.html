@@ -30,6 +30,10 @@
 <div id="desktop">
 
   <div class="desktop-icons">
+    <button class="desktop-icon" data-window="win-welcome">
+      <img src="img/icon-welcome.svg" alt="">
+      <span>Welcome</span>
+    </button>
     <button class="desktop-icon" data-window="win-deckborn">
       <img src="img/icon-deckborn.svg" alt="">
       <span>Deckborn.exe</span>
@@ -47,6 +51,34 @@
       <span>Contact</span>
     </button>
   </div>
+
+  <!-- ===== Welcome window ===== -->
+  <section class="xp-window" id="win-welcome" data-title="Welcome">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-welcome.svg" alt="">
+        Welcome &mdash; clayxp
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>Hi, I'm Clay (they/them) &mdash; welcome to my desktop.</p>
+      <p>This little portfolio works like an old Windows machine. Everything lives in a window, and here's how to get around:</p>
+      <ul class="welcome-tour">
+        <li><a href="#" data-window="win-deckborn"><strong>Deckborn.exe</strong></a> &amp; <a href="#" data-window="win-wrongbird"><strong>Wrong Bird.exe</strong></a> &mdash; the two games I'm building. Open them to play a build or see screenshots.</li>
+        <li><a href="#" data-window="win-about"><strong>About Me</strong></a> &mdash; a bit about who I am and what I care about.</li>
+        <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> &mdash; where to find me and how to reach out.</li>
+      </ul>
+      <p>Open the desktop icons on the left, or hit the <strong>start</strong> button down in the corner &mdash; drag windows around, minimize them to the taskbar, close this one whenever you're ready. Have a look around!</p>
+      <div class="link-row">
+        <button class="xp-button-link primary" data-window="win-deckborn">Explore my games &rarr;</button>
+      </div>
+    </div>
+  </section>
 
   <!-- ===== Deckborn window ===== -->
   <section class="xp-window" id="win-deckborn" data-title="Deckborn Prototype">
@@ -172,6 +204,7 @@
     </div>
     <div class="start-menu-body">
       <ul class="start-menu-list">
+        <li><button data-window="win-welcome"><img src="img/icon-welcome.svg" alt="">Welcome</button></li>
         <li><button data-window="win-deckborn"><img src="img/icon-deckborn.svg" alt="">Deckborn.exe</button></li>
         <li><button data-window="win-wrongbird"><img src="img/icon-wrongbird.svg" alt="">Wrong Bird.exe</button></li>
         <li><button data-window="win-about"><img src="img/icon-about.svg" alt="">About Me</button></li>

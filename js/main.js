@@ -212,7 +212,10 @@
 
   // ---- icons + start menu open windows ----
   document.querySelectorAll('[data-window]').forEach(function (trigger) {
-    trigger.addEventListener('click', function () {
+    trigger.addEventListener('click', function (e) {
+      // Some triggers are <a href="#"> (inline tour links); don't let them
+      // jump to the top of the page.
+      e.preventDefault();
       openWindow(trigger.dataset.window);
     });
   });
@@ -247,8 +250,12 @@
   // ---- boot screen ----
   var boot = document.getElementById('boot-screen');
   function dismissBoot() {
+    // dismissBoot fires from either the click handler or the timeout below,
+    // so bail if we've already run to avoid re-opening the welcome window.
+    if (boot.classList.contains('hidden')) return;
     boot.classList.add('hidden');
     setTimeout(function () { boot.style.display = 'none'; }, 650);
+    openWindow('win-welcome');
   }
   boot.addEventListener('click', dismissBoot);
   setTimeout(dismissBoot, 2600);
