@@ -200,6 +200,63 @@ html, body {
 .download-note { margin-bottom: 12px; }
 .link-row { display: flex; gap: 10px; }
 
+/* ============ FOLDER (EXPLORER) WINDOWS ============ */
+/* Folder windows drop the default body padding so the address bar can span
+   edge-to-edge; the icon grid gets its own padding. */
+.folder-body { padding: 0; }
+
+.explorer-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #ffffff, var(--xp-face-dark));
+  border-bottom: 1px solid var(--xp-face-dark);
+  font-size: 12px;
+  color: #2a2a3a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.explorer-label { color: #6a6a86; }
+
+.folder-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+  padding: 12px;
+  align-content: start;
+}
+
+.folder-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #1a1a2a;
+  text-decoration: none;
+  font-family: var(--xp-font);
+  font-size: 11.5px;
+  text-align: center;
+  cursor: pointer;
+}
+.folder-item img {
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+}
+.folder-item span { line-height: 1.2; }
+.folder-item:hover,
+.folder-item:focus-visible {
+  background: rgba(51, 112, 210, 0.12);
+  border: 1px dotted rgba(51, 112, 210, 0.6);
+  outline: none;
+}
+
 .mobile-only { display: none; }
 
 button, .xp-button-link, a { touch-action: manipulation; }

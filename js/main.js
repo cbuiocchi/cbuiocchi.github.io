@@ -62,7 +62,10 @@
       win.classList.remove('minimized');
 
       if (!isMobile() && !win.style.left && !win.style.top) {
-        var w = 620, h = 480;
+        // Per-window size can be preset via data-width/data-height;
+        // otherwise fall back to the 620x480 default.
+        var w = parseInt(win.dataset.width, 10) || 620;
+        var h = parseInt(win.dataset.height, 10) || 480;
         win.style.width = w + 'px';
         win.style.height = h + 'px';
         if (id === 'win-welcome') {
@@ -72,9 +75,10 @@
           // 40 = taskbar height; keep the window centered in the visible area.
           win.style.top = Math.max(0, (desktop.clientHeight - 40 - h) / 2) + 'px';
         } else {
+          // Position can also be preset via data-left/data-top; else cascade.
           var step = cascadeOffset % CASCADE_MAX;
-          win.style.left = (60 + step * CASCADE_STEP) + 'px';
-          win.style.top = (40 + step * CASCADE_STEP) + 'px';
+          win.style.left = (win.dataset.left || (60 + step * CASCADE_STEP)) + 'px';
+          win.style.top = (win.dataset.top || (40 + step * CASCADE_STEP)) + 'px';
           cascadeOffset++;
         }
       }

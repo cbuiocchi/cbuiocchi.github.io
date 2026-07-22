@@ -35,12 +35,12 @@
       <span>Welcome</span>
     </button>
     <button class="desktop-icon" data-window="win-deckborn">
-      <img src="img/icon-deckborn.svg" alt="">
-      <span>Deckborn.exe</span>
+      <img src="img/icon-folder-deckborn.svg" alt="">
+      <span>Deckborn</span>
     </button>
     <button class="desktop-icon" data-window="win-wrongbird">
-      <img src="img/icon-wrongbird.svg" alt="">
-      <span>Wrong Bird.exe</span>
+      <img src="img/icon-folder-wrongbird.svg" alt="">
+      <span>Wrong Bird</span>
     </button>
     <button class="desktop-icon" data-window="win-about">
       <img src="img/icon-about.svg" alt="">
@@ -69,7 +69,7 @@
       <p>Hi, I'm Clay (they/them) &mdash; welcome to my desktop.</p>
       <p>This little portfolio works like an old Windows machine. Everything lives in a window, and here's how to get around:</p>
       <ul class="welcome-tour">
-        <li><a href="#" data-window="win-deckborn"><strong>Deckborn.exe</strong></a> &amp; <a href="#" data-window="win-wrongbird"><strong>Wrong Bird.exe</strong></a> &mdash; the two games I'm building. Open them to play a build or see screenshots.</li>
+        <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> &amp; <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> &mdash; the two games I'm building. Each is a folder &mdash; open it to play a build, read devlogs, or see screenshots.</li>
         <li><a href="#" data-window="win-about"><strong>About Me</strong></a> &mdash; a bit about who I am and what I care about.</li>
         <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> &mdash; where to find me and how to reach out.</li>
       </ul>
@@ -80,8 +80,51 @@
     </div>
   </section>
 
-  <!-- ===== Deckborn window ===== -->
-  <section class="xp-window" id="win-deckborn" data-title="Deckborn Prototype">
+  <!-- ============================================================
+       DECKBORN — folder + its child windows
+       The folder is an Explorer-style window of icons; each icon
+       opens its own child window (game / devlogs / gdd / shots).
+       Child windows are just more .xp-window sections, opened by the
+       [data-window] buttons inside the folder (wired by main.js).
+       ============================================================ -->
+
+  <!-- ===== Deckborn folder ===== -->
+  <section class="xp-window" id="win-deckborn" data-title="Deckborn" data-width="500" data-height="380">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-folder-deckborn.svg" alt="">
+        Deckborn
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body folder-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Deckborn</div>
+      <div class="folder-view">
+        <button class="folder-item" data-window="win-deckborn-game">
+          <img src="img/icon-deckborn.svg" alt=""><span>Play Deckborn</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlogs">
+          <img src="img/icon-notepad.svg" alt=""><span>Devlogs</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-gdd">
+          <img src="img/icon-gdd.svg" alt=""><span>GDD &amp; Docs</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-shots">
+          <img src="img/icon-screenshots.svg" alt=""><span>Screenshots</span>
+        </button>
+        <a class="folder-item" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">
+          <img src="img/icon-itch.svg" alt=""><span>itch.io page</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Play (the playable build) ===== -->
+  <section class="xp-window" id="win-deckborn-game" data-title="Play Deckborn" data-width="620" data-height="480">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-deckborn.svg" alt="">
@@ -115,8 +158,141 @@
     </div>
   </section>
 
-  <!-- ===== Wrong Bird window ===== -->
-  <section class="xp-window" id="win-wrongbird" data-title="Wrong Bird">
+  <!-- ===== Deckborn > Devlogs (folder of entries) ===== -->
+  <section class="xp-window" id="win-deckborn-devlogs" data-title="Deckborn Devlogs" data-width="500" data-height="380">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlogs
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body folder-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Deckborn \ Devlogs</div>
+      <div class="folder-view">
+        <!-- Add a new entry: copy a <section id="win-deckborn-devlog-N"> below,
+             then add a matching .folder-item button here. -->
+        <button class="folder-item" data-window="win-deckborn-devlog-1">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 01 &mdash; Placeholder</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 01 (placeholder) ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-1" data-title="Deckborn Devlog 01" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 01.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 01 ===</p>
+      <p>Date: (placeholder)</p>
+      <p>What I worked on this session goes here. This is a scaffold entry &mdash; replace it with a real write-up (or generate one with the devlog workflow).</p>
+      <p>What went well:</p>
+      <p>What I'm tackling next:</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > GDD &amp; Docs ===== -->
+  <section class="xp-window" id="win-deckborn-gdd" data-title="Deckborn GDD &amp; Docs" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-gdd.svg" alt="">
+        Deckborn GDD.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn &mdash; Game Design Doc ===</p>
+      <p>Elevator pitch: An RPG with deckbuilding combat, inspired by classic JRPGs.</p>
+      <p>Pillars: (placeholder)</p>
+      <p>Core loop: (placeholder)</p>
+      <p>Combat &amp; deckbuilding: (placeholder)</p>
+      <p>Scope / milestones: vertical slice targeting Fall 2026.</p>
+      <p>This is a scaffold &mdash; drop the real GDD sections here.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Screenshots ===== -->
+  <section class="xp-window" id="win-deckborn-shots" data-title="Deckborn Screenshots" data-width="600" data-height="360">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-screenshots.svg" alt="">
+        Deckborn Screenshots
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="screenshot-strip">
+        <img src="img/deckborn-cover.png" alt="Deckborn cover art" loading="lazy">
+        <img src="img/deckborn-1.png" alt="Deckborn screenshot 1" loading="lazy">
+        <img src="img/deckborn-2.png" alt="Deckborn screenshot 2" loading="lazy">
+        <img src="img/deckborn-3.png" alt="Deckborn screenshot 3" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WRONG BIRD — folder + its child windows (mirror of Deckborn)
+       ============================================================ -->
+
+  <!-- ===== Wrong Bird folder ===== -->
+  <section class="xp-window" id="win-wrongbird" data-title="Wrong Bird" data-width="500" data-height="380">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-folder-wrongbird.svg" alt="">
+        Wrong Bird
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body folder-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Wrong Bird</div>
+      <div class="folder-view">
+        <button class="folder-item" data-window="win-wrongbird-game">
+          <img src="img/icon-wrongbird.svg" alt=""><span>Wrong Bird</span>
+        </button>
+        <button class="folder-item" data-window="win-wrongbird-devlogs">
+          <img src="img/icon-notepad.svg" alt=""><span>Devlogs</span>
+        </button>
+        <button class="folder-item" data-window="win-wrongbird-gdd">
+          <img src="img/icon-gdd.svg" alt=""><span>GDD &amp; Docs</span>
+        </button>
+        <button class="folder-item" data-window="win-wrongbird-shots">
+          <img src="img/icon-screenshots.svg" alt=""><span>Screenshots</span>
+        </button>
+        <a class="folder-item" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">
+          <img src="img/icon-itch.svg" alt=""><span>itch.io page</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wrong Bird > Download (build) ===== -->
+  <section class="xp-window" id="win-wrongbird-game" data-title="Wrong Bird" data-width="600" data-height="460">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-wrongbird.svg" alt="">
@@ -141,6 +317,98 @@
       </div>
       <div class="link-row">
         <a class="xp-button-link primary" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">Download on itch.io &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wrong Bird > Devlogs (folder of entries) ===== -->
+  <section class="xp-window" id="win-wrongbird-devlogs" data-title="Wrong Bird Devlogs" data-width="500" data-height="380">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlogs
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body folder-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Wrong Bird \ Devlogs</div>
+      <div class="folder-view">
+        <button class="folder-item" data-window="win-wrongbird-devlog-1">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 01 &mdash; Placeholder</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Wrong Bird > Devlog entry 01 (placeholder) ===== -->
+  <section class="xp-window" id="win-wrongbird-devlog-1" data-title="Wrong Bird Devlog 01" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 01.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Wrong Bird Devlog 01 ===</p>
+      <p>Date: (placeholder)</p>
+      <p>What I worked on this session goes here. This is a scaffold entry &mdash; replace it with a real write-up (or generate one with the devlog workflow).</p>
+      <p>What went well:</p>
+      <p>What I'm tackling next:</p>
+    </div>
+  </section>
+
+  <!-- ===== Wrong Bird > GDD &amp; Docs ===== -->
+  <section class="xp-window" id="win-wrongbird-gdd" data-title="Wrong Bird GDD &amp; Docs" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-gdd.svg" alt="">
+        Wrong Bird GDD.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Wrong Bird &mdash; Game Design Doc ===</p>
+      <p>Elevator pitch: A pet-raising sim with roguelite mechanics where you train penguins to fly.</p>
+      <p>Pillars: (placeholder)</p>
+      <p>Core loop: train &rarr; launch &rarr; upgrade (placeholder)</p>
+      <p>RNG &amp; systems: (placeholder)</p>
+      <p>Scope / milestones: distance-launching loop + vertical slice targeting Fall 2026.</p>
+      <p>This is a scaffold &mdash; drop the real GDD sections here.</p>
+    </div>
+  </section>
+
+  <!-- ===== Wrong Bird > Screenshots ===== -->
+  <section class="xp-window" id="win-wrongbird-shots" data-title="Wrong Bird Screenshots" data-width="600" data-height="360">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-screenshots.svg" alt="">
+        Wrong Bird Screenshots
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="screenshot-strip">
+        <img src="img/wrongbird-cover.jpeg" alt="Wrong Bird cover art" loading="lazy">
+        <img src="img/wrongbird-1.png" alt="Wrong Bird screenshot 1" loading="lazy">
+        <img src="img/wrongbird-2.png" alt="Wrong Bird screenshot 2" loading="lazy">
+        <img src="img/wrongbird-3.png" alt="Wrong Bird screenshot 3" loading="lazy">
       </div>
     </div>
   </section>
@@ -205,8 +473,8 @@
     <div class="start-menu-body">
       <ul class="start-menu-list">
         <li><button data-window="win-welcome"><img src="img/icon-welcome.svg" alt="">Welcome</button></li>
-        <li><button data-window="win-deckborn"><img src="img/icon-deckborn.svg" alt="">Deckborn.exe</button></li>
-        <li><button data-window="win-wrongbird"><img src="img/icon-wrongbird.svg" alt="">Wrong Bird.exe</button></li>
+        <li><button data-window="win-deckborn"><img src="img/icon-folder-deckborn.svg" alt="">Deckborn</button></li>
+        <li><button data-window="win-wrongbird"><img src="img/icon-folder-wrongbird.svg" alt="">Wrong Bird</button></li>
         <li><button data-window="win-about"><img src="img/icon-about.svg" alt="">About Me</button></li>
         <li><button data-window="win-contact"><img src="img/icon-contact.svg" alt="">Contact</button></li>
       </ul>

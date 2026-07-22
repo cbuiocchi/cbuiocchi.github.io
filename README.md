@@ -24,12 +24,32 @@ Every window is a `<section class="xp-window" id="win-something">` in `index.htm
 
 `main.js` finds every `.xp-window` on page load and wires up dragging + the three buttons automatically. You don't need to touch JS to add content to an *existing* window — just edit the HTML inside `.window-body`.
 
-## Adding a third game window (e.g. All Hands on Deck!)
+A window can preset its opening size/position with optional `data-width` / `data-height` / `data-left` / `data-top` attributes on the `<section>` (in px). Without them it opens at the cascaded 620×480 default.
 
-1. Copy one of the existing `<section class="xp-window">` blocks in `index.html` (Deckborn's is the closest match if it'll have a playable embed; Wrong Bird's if it's download-only).
-2. Give it a new unique `id` (e.g. `win-ahoad`) and update `data-title`.
-3. Add a matching desktop icon button (`data-window="win-ahoad"`) in `.desktop-icons`, and a matching entry in the start menu list.
-4. Draw or reuse an SVG icon in `img/` for it and reference it in both the icon button and the title bar.
+## Folders (Deckborn & Wrong Bird)
+
+The two projects are **folders**, not single windows. A folder is an Explorer-style window whose body is `<div class="window-body folder-body">` containing an `.explorer-bar` (the "Address" strip) and a `.folder-view` grid of `.folder-item` icons. Each icon is either:
+- a `<button class="folder-item" data-window="win-…">` that opens a **child window**, or
+- an `<a class="folder-item" href="…">` external shortcut (e.g. the itch.io link).
+
+Any element with `data-window="win-X"` opens window `win-X` — this is the same mechanism the desktop icons use, so folder icons need **no JS**. The child windows (game / devlogs / GDD / screenshots) are just more `<section class="xp-window">` blocks living in `index.html`; each project's set is grouped under a comment banner.
+
+Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-game`, `win-deckborn-devlogs`, `win-deckborn-gdd`, `win-deckborn-shots`, and devlog entries `win-deckborn-devlog-N`. Wrong Bird mirrors this.
+
+### Adding a devlog entry
+
+1. Copy an existing `<section class="xp-window" id="win-deckborn-devlog-1" …>` block, give it a new id (`…-devlog-2`), update `data-title`, and fill in the `.notepad-body` text.
+2. In that project's Devlogs folder (`#win-deckborn-devlogs .folder-view`), add a matching `<button class="folder-item" data-window="win-deckborn-devlog-2">`.
+
+### Adding GDD content
+
+Edit the `.notepad-body` inside `#win-deckborn-gdd` / `#win-wrongbird-gdd` directly — the scaffold headings are placeholders to replace.
+
+### Adding a third project folder
+
+1. Add a folder `<section class="xp-window" id="win-newgame" …>` (copy Deckborn's folder block) plus its child windows.
+2. Add a desktop icon button (`data-window="win-newgame"`) in `.desktop-icons` and a matching start-menu entry.
+3. Draw or reuse SVG icons in `img/` (there's a folder icon per project, plus shared `icon-notepad`, `icon-gdd`, `icon-screenshots`).
 
 No JS changes needed — `main.js` discovers windows and triggers by their `data-window` attribute automatically.
 
