@@ -62,12 +62,21 @@
       win.classList.remove('minimized');
 
       if (!isMobile() && !win.style.left && !win.style.top) {
-        var step = cascadeOffset % CASCADE_MAX;
-        win.style.left = (60 + step * CASCADE_STEP) + 'px';
-        win.style.top = (40 + step * CASCADE_STEP) + 'px';
-        win.style.width = '620px';
-        win.style.height = '480px';
-        cascadeOffset++;
+        var w = 620, h = 480;
+        win.style.width = w + 'px';
+        win.style.height = h + 'px';
+        if (id === 'win-welcome') {
+          // The welcome window greets visitors, so sit it dead-center of the
+          // desktop rather than in the cascade stack.
+          win.style.left = Math.max(0, (desktop.clientWidth - w) / 2) + 'px';
+          // 40 = taskbar height; keep the window centered in the visible area.
+          win.style.top = Math.max(0, (desktop.clientHeight - 40 - h) / 2) + 'px';
+        } else {
+          var step = cascadeOffset % CASCADE_MAX;
+          win.style.left = (60 + step * CASCADE_STEP) + 'px';
+          win.style.top = (40 + step * CASCADE_STEP) + 'px';
+          cascadeOffset++;
+        }
       }
 
       addTaskbarItem(id);
