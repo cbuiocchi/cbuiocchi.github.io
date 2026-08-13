@@ -212,16 +212,20 @@
       focusWindow(win.id);
     });
 
-    win.querySelector('[data-action="close"]').addEventListener('click', function () {
-      closeWindow(win.id);
-    });
-    win.querySelector('[data-action="minimize"]').addEventListener('click', function () {
-      minimizeWindow(win.id);
-    });
-    win.querySelector('[data-action="maximize"]').addEventListener('click', function () {
-      toggleMaximize(win.id);
-    });
+    // Not every window carries all three controls — the pop-up ad only has a
+    // close button — so wire whichever ones are actually there.
+    bindControl(win, 'close', closeWindow);
+    bindControl(win, 'minimize', minimizeWindow);
+    bindControl(win, 'maximize', toggleMaximize);
   });
+
+  function bindControl(win, action, fn) {
+    var btn = win.querySelector('[data-action="' + action + '"]');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      fn(win.id);
+    });
+  }
 
   // ---- icons + start menu open windows ----
   document.querySelectorAll('[data-window]').forEach(function (trigger) {
@@ -260,6 +264,33 @@
   tickClock();
   setInterval(tickClock, 15000);
 
+  // ---- Deckborn pop-up ad ----
+  // Deliberately not routed through openWindow(): the ad skips the cascade
+  // and stays out of the taskbar, so closing it is final (an ad you can
+  // restore from the taskbar rather defeats the bit). On desktop it parks
+  // itself against the right edge, clear of the centered welcome window; on
+  // mobile the responsive rules drop it into the page flow, so leave the
+  // geometry alone there.
+  var AD_ID = 'win-deckborn-ad';
+
+  function openAd() {
+    var ad = getWindow(AD_ID);
+    if (!ad || ad.classList.contains('open')) return;
+
+    if (!isMobile()) {
+      var w = parseInt(ad.dataset.width, 10) || 400;
+      var h = parseInt(ad.dataset.height, 10) || 450;
+      ad.style.width = w + 'px';
+      ad.style.height = h + 'px';
+      ad.style.left = Math.max(12, desktop.clientWidth - w - 40) + 'px';
+      // 40 = taskbar height, matching the centering used for the welcome window.
+      ad.style.top = Math.max(12, (desktop.clientHeight - 40 - h) / 2) + 'px';
+    }
+
+    ad.classList.add('open');
+    focusWindow(AD_ID);
+  }
+
   // ---- boot screen ----
   var boot = document.getElementById('boot-screen');
   function dismissBoot() {
@@ -269,6 +300,8 @@
     boot.classList.add('hidden');
     setTimeout(function () { boot.style.display = 'none'; }, 650);
     openWindow('win-welcome');
+    // Let the desktop settle for a beat before the ad barges in.
+    setTimeout(openAd, 1200);
   }
   boot.addEventListener('click', dismissBoot);
   setTimeout(dismissBoot, 2600);

@@ -52,6 +52,56 @@
     </button>
   </div>
 
+  <!-- ============================================================
+       DECKBORN POP-UP AD
+       A deliberately garish XP-era popup ad for Deckborn, in the game's
+       royal-purple + gold palette. It's a normal .xp-window (so it drags,
+       focuses, and reflows on mobile like everything else) with a close
+       button only — no minimize/maximize, and no taskbar entry, because an
+       ad you can restore isn't much of a joke. Styling lives under
+       .ad-window in style.css; openAd() in main.js pops it after boot.
+       Sits first in the window order so it lands at the top of the page on
+       mobile, where windows stack in DOM order.
+       ============================================================ -->
+  <section class="xp-window ad-window" id="win-deckborn-ad" data-title="Play Deckborn!" data-width="400" data-height="450">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-ad.svg" alt="">
+        Deckborn.exe &mdash; Special Offer!
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body ad-body">
+      <div class="ad-ticker" aria-hidden="true">
+        <div class="ad-ticker-track">
+          <span>&#9733; FREE TO PLAY &#9733; NO INSTALL &#9733; UNREAL ENGINE 5 &#9733; DECKBUILDING JRPG &#9733;</span>
+          <span>&#9733; FREE TO PLAY &#9733; NO INSTALL &#9733; UNREAL ENGINE 5 &#9733; DECKBUILDING JRPG &#9733;</span>
+        </div>
+      </div>
+
+      <div class="ad-content">
+        <p class="ad-kicker">&#9888; You are visitor #1,000,000 &#9888;</p>
+
+        <p class="ad-headline"><span>Play</span><span>Deckborn</span></p>
+
+        <p class="ad-sub">A 3D deckbuilding JRPG, built in Unreal Engine 5.</p>
+
+        <div class="ad-cta-row">
+          <a class="ad-cta" href="https://claybuiocchi.itch.io/deckborn-ue5" target="_blank" rel="noopener">
+            CLICK HERE &rarr;
+          </a>
+        </div>
+
+        <p class="ad-fineprint">
+          *not really an ad. it's just my game.
+          <button class="ad-inline-link" data-window="win-deckborn">see the whole folder</button>
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== Welcome window ===== -->
   <section class="xp-window" id="win-welcome" data-title="Welcome">
     <div class="title-bar">

@@ -53,6 +53,19 @@ Edit the `.notepad-body` inside `#win-deckborn-gdd` / `#win-wrongbird-gdd` direc
 
 No JS changes needed — `main.js` discovers windows and triggers by their `data-window` attribute automatically.
 
+## The Deckborn pop-up ad
+
+`#win-deckborn-ad` is a fake XP-era popup ad for Deckborn, in the game's royal-purple-and-gold palette. It's a normal `.xp-window`, so it drags, focuses, and reflows on mobile like every other window — but it only has a **close** button (no minimize/maximize) and it deliberately stays out of the taskbar, so closing it is final.
+
+- **Markup** — the `<section class="xp-window ad-window">` block near the top of `index.html`, before the Welcome window. It sits first in the window order on purpose: on mobile, windows stack in DOM order, so that puts the ad at the top of the page.
+- **Styling** — the `.ad-window` block in `css/style.css`. The purple/gold palette is defined as CSS variables scoped to `.ad-window`, so it can't leak into the normal windows. Change `--db-purple` / `--db-gold` there to retune the colors.
+- **Behavior** — `openAd()` in `js/main.js`, called ~1.2s after the boot screen clears. On desktop it parks itself against the right edge, vertically centered and clear of the Welcome window; on mobile the responsive rules drop it into the page flow and the JS leaves its geometry alone.
+- **Link** — the `.ad-cta` anchor points at `https://claybuiocchi.itch.io/deckborn-ue5`.
+
+All the animation (marquee, blinking kicker, pulsing button, pop-in) is disabled under `prefers-reduced-motion: reduce`.
+
+Because the ad has no minimize/maximize button, `main.js` binds the title-bar controls through `bindControl()`, which skips any control a window doesn't have. Windows can safely omit controls.
+
 ## Swapping in a real itch.io embed
 
 Deckborn's embed is a direct `<iframe>` pointing at itch.io's HTML5 build URL (found by inspecting the "Run game" button's HTML on the itch.io page — it's the `data-iframe` attribute). If Clay re-uploads a new build to itch.io, that URL will change. To update it:

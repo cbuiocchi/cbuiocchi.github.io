@@ -261,6 +261,202 @@ html, body {
 
 button, .xp-button-link, a { touch-action: manipulation; }
 
+/* ============ DECKBORN POP-UP AD ============ */
+/* Deckborn's own palette — royal purple + gold — deliberately louder than
+   the pastel XP chrome everything else uses, so the ad reads as an intruder
+   from a different (worse) website. Scoped to .ad-window so none of it can
+   leak into the normal windows. */
+.ad-window {
+  --db-purple-deep: #23103f;
+  --db-purple:      #4b1e94;
+  --db-purple-mid:  #6a35c9;
+  --db-purple-lite: #9d6ef0;
+  --db-gold:        #f5c542;
+  --db-gold-lite:   #ffe89b;
+  --db-gold-deep:   #a9760d;
+
+  border: 2px solid var(--db-gold);
+  border-radius: 8px 8px 4px 4px;
+  box-shadow:
+    0 0 0 1px var(--db-purple-deep),
+    0 10px 34px rgba(35, 16, 63, 0.6);
+}
+
+.ad-window .title-bar {
+  background: linear-gradient(180deg, var(--db-purple-mid) 0%, var(--db-purple) 45%, var(--db-purple-deep) 100%);
+  border-bottom: 1px solid var(--db-gold-deep);
+  color: var(--db-gold-lite);
+}
+/* The ad never dims — it wants your attention whether it has focus or not. */
+.ad-window:not(.focused) .title-bar {
+  background: linear-gradient(180deg, var(--db-purple-mid) 0%, var(--db-purple) 45%, var(--db-purple-deep) 100%);
+}
+.ad-window .title-bar-controls button[data-action="close"] {
+  background: linear-gradient(180deg, var(--db-gold-lite), var(--db-gold));
+  border-color: var(--db-gold-deep);
+}
+.ad-window .title-bar-controls button[data-action="close"]::before,
+.ad-window .title-bar-controls button[data-action="close"]::after {
+  background: var(--db-purple-deep);
+}
+
+/* The body is a two-part column: the marquee pinned flush under the title
+   bar, then the pitch centered in whatever height is left over. */
+.ad-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  text-align: center;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--db-purple) 0%, var(--db-purple-deep) 70%);
+  color: var(--db-gold-lite);
+}
+
+.ad-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px 18px;
+}
+
+/* scrolling marquee strip, full-bleed across the top of the body */
+.ad-ticker {
+  padding: 4px 0;
+  background: linear-gradient(180deg, var(--db-gold-lite), var(--db-gold));
+  color: var(--db-purple-deep);
+  font-size: 10.5px;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.ad-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ad-ticker 14s linear infinite;
+}
+.ad-ticker-track span { padding-right: 24px; white-space: nowrap; }
+@keyframes ad-ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ad-kicker {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: bold;
+  letter-spacing: 0.4px;
+  color: var(--db-gold);
+  animation: ad-blink 1.6s steps(1, end) infinite;
+}
+@keyframes ad-blink {
+  0%, 65% { opacity: 1; }
+  66%, 100% { opacity: 0.25; }
+}
+
+/* the big letters */
+.ad-headline {
+  display: flex;
+  flex-direction: column;
+  margin: 2px 0;
+  font-size: clamp(38px, 7.5vw, 56px);
+  line-height: 0.92;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--db-gold-lite);
+  text-shadow: 0 2px 0 var(--db-gold-deep), 0 6px 14px rgba(0, 0, 0, 0.55);
+}
+/* Gold-leaf gradient where it's supported; the flat gold above is the fallback. */
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .ad-headline {
+    background: linear-gradient(180deg, #fff6d0 0%, var(--db-gold) 48%, #d19a1c 72%, var(--db-gold-lite) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 0 #7a5306) drop-shadow(0 5px 12px rgba(0, 0, 0, 0.5));
+  }
+}
+
+.ad-sub {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #ded0f7;
+}
+
+.ad-cta-row { margin-top: 4px; }
+
+.ad-cta {
+  display: inline-block;
+  padding: 11px 26px;
+  background: linear-gradient(180deg, var(--db-gold-lite) 0%, var(--db-gold) 55%, #dda520 100%);
+  border: 2px solid var(--db-gold-deep);
+  border-radius: 5px;
+  box-shadow: inset 0 1px 0 #fffdf2, 0 3px 0 #7a5306, 0 6px 14px rgba(0, 0, 0, 0.45);
+  color: var(--db-purple-deep);
+  font-family: var(--xp-font);
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-decoration: none;
+  cursor: pointer;
+  animation: ad-pulse 1.7s ease-in-out infinite;
+}
+.ad-cta:hover, .ad-cta:focus-visible {
+  filter: brightness(1.08);
+  outline: none;
+}
+.ad-cta:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 1px 0 #fffdf2, 0 0 0 #7a5306;
+}
+@keyframes ad-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.045); }
+}
+
+.ad-fineprint {
+  margin: 2px 0 0;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--db-purple-lite);
+}
+.ad-inline-link {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--db-gold);
+  font-family: var(--xp-font);
+  font-size: 10.5px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ad-inline-link:hover { color: var(--db-gold-lite); }
+
+/* the pop-in — it barges in rather than fading politely */
+.ad-window.open { animation: ad-pop-in 0.42s cubic-bezier(0.18, 1.35, 0.4, 1) both; }
+@keyframes ad-pop-in {
+  0%   { opacity: 0; transform: scale(0.72); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ad-window.open,
+  .ad-ticker-track,
+  .ad-kicker,
+  .ad-cta {
+    animation: none;
+  }
+  .ad-window.open { opacity: 1; transform: none; }
+}
+
 /* ============ TASKBAR ============ */
 #taskbar {
   position: absolute;
@@ -448,6 +644,13 @@ button, .xp-button-link, a { touch-action: manipulation; }
 
   .game-embed-wrap { aspect-ratio: 4 / 3; }
   .screenshot-strip img { height: 140px; }
+
+  /* The ad reflows into the page like any other window on mobile; it just
+     needs a bit more breathing room and a thumb-sized call to action. */
+  .ad-content { padding: 18px 16px 22px; gap: 12px; }
+  .ad-sub { font-size: 13.5px; }
+  .ad-cta { padding: 14px 30px; font-size: 16px; }
+  .ad-fineprint, .ad-inline-link { font-size: 11.5px; }
 
   .resize-handle { display: none; }
 
