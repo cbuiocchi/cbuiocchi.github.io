@@ -18,6 +18,27 @@
     return window.innerWidth <= 760;
   }
 
+  // ---- boot screen ----
+  // Wired up FIRST, on purpose. The boot screen covers the whole page, so if
+  // anything below this throws before the dismissal is registered, the visitor
+  // is stuck staring at it with no way into the site. Registering it up front
+  // means only the boot code itself can strand anyone. (css/style.css also
+  // auto-hides it on a pure-CSS timer, for the case where this file fails to
+  // load or parse at all.)
+  var boot = document.getElementById('boot-screen');
+  function dismissBoot() {
+    // dismissBoot fires from either the click handler or the timeout below,
+    // so bail if we've already run to avoid re-opening the welcome window.
+    if (boot.classList.contains('hidden')) return;
+    boot.classList.add('hidden');
+    setTimeout(function () { boot.style.display = 'none'; }, 650);
+    openWindow('win-welcome');
+    // Let the desktop settle for a beat before the ad barges in.
+    setTimeout(openAd, 1200);
+  }
+  boot.addEventListener('click', dismissBoot);
+  setTimeout(dismissBoot, 2600);
+
   function getWindow(id) {
     return document.getElementById(id);
   }
@@ -206,17 +227,23 @@
 
   // ---- wire up all windows ----
   document.querySelectorAll('.xp-window').forEach(function (win) {
-    makeDraggable(win);
+    // Windows are hand-written HTML, so one with a typo or a missing piece
+    // shouldn't cost every other window its wiring. Contain the damage.
+    try {
+      makeDraggable(win);
 
-    win.addEventListener('mousedown', function () {
-      focusWindow(win.id);
-    });
+      win.addEventListener('mousedown', function () {
+        focusWindow(win.id);
+      });
 
-    // Not every window carries all three controls — the pop-up ad only has a
-    // close button — so wire whichever ones are actually there.
-    bindControl(win, 'close', closeWindow);
-    bindControl(win, 'minimize', minimizeWindow);
-    bindControl(win, 'maximize', toggleMaximize);
+      // Not every window carries all three controls — the pop-up ad only has
+      // a close button — so wire whichever ones are actually there.
+      bindControl(win, 'close', closeWindow);
+      bindControl(win, 'minimize', minimizeWindow);
+      bindControl(win, 'maximize', toggleMaximize);
+    } catch (err) {
+      if (window.console) console.error('Could not wire up window', win.id, err);
+    }
   });
 
   function bindControl(win, action, fn) {
@@ -271,10 +298,9 @@
   // itself against the right edge, clear of the centered welcome window; on
   // mobile the responsive rules drop it into the page flow, so leave the
   // geometry alone there.
-  var AD_ID = 'win-deckborn-ad';
-
   function openAd() {
-    var ad = getWindow(AD_ID);
+    var adId = 'win-deckborn-ad';
+    var ad = getWindow(adId);
     if (!ad || ad.classList.contains('open')) return;
 
     if (!isMobile()) {
@@ -288,21 +314,6 @@
     }
 
     ad.classList.add('open');
-    focusWindow(AD_ID);
+    focusWindow(adId);
   }
-
-  // ---- boot screen ----
-  var boot = document.getElementById('boot-screen');
-  function dismissBoot() {
-    // dismissBoot fires from either the click handler or the timeout below,
-    // so bail if we've already run to avoid re-opening the welcome window.
-    if (boot.classList.contains('hidden')) return;
-    boot.classList.add('hidden');
-    setTimeout(function () { boot.style.display = 'none'; }, 650);
-    openWindow('win-welcome');
-    // Let the desktop settle for a beat before the ad barges in.
-    setTimeout(openAd, 1200);
-  }
-  boot.addEventListener('click', dismissBoot);
-  setTimeout(dismissBoot, 2600);
 })();

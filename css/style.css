@@ -32,6 +32,18 @@ html, body {
   pointer-events: none;
 }
 
+/* Safety net. The boot screen covers the entire page, so if main.js ever
+   fails to load or throws before it wires up the dismissal, a visitor would
+   be stranded on it with no way in. This pure-CSS timer clears it a beat
+   after the JS normally would (2.6s + 0.65s fade), so in the happy path it
+   never comes into play — the screen is already display:none by then. */
+#boot-screen {
+  animation: boot-failsafe 0s linear 4.5s forwards;
+}
+@keyframes boot-failsafe {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+
 .boot-logo {
   display: flex;
   align-items: center;
