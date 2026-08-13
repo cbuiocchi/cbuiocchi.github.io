@@ -440,18 +440,6 @@ button, .xp-button-link, a { touch-action: manipulation; }
   line-height: 1.5;
   color: var(--db-purple-lite);
 }
-.ad-inline-link {
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--db-gold);
-  font-family: var(--xp-font);
-  font-size: 10.5px;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.ad-inline-link:hover { color: var(--db-gold-lite); }
-
 /* the pop-in — it barges in rather than fading politely */
 .ad-window.open { animation: ad-pop-in 0.42s cubic-bezier(0.18, 1.35, 0.4, 1) both; }
 @keyframes ad-pop-in {
@@ -662,7 +650,7 @@ button, .xp-button-link, a { touch-action: manipulation; }
   .ad-content { padding: 18px 16px 22px; gap: 12px; }
   .ad-sub { font-size: 13.5px; }
   .ad-cta { padding: 14px 30px; font-size: 16px; }
-  .ad-fineprint, .ad-inline-link { font-size: 11.5px; }
+  .ad-fineprint { font-size: 11.5px; }
 
   .resize-handle { display: none; }
 
