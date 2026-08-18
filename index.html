@@ -46,6 +46,10 @@
       <img src="img/icon-about.svg" alt="">
       <span>About Me</span>
     </button>
+    <button class="desktop-icon" data-window="win-resume">
+      <img src="img/icon-resume.svg" alt="">
+      <span>Resume</span>
+    </button>
     <button class="desktop-icon" data-window="win-contact">
       <img src="img/icon-contact.svg" alt="">
       <span>Contact</span>
@@ -118,6 +122,7 @@
       <ul class="welcome-tour">
         <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> &amp; <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> &mdash; the two games I'm building. Each is a folder &mdash; open it to play a build, read devlogs, or see screenshots.</li>
         <li><a href="#" data-window="win-about"><strong>About Me</strong></a> &mdash; a bit about who I am and what I care about.</li>
+        <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> &mdash; my full skills, projects, and experience.</li>
         <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> &mdash; where to find me and how to reach out.</li>
       </ul>
       <p>Open the desktop icons on the left, or hit the <strong>start</strong> button down in the corner &mdash; drag windows around, minimize them to the taskbar, close this one whenever you're ready. Have a look around!</p>
@@ -481,6 +486,74 @@
     </div>
   </section>
 
+  <!-- ===== Resume window ===== -->
+  <section class="xp-window" id="win-resume" data-title="Resume" data-width="600" data-height="520">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-resume.svg" alt="">
+        Resume.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Clay Buiocchi &mdash; Resume ===</p>
+      <p><strong>Clay Buiocchi</strong> (they/them) &middot; Game Designer</p>
+      <p>650-996-5911 &middot; <a href="mailto:cmb9597@gmail.com">cmb9597@gmail.com</a> &middot; <a href="https://cbuiocchi.github.io" target="_blank" rel="noopener">cbuiocchi.github.io</a> &middot; <a href="https://www.linkedin.com/in/clay-buiocchi-080697358/" target="_blank" rel="noopener">linkedin.com/in/clay-buiocchi</a></p>
+
+      <p>=== SKILLS ===</p>
+      <p><strong>Design:</strong> UI/UX for games, systems design, game design documentation, level design &amp; encounter design, playtesting &amp; iteration, narrative design, sound design</p>
+      <p><strong>Technical:</strong> Unreal Engine 5 (Blueprints, UMG), Godot (GDScript), Figma, Aseprite, Blender fundamentals, DAWs such as Logic Pro</p>
+      <p><strong>Cross-Disciplinary:</strong> reading engagement &amp; frustration cues in real time, scaffolding difficulty, behavior &amp; feedback loop design, de-escalation / pacing, multitasking, communication</p>
+
+      <p>=== GAME DESIGN PROJECTS ===</p>
+      <p><strong>Deckborn: 3D Single-Player Deckbuilding JRPG</strong> &mdash; In Development</p>
+      <ul class="resume-list">
+        <li>Wrote a Game Design Document covering full scope of game, split into both exploration and combat sections</li>
+        <li>Prototyped deckbuilding card system using UMG</li>
+        <li>Created small open world and dungeon with roaming enemies and shop for modifying deck</li>
+      </ul>
+      <p><strong>Wrong Bird: Training Prototype</strong> &mdash; Portfolio Piece</p>
+      <ul class="resume-list">
+        <li>Wrote a GDD with full scope of game, with both training and launch sequences planned out</li>
+        <li>Prototyped training loop in UE5</li>
+        <li>Learned to use UMG to make intuitive UI/UX inside of Unreal Engine</li>
+        <li>Built RNG based system using data types and Blueprints</li>
+      </ul>
+
+      <p>=== EDUCATION ===</p>
+      <p><strong>Circuit Stream: Game Design Bootcamp</strong> &mdash; February 2026 to September 2026</p>
+      <p>Intensive program covering game design fundamentals, Unreal Engine 5 development, and portfolio production</p>
+      <p><strong>Wheaton College</strong></p>
+      <p>Bachelor of Arts, Music Major, Psychology Minor &middot; Norton, MA</p>
+
+      <p>=== RELEVANT EXPERIENCE ===</p>
+      <p><strong>First Circle Learning Center</strong> &mdash; Sept 2024 &ndash; Present</p>
+      <p>Teacher &middot; Lexington, MA</p>
+      <ul class="resume-list">
+        <li>Support development across infant, toddler, and preschool classrooms; EEC-certified in all three</li>
+      </ul>
+      <p><strong>Austen Riggs Nursery School</strong> &mdash; Jan 2024 &ndash; June 2024</p>
+      <p>Teacher's Aide &middot; Stockbridge, MA</p>
+      <ul class="resume-list">
+        <li>Supported ages 2-6 in daily activities and learning; ran weekly music time</li>
+      </ul>
+      <p><strong>Justice Resource Institute</strong> &mdash; May 2021 &ndash; Oct 2023</p>
+      <p>Therapeutic Mentor and Counselor, Community Based Services &middot; Acton, MA</p>
+      <ul class="resume-list">
+        <li>Provided in-home care for children with complex behavioral needs; served on a multi-disciplinary intervention team</li>
+      </ul>
+      <p><strong>Justice Resource Institute, Walden Street School</strong> &mdash; Sept 2020 &ndash; May 2021</p>
+      <p>Residential Counselor &middot; Concord, MA</p>
+      <ul class="resume-list">
+        <li>Supported safety and development for students with complex trauma through counseling and structured intervention</li>
+      </ul>
+    </div>
+  </section>
+
   <!-- ===== Contact window ===== -->
   <section class="xp-window" id="win-contact" data-title="Contact">
     <div class="title-bar">
@@ -523,6 +596,7 @@
         <li><button data-window="win-deckborn"><img src="img/icon-folder-deckborn.svg" alt="">Deckborn</button></li>
         <li><button data-window="win-wrongbird"><img src="img/icon-folder-wrongbird.svg" alt="">Wrong Bird</button></li>
         <li><button data-window="win-about"><img src="img/icon-about.svg" alt="">About Me</button></li>
+        <li><button data-window="win-resume"><img src="img/icon-resume.svg" alt="">Resume</button></li>
         <li><button data-window="win-contact"><img src="img/icon-contact.svg" alt="">Contact</button></li>
       </ul>
       <ul class="start-menu-list start-menu-external">

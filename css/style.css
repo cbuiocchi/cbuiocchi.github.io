@@ -195,6 +195,12 @@ html, body {
 .welcome-tour li { margin-bottom: 8px; }
 .welcome-tour a { color: #0a246a; }
 
+.resume-list {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+.resume-list li { margin-bottom: 6px; }
+
 .screenshot-strip {
   display: flex;
   gap: 8px;
