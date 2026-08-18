@@ -195,11 +195,90 @@ html, body {
 .welcome-tour li { margin-bottom: 8px; }
 .welcome-tour a { color: #0a246a; }
 
-.resume-list {
-  margin: 0 0 12px;
-  padding-left: 20px;
+/* ============ RESUME (rendered as a document, not desktop chrome) ============ */
+.resume-viewer {
+  background: #ada2c4;
+  padding: 22px;
 }
-.resume-list li { margin-bottom: 6px; }
+
+.resume-doc {
+  max-width: 640px;
+  margin: 0 auto;
+  background: #fff;
+  color: #1a1a1a;
+  font-family: Calibri, Candara, "Segoe UI", Optima, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 34px 38px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+}
+
+.resume-doc-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.resume-name {
+  margin: 0 0 2px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.resume-subtitle {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #333;
+}
+.resume-contact {
+  margin: 0;
+  font-size: 12px;
+  color: #333;
+}
+.resume-contact a { color: #1a4fa0; text-decoration: none; }
+.resume-contact a:hover { text-decoration: underline; }
+
+.resume-section { margin-top: 16px; }
+.resume-section-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1.5px solid #333;
+  padding-bottom: 3px;
+}
+
+.resume-skill-line { margin: 0 0 5px; }
+
+.resume-entry { margin-bottom: 10px; }
+.resume-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 700;
+}
+.resume-entry-date {
+  font-weight: 400;
+  font-style: italic;
+  color: #555;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.resume-entry-sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 1px 0 4px;
+  font-style: italic;
+  color: #333;
+  font-size: 12px;
+}
+
+.resume-bullets {
+  margin: 2px 0 0;
+  padding-left: 18px;
+}
+.resume-bullets li { margin-bottom: 3px; }
 
 .screenshot-strip {
   display: flex;
@@ -680,4 +759,8 @@ button, .xp-button-link, a { touch-action: manipulation; }
   .start-menu-list a {
     padding: 11px 14px;
   }
+
+  .resume-viewer { padding: 10px; }
+  .resume-doc { padding: 20px 18px; }
+  .resume-entry-header, .resume-entry-sub { flex-direction: column; gap: 2px; }
 }
