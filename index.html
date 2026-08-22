@@ -104,7 +104,7 @@
   </section>
 
   <!-- ===== Welcome window ===== -->
-  <section class="xp-window" id="win-welcome" data-title="Welcome">
+  <section class="xp-window" id="win-welcome" data-title="Welcome" data-width="700" data-height="460">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-welcome.svg" alt="">
@@ -117,17 +117,19 @@
       </div>
     </div>
     <div class="window-body notepad-body">
-      <div class="welcome-intro">
+      <div class="welcome-layout">
         <img class="welcome-photo" src="img/clay-photo.jpg" alt="Clay Buiocchi">
-        <p>Hi, I'm Clay Buiocchi (they/them). Welcome to my desktop.</p>
+        <div class="welcome-text">
+          <p>Hi, I'm Clay Buiocchi (they/them). Welcome to my desktop.</p>
+          <ul class="welcome-tour">
+            <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are the two games I'm building. Each one's a folder: open it up to play a build, read devlogs, or browse screenshots.</li>
+            <li><a href="#" data-window="win-about"><strong>About Me</strong></a> covers who I am and what I care about.</li>
+            <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> has my full skills, projects, and experience.</li>
+            <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> is where to find me and how to reach out.</li>
+          </ul>
+          <p>Open the desktop icons on the left, or hit the <strong>start</strong> button down in the corner. Drag windows around, minimize them to the taskbar, close this one whenever you're ready. Have a look around!</p>
+        </div>
       </div>
-      <ul class="welcome-tour">
-        <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are the two games I'm building. Each one's a folder: open it up to play a build, read devlogs, or browse screenshots.</li>
-        <li><a href="#" data-window="win-about"><strong>About Me</strong></a> covers who I am and what I care about.</li>
-        <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> has my full skills, projects, and experience.</li>
-        <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> is where to find me and how to reach out.</li>
-      </ul>
-      <p>Open the desktop icons on the left, or hit the <strong>start</strong> button down in the corner. Drag windows around, minimize them to the taskbar, close this one whenever you're ready. Have a look around!</p>
     </div>
   </section>
 
