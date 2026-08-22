@@ -209,6 +209,13 @@ html, body {
   padding: 22px;
 }
 
+.resume-toolbar {
+  max-width: 640px;
+  margin: 0 auto 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .resume-doc {
   max-width: 640px;
   margin: 0 auto;
