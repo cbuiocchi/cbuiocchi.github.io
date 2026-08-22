@@ -379,6 +379,7 @@ button, .xp-button-link, a { touch-action: manipulation; }
   --db-gold:        #f5c542;
   --db-gold-lite:   #ffe89b;
   --db-gold-deep:   #a9760d;
+  --db-bg-dark:     #1a1310;
 
   border: 2px solid var(--db-gold);
   border-radius: 8px 8px 4px 4px;
@@ -412,8 +413,7 @@ button, .xp-button-link, a { touch-action: manipulation; }
   flex-direction: column;
   padding: 0;
   text-align: center;
-  background:
-    radial-gradient(120% 90% at 50% 0%, var(--db-purple) 0%, var(--db-purple-deep) 70%);
+  background: var(--db-bg-dark);
   color: var(--db-gold-lite);
 }
 
