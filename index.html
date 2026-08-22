@@ -228,14 +228,38 @@
       <div class="folder-view">
         <!-- Add a new entry: copy a <section id="win-deckborn-devlog-N"> below,
              then add a matching .folder-item button here. -->
+        <button class="folder-item" data-window="win-deckborn-devlog-9">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 09 &mdash; Aug 12: The Return Transition Bug</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-8">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 08 &mdash; Aug 10: The Warlord Was Never Fighting Back</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-7">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 07 &mdash; Aug 9: Music, Sound, and the Tutorial Hand</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-6">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 06 &mdash; Aug 5: The Poison Was Never the Bug</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-5">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 05 &mdash; Jul 30: Base Camp and the Orc Nerf</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-4">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 04 &mdash; Jul 26: Fixing Combat Timing</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-3">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 03 &mdash; Jul 25: Dungeon, Cards, and AI</span>
+        </button>
+        <button class="folder-item" data-window="win-deckborn-devlog-2">
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 02 &mdash; Jul 17: Cutting the Village Hub</span>
+        </button>
         <button class="folder-item" data-window="win-deckborn-devlog-1">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 01 &mdash; Placeholder</span>
+          <img src="img/icon-notepad.svg" alt=""><span>Entry 01 &mdash; Jul 6: First Playable Fight</span>
         </button>
       </div>
     </div>
   </section>
 
-  <!-- ===== Deckborn > Devlog entry 01 (placeholder) ===== -->
+  <!-- ===== Deckborn > Devlog entry 01 ===== -->
   <section class="xp-window" id="win-deckborn-devlog-1" data-title="Deckborn Devlog 01" data-width="560" data-height="460">
     <div class="title-bar">
       <div class="title-bar-text">
@@ -249,11 +273,276 @@
       </div>
     </div>
     <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 01 ===</p>
-      <p>Date: (placeholder)</p>
-      <p>What I worked on this session goes here. This is a scaffold entry &mdash; replace it with a real write-up (or generate one with the devlog workflow).</p>
-      <p>What went well:</p>
-      <p>What I'm tackling next:</p>
+      <p>=== Deckborn Devlog 01: First Playable Fight ===</p>
+      <p>Date: July 6, 2026</p>
+      <p><strong>World</strong></p>
+      <p>- Town, valley (roaming enemies), and dungeon (straight gauntlet) are built as three distinct spaces.</p>
+      <p>- Wandering into a roaming enemy pulls you straight into a fight.</p>
+      <p><strong>Scope</strong></p>
+      <p>- Retargeting for a smaller, polished slice by September.</p>
+      <p>- Cut: secret valley areas, the two-step crafting system (now a flat gold-for-cards buy).</p>
+      <p><strong>Combat core</strong></p>
+      <p>- Built and tested headless first, so I could confirm the rules worked before there was anything to look at.</p>
+      <p>- Building the actual screen took longer: fanned hand, hover to preview, drag to target.</p>
+      <p>- Dragging a card to resolve a fight now works!</p>
+      <p><strong>Reflection</strong></p>
+      <p>Up until this week I could only watch a fight resolve on its own. This is the first time a fight has actually been won or lost by something I did on screen.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 02 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-2" data-title="Deckborn Devlog 02" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 02.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 02: Cutting the Village Hub ===</p>
+      <p>Date: July 17, 2026</p>
+      <p><strong>Village hub cut</strong></p>
+      <p>- Cut the Village/Town hub as its own zone. Its four prep locations (heal, buy, remove) are consolidated into a single Shop, now a stop inside the Valley instead of a separate space.</p>
+      <p>- World is two zones now instead of three: Valley (exploration + Shop) and Dungeon.</p>
+      <p><strong>Training Grounds cut</strong></p>
+      <p>- Cut the free practice fight (no gold cost, no real HP or death risk) permanently, not just for the current slice. No consequence-free way to test a loadout before heading into the Valley anymore.</p>
+      <p><strong>Reflection</strong></p>
+      <p>Cutting a whole zone gives me much more time to polish the most engaging parts of the game: exploration and combat.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 03 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-3" data-title="Deckborn Devlog 03" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 03.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 03: Dungeon, Cards, and AI ===</p>
+      <p>Date: July 25, 2026</p>
+      <p><strong>Enemy AI</strong></p>
+      <p>- Each enemy now picks from weighted moves, favors defense when hurt, won't repeat a move twice in a row.</p>
+      <p>- In the valley they notice, chase, and give up and return home if you outrun them.</p>
+      <p><strong>Cards</strong></p>
+      <p>- Rebuilt around ~20 cards.</p>
+      <p><strong>Shop</strong></p>
+      <p>- Gold from fights buys new cards, removes unwanted ones, or heals you.</p>
+      <p><strong>Dungeon</strong></p>
+      <p>- Built as a 6-enemy gauntlet into the Warlord, who telegraphs his 3-move cycle.</p>
+      <p>- Lit and dressed: torches, columns, walls raised to ~4x height (camera angle exposed the old ones).</p>
+      <p><strong>Reflection</strong></p>
+      <p>None of it has been played by an actual person yet, including me. I wanted the world to stop feeling like it was running on rails, and this is the first stretch where that's actually true.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 04 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-4" data-title="Deckborn Devlog 04" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 04.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 04: Fixing Combat Timing ===</p>
+      <p>Date: July 26, 2026</p>
+      <p><strong>Hero animation</strong></p>
+      <p>- Attacks swing, defense braces, utility gestures, most cards override with a unique animation.</p>
+      <p><strong>Timing fix</strong></p>
+      <p>- Damage, hit flash, screen punch, flinch, and death were all firing on the attack's first frame, so the hero swung at a corpse.</p>
+      <p>- Everything's scheduled off real animation length now, including the Aura Strike projectile, which arrives on the damage frame.</p>
+      <p><strong>Run clock</strong></p>
+      <p>- Added a countdown to the valley. No timer meant infinite money.</p>
+      <p><strong>Dungeon fork</strong></p>
+      <p>- Two paths in the dungeon: left is an elite rat encounter with a rare card drop, right is a healing fountain. Taking one closes the other.</p>
+      <p><strong>Reflection</strong></p>
+      <p>Combat used to be a spreadsheet with a camera pointed at it. None of this timing work has been watched by a person yet, so I can prove it fires correctly and I still don't know if it feels good.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 05 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-5" data-title="Deckborn Devlog 05" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 05.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 05: Base Camp and the Orc Nerf ===</p>
+      <p>Date: July 30, 2026</p>
+      <p><strong>Base camp</strong></p>
+      <p>- Valley now opens on a camp (fire, tents, canopy, banner gate) instead of an empty field.</p>
+      <p><strong>Jack / run clock</strong></p>
+      <p>- Press E to talk to Jack, finishing his dialogue is what starts the run clock.</p>
+      <p>- Means the clock doesn't start until someone's explained it, and wandering off first doesn't put you on a silent timer.</p>
+      <p><strong>Menus</strong></p>
+      <p>- Main menu's Play button had never actually been wired to anything.</p>
+      <p>- Victory/defeat are real screens now, stay up until clicked.</p>
+      <p>- Cut character creation, there's no class system left for it to serve.</p>
+      <p><strong>Orc nerf</strong></p>
+      <p>- Strength is added per hit, never decays, no cap, and his best attack hits twice.</p>
+      <p>- His rage move was climbing about half a strength a turn forever, out-damaging your whole health pool by turn 5.</p>
+      <p><strong>Also</strong></p>
+      <p>- Roaming enemies no longer wander into the shop yard.</p>
+      <p><strong>Reflection</strong></p>
+      <p>The Orc nerf is the one worth remembering: when an enemy feels unfair, check the growth rate before you touch the flat numbers.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 06 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-6" data-title="Deckborn Devlog 06" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 06.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 06: The Poison Was Never the Bug ===</p>
+      <p>Date: August 5, 2026</p>
+      <p><strong>Poison / UI refresh bug</strong></p>
+      <p>- Poison was actually working the whole time. The combat UI just only refreshed on player input.</p>
+      <p>- So poison ticks, enemy attacks, block decay, all landed silently and snapped to true a click later.</p>
+      <p>- Fixed: UI refreshes on the beat now, poison tick makes the target visibly flinch.</p>
+      <p><strong>Health bars</strong></p>
+      <p>- Moved off-screen bars onto the enemies, anchored to each creature's height.</p>
+      <p>- Same fix applied to the drag-targets, which had the same problem and were hard to hit on short enemies.</p>
+      <p><strong>Damage timing</strong></p>
+      <p>- Damage numbers now pop on hit, and card damage lands on the contact frame instead of instantly on release.</p>
+      <p><strong>Also</strong></p>
+      <p>- Post-fight gold summary. Tutorial fight (5 non-blocking tips, replays every run). One-use healing fountain at the dungeon entrance. Pulled 120 dead nodes out of the Blueprint code.</p>
+      <p><strong>Reflection</strong></p>
+      <p>Poison was never the bug. The interface only telling the truth on click was, and that's a good reminder that a silent system reads as a broken one.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 07 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-7" data-title="Deckborn Devlog 07" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 07.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 07: Music, Sound, and the Tutorial Hand ===</p>
+      <p>Date: August 9, 2026</p>
+      <p><strong>Music</strong></p>
+      <p>- Lives on a layer that survives level loads, so fights no longer restart the track.</p>
+      <p>- Boss fights get a unique track, normal fights alternate between two, roll is cached per encounter so it doesn't audibly flip mid-transition.</p>
+      <p>- Victory/defeat stings fade at 10 seconds instead of playing out, since the valley trip cuts them off anyway.</p>
+      <p><strong>Combat sound</strong></p>
+      <p>- Cast sound on the cast frame, impact sound on the contact frame.</p>
+      <p><strong>Jack / controls</strong></p>
+      <p>- Jack now lives permanently at the road post. Talking to him pulls the camera in.</p>
+      <p>- Deck menu moved off E onto Q, freeing E for interact (talk, read signs, start boss fight).</p>
+      <p><strong>Tutorial</strong></p>
+      <p>- Opening hand is stacked to the two cards the tips reference, everything else greys out.</p>
+      <p>- Unlocks automatically if nothing in hand matches what the tip wants.</p>
+      <p><strong>Also</strong></p>
+      <p>- Potions pulled back out of exploration, combat-only item again.</p>
+      <p><strong>Reflection</strong></p>
+      <p>Stacking the tutorial's opening hand felt like a small trick, but it's the difference between a tip that's advice and a tip that's a play you actually run.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 08 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-8" data-title="Deckborn Devlog 08" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 08.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 08: The Warlord Was Never Fighting Back ===</p>
+      <p>Date: August 10, 2026</p>
+      <p><strong>Warlord AI</strong></p>
+      <p>- His three-move cycle was never running. An empty weight list defaults to random odds instead of the sequential pattern.</p>
+      <p>- He'd been picking at random this whole time, making him the easiest fight in the dungeon.</p>
+      <p>- Fixed. Cleave is two hits (compounds with his own strength buff), guard turn now chips damage.</p>
+      <p><strong>Warlord entrance</strong></p>
+      <p>- Walking into the arena cuts the camera to him for four lines before the fight starts.</p>
+      <p>- Camera position is computed from his location, so it follows if I move him.</p>
+      <p><strong>Sealed doors</strong></p>
+      <p>- A stone slab drops across the doorway behind you on entry.</p>
+      <p>- First seal is a real point of no return, it cuts off the fountain and the way back.</p>
+      <p><strong>Lighting</strong></p>
+      <p>- Relit the dungeon to match the arena: warm ambient near-off, tight bright pools on the walls.</p>
+      <p>- This also fixed blown-out combat effects, a dark room with auto exposure was reading every bright effect as a white blob.</p>
+      <p><strong>Also</strong></p>
+      <p>- Sign posted at the fork. AoE cards now play their impact effect on every target hit, not just one.</p>
+      <p><strong>Reflection</strong></p>
+      <p>None of the difficulty tuning has been played, it's arithmetic against numbers pulled from the live project. If the boss overshoots, the second cleave hit is the first thing I'd turn back down.</p>
+    </div>
+  </section>
+
+  <!-- ===== Deckborn > Devlog entry 09 ===== -->
+  <section class="xp-window" id="win-deckborn-devlog-9" data-title="Deckborn Devlog 09" data-width="560" data-height="460">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
+        Devlog 09.txt - Notepad
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body notepad-body">
+      <p>=== Deckborn Devlog 09: The Return Transition Bug ===</p>
+      <p>Date: August 12, 2026</p>
+      <p><strong>Return transition</strong></p>
+      <p>- Coming back from a fight, the hero used to pop back in half a second late, fully solid, in a single frame.</p>
+      <p>- Cause: the transition system blocks input, and hiding the player was a side effect of that block.</p>
+      <p>- Fix: turned off the input block. You can move during the wipe now.</p>
+      <p><strong>New transitions</strong></p>
+      <p>- Diamond wipe into a fight, iris wipe back out, both retimed onto an ease curve.</p>
+      <p>- Loading screen covers the roughly 600ms mid-load gap where no UI exists.</p>
+      <p><strong>Pause menu</strong></p>
+      <p>- Escape or P, works in exploration and combat.</p>
+      <p>- Fixed: pausing didn't pause the interface, so the valley clock and potions ran straight through it.</p>
+      <p><strong>Reflection</strong></p>
+      <p>I chased this bug through three wrong guesses before finding the real one. All of it is proven by logs and footage, none of it by a person actually watching the wipe happen.</p>
     </div>
   </section>
 
