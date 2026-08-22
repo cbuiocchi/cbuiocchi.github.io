@@ -468,13 +468,13 @@ button, .xp-button-link, a { touch-action: manipulation; }
   flex-direction: column;
   margin: 2px 0;
   font-family: 'Firlest', var(--xp-font);
-  font-size: clamp(38px, 7.5vw, 56px);
+  font-size: clamp(48px, 9.5vw, 72px);
   line-height: 0.98;
   font-weight: 400;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--db-purple);
-  -webkit-text-stroke: 2px var(--db-gold);
+  -webkit-text-stroke: 4px var(--db-gold);
   paint-order: stroke fill;
   text-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
 }
