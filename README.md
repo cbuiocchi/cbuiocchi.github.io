@@ -43,7 +43,7 @@ Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-
 
 ### Adding GDD content
 
-Edit the `.notepad-body` inside `#win-deckborn-gdd` / `#win-wrongbird-gdd` directly — the scaffold headings are placeholders to replace.
+Edit the `.notepad-body` inside `#win-deckborn-gdd` / `#win-wrongbird-gdd` directly — each line is a plain `<p>`, so add sections by adding paragraphs.
 
 ### Adding a third project folder
 
