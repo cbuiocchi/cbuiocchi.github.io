@@ -108,3 +108,25 @@ gh repo create cbuiocchi.github.io --public --source=. --push
 ```
 
 Then in the repo's Settings → Pages, set the source to the `master`/`main` branch, root folder. The site goes live at `https://cbuiocchi.github.io` within a minute or two. (If you'd rather not use a user-site repo name, any repo name works too — it'll just live at `https://cbuiocchi.github.io/<repo-name>` instead, and GitHub Pages needs to be turned on manually in Settings either way.)
+
+## Visitor analytics
+
+The site uses [GoatCounter](https://www.goatcounter.com) to count visits. It's free for
+personal sites, sets no cookies, and needs no consent banner.
+
+**One-time setup (not done yet):**
+
+1. Sign up at [goatcounter.com](https://www.goatcounter.com/signup) and pick a site code
+   (e.g. `claybuiocchi`).
+2. In `index.html`, near the bottom, replace `YOUR-GOATCOUNTER-CODE` with that code.
+3. Commit and push. Stats appear at `https://<your-code>.goatcounter.com`.
+
+Until step 2 is done, the script is inert and counts nothing.
+
+The dashboard shows pageviews, unique visits, referrers, countries, and browsers. Referrers
+are the useful part — they tell you whether traffic is coming from itch.io, LinkedIn, or a
+job application. Note that ad blockers suppress some requests, so the numbers are a floor
+rather than an exact count.
+
+GitHub's own Insights → Traffic tab measures views of the *repository page*, not visits to
+the live site, so it isn't a substitute for this.
