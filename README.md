@@ -34,7 +34,7 @@ The two projects are **folders**, not single windows. A folder is an Explorer-st
 
 Any element with `data-window="win-X"` opens window `win-X` — this is the same mechanism the desktop icons use, so folder icons need **no JS**. The child windows (game / devlogs / GDD / screenshots) are just more `<section class="xp-window">` blocks living in `index.html`; each project's set is grouped under a comment banner.
 
-Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-game`, `win-deckborn-devlogs`, `win-deckborn-gdd`, `win-deckborn-shots`, and devlog entries `win-deckborn-devlog-N`. Wrong Bird mirrors this, minus a Devlogs folder (it has none yet).
+Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-game`, `win-deckborn-devlogs`, `win-deckborn-gdd`, and devlog entries `win-deckborn-devlog-N`. Wrong Bird mirrors this, minus a Devlogs folder (it has none yet), plus `win-wrongbird-shots` for screenshots.
 
 ### Adding a devlog entry
 
@@ -43,9 +43,7 @@ Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-
 
 ### Adding GDD content
 
-Deckborn's GDD is a real PDF, `Deckborn_GDD.pdf` at the repo root. `#win-deckborn-gdd` is a `.pdf-viewer` window: a toolbar with a one-line summary plus "Open in new tab" / "Download PDF" buttons, and an embedded `<iframe data-src="Deckborn_GDD.pdf">` that `main.js` only loads when the window opens (and skips on mobile, where the buttons are shown instead). To update it, overwrite `Deckborn_GDD.pdf` — keep it small (the committed copy has its images recompressed to JPEG, ~2MB vs. the 16MB export).
-
-Wrong Bird's GDD is still a scaffold: edit the `.notepad-body` inside `#win-wrongbird-gdd` directly, or copy Deckborn's PDF viewer block once a PDF exists.
+Both GDDs are real PDFs at the repo root: `Deckborn_GDD.pdf` and `Wrong_Bird_GDD.pdf`. `#win-deckborn-gdd` and `#win-wrongbird-gdd` are each a `.pdf-viewer` window: a toolbar with a one-line summary plus "Open in new tab" / "Download PDF" buttons, and an embedded `<iframe data-src="…_GDD.pdf">` that `main.js` only loads when the window opens (and skips on mobile, where the buttons are shown instead). To update one, overwrite its PDF — keep it small (the committed copies have their images recompressed to JPEG: Deckborn ~2MB vs. a 16MB export, Wrong Bird ~1.3MB vs. 15MB).
 
 ### Adding a third project folder
 
