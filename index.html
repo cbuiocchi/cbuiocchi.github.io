@@ -680,11 +680,11 @@
   </section>
 
   <!-- ===== Wrong Bird > GDD &amp; Docs ===== -->
-  <section class="xp-window" id="win-wrongbird-gdd" data-title="Wrong Bird GDD &amp; Docs" data-width="560" data-height="460">
+  <section class="xp-window" id="win-wrongbird-gdd" data-title="Wrong Bird GDD &amp; Docs" data-width="720" data-height="620">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-gdd.svg" alt="">
-        Wrong Bird GDD.txt - Notepad
+        Wrong_Bird_GDD.pdf - Preview
       </div>
       <div class="title-bar-controls">
         <button aria-label="Minimize" data-action="minimize"></button>
@@ -692,14 +692,17 @@
         <button aria-label="Close" data-action="close"></button>
       </div>
     </div>
-    <div class="window-body notepad-body">
-      <p>=== Wrong Bird &mdash; Game Design Doc ===</p>
-      <p>Elevator pitch: A pet-raising sim with roguelite mechanics where you train penguins to fly.</p>
-      <p>Pillars: (placeholder)</p>
-      <p>Core loop: train &rarr; launch &rarr; upgrade (placeholder)</p>
-      <p>RNG &amp; systems: (placeholder)</p>
-      <p>Scope / milestones: distance-launching loop + vertical slice targeting Fall 2026.</p>
-      <p>This is a scaffold &mdash; drop the real GDD sections here.</p>
+    <div class="window-body pdf-viewer">
+      <div class="pdf-toolbar">
+        <p class="pdf-summary">The full game design document: core and training/launch loops, stats, abilities, biomes, evolution, breeding and rarity, raising and mood, interface, audio, build order, and production scope.</p>
+        <div class="pdf-actions">
+          <a class="xp-button-link" href="Wrong_Bird_GDD.pdf" target="_blank" rel="noopener">Open in new tab</a>
+          <a class="xp-button-link primary" href="Wrong_Bird_GDD.pdf" download>Download PDF &darr;</a>
+        </div>
+      </div>
+      <div class="pdf-frame desktop-only">
+        <iframe data-src="Wrong_Bird_GDD.pdf#view=FitH" title="Wrong Bird Game Design Document"></iframe>
+      </div>
     </div>
   </section>
 

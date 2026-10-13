@@ -702,7 +702,7 @@ button, .xp-button-link, a { touch-action: manipulation; }
   padding-top: 4px;
 }
 
-/* ============ PDF VIEWER (Deckborn GDD) ============ */
+/* ============ PDF VIEWER (GDDs) ============ */
 .pdf-viewer {
   display: flex;
   flex-direction: column;
