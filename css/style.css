@@ -702,6 +702,40 @@ button, .xp-button-link, a { touch-action: manipulation; }
   padding-top: 4px;
 }
 
+/* ============ PDF VIEWER (Deckborn GDD) ============ */
+.pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ada2c4;
+  padding: 12px;
+}
+.pdf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pdf-summary { margin: 0; }
+.pdf-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.pdf-frame {
+  flex: 1;
+  min-height: 0;
+  background: #fff;
+  border: 1px solid #666;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+}
+.pdf-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
 /* ============ RESPONSIVE / MOBILE ============ */
 @media (max-width: 760px) {
   html, body { overflow: auto; height: auto; }
@@ -783,6 +817,8 @@ button, .xp-button-link, a { touch-action: manipulation; }
   }
 
   .resume-viewer { padding: 10px; }
+  .pdf-toolbar { flex-direction: column; align-items: stretch; }
+  .pdf-actions { flex-wrap: wrap; }
   .resume-doc { padding: 20px 18px; }
   .resume-entry-header, .resume-entry-sub { flex-direction: column; gap: 2px; }
 }
