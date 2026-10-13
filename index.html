@@ -548,11 +548,11 @@
   </section>
 
   <!-- ===== Deckborn > GDD &amp; Docs ===== -->
-  <section class="xp-window" id="win-deckborn-gdd" data-title="Deckborn GDD &amp; Docs" data-width="560" data-height="460">
+  <section class="xp-window" id="win-deckborn-gdd" data-title="Deckborn GDD &amp; Docs" data-width="720" data-height="620">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-gdd.svg" alt="">
-        Deckborn GDD.txt - Notepad
+        Deckborn_GDD.pdf - Preview
       </div>
       <div class="title-bar-controls">
         <button aria-label="Minimize" data-action="minimize"></button>
@@ -560,14 +560,17 @@
         <button aria-label="Close" data-action="close"></button>
       </div>
     </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn &mdash; Game Design Doc ===</p>
-      <p>Elevator pitch: An RPG with deckbuilding combat, inspired by classic JRPGs.</p>
-      <p>Pillars: (placeholder)</p>
-      <p>Core loop: (placeholder)</p>
-      <p>Combat &amp; deckbuilding: (placeholder)</p>
-      <p>Scope / milestones: vertical slice targeting Fall 2026.</p>
-      <p>This is a scaffold &mdash; drop the real GDD sections here.</p>
+    <div class="window-body pdf-viewer">
+      <div class="pdf-toolbar">
+        <p class="pdf-summary">The full game design document: core loop, Valley and Dungeon structure, combat rules, all 22 cards, 12 enemies, economy, UI, and production scope.</p>
+        <div class="pdf-actions">
+          <a class="xp-button-link" href="Deckborn_GDD.pdf" target="_blank" rel="noopener">Open in new tab</a>
+          <a class="xp-button-link primary" href="Deckborn_GDD.pdf" download>Download PDF &darr;</a>
+        </div>
+      </div>
+      <div class="pdf-frame desktop-only">
+        <iframe data-src="Deckborn_GDD.pdf#view=FitH" title="Deckborn Game Design Document"></iframe>
+      </div>
     </div>
   </section>
 

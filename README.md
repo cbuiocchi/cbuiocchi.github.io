@@ -43,7 +43,9 @@ Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-
 
 ### Adding GDD content
 
-Edit the `.notepad-body` inside `#win-deckborn-gdd` / `#win-wrongbird-gdd` directly — the scaffold headings are placeholders to replace.
+Deckborn's GDD is a real PDF, `Deckborn_GDD.pdf` at the repo root. `#win-deckborn-gdd` is a `.pdf-viewer` window: a toolbar with a one-line summary plus "Open in new tab" / "Download PDF" buttons, and an embedded `<iframe data-src="Deckborn_GDD.pdf">` that `main.js` only loads when the window opens (and skips on mobile, where the buttons are shown instead). To update it, overwrite `Deckborn_GDD.pdf` — keep it small (the committed copy has its images recompressed to JPEG, ~2MB vs. the 16MB export).
+
+Wrong Bird's GDD is still a scaffold: edit the `.notepad-body` inside `#win-wrongbird-gdd` directly, or copy Deckborn's PDF viewer block once a PDF exists.
 
 ### Adding a third project folder
 
