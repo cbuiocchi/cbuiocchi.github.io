@@ -34,7 +34,7 @@ The two projects are **folders**, not single windows. A folder is an Explorer-st
 
 Any element with `data-window="win-X"` opens window `win-X` — this is the same mechanism the desktop icons use, so folder icons need **no JS**. The child windows (game / devlogs / GDD / screenshots) are just more `<section class="xp-window">` blocks living in `index.html`; each project's set is grouped under a comment banner.
 
-Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-game`, `win-deckborn-devlogs`, `win-deckborn-gdd`, `win-deckborn-shots`, and devlog entries `win-deckborn-devlog-N`. Wrong Bird mirrors this.
+Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-game`, `win-deckborn-devlogs`, `win-deckborn-gdd`, `win-deckborn-shots`, and devlog entries `win-deckborn-devlog-N`. Wrong Bird mirrors this, minus a Devlogs folder (it has none yet).
 
 ### Adding a devlog entry
 
