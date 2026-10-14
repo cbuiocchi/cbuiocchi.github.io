@@ -1,10 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <rect x="4" y="6" width="40" height="36" rx="4" fill="#3fb2ef" stroke="#1786c9" stroke-width="1.5"/>
-  <ellipse cx="24" cy="27" rx="11" ry="13" fill="#2d2438"/>
-  <ellipse cx="24" cy="29" rx="7" ry="9" fill="#fff"/>
-  <circle cx="24" cy="15" r="6.5" fill="#2d2438"/>
-  <ellipse cx="24" cy="16.5" rx="3.6" ry="3" fill="#fff"/>
-  <polygon points="24,16 21,20 27,20" fill="#ffcc00"/>
-  <circle cx="21.5" cy="14" r="1.1" fill="#222"/>
-  <circle cx="26.5" cy="14" r="1.1" fill="#222"/>
+  <defs>
+    <linearGradient id="wb-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e93db"/>
+      <stop offset="0.6" stop-color="#5cc4f5"/>
+      <stop offset="1" stop-color="#b8ebff"/>
+    </linearGradient>
+    <clipPath id="wb-tile"><rect x="3" y="3" width="40" height="40" rx="9"/></clipPath>
+  </defs>
+  <!-- chunky cartoon tile with hard offset shadow -->
+  <rect x="5.5" y="5.5" width="40" height="40" rx="9" fill="#0b1a33" fill-opacity="0.85"/>
+  <g clip-path="url(#wb-tile)">
+    <rect x="3" y="3" width="40" height="40" fill="url(#wb-sky)"/>
+    <!-- snow -->
+    <circle cx="9" cy="10" r="1.3" fill="#fff"/>
+    <circle cx="37" cy="9" r="1.1" fill="#fff"/>
+    <circle cx="34" cy="19" r="0.9" fill="#fff" fill-opacity="0.8"/>
+    <circle cx="8.5" cy="22" r="0.9" fill="#fff" fill-opacity="0.8"/>
+    <circle cx="15" cy="6.5" r="0.8" fill="#fff" fill-opacity="0.8"/>
+    <!-- snow ground -->
+    <path d="M3 38 Q23 34 43 38 V43 H3 Z" fill="#f2fbff" stroke="#0b1a33" stroke-width="2"/>
+  </g>
+  <rect x="3" y="3" width="40" height="40" rx="9" fill="none" stroke="#0b1a33" stroke-width="2.5"/>
+  <!-- penguin, standing -->
+  <g stroke="#0b1a33" stroke-width="2" stroke-linejoin="round">
+    <path d="M19 37.5 h4 M23 37.5 h4" stroke="#e8b400" stroke-width="3" stroke-linecap="round"/>
+    <path d="M16 21 Q9 25.5 8.5 31.5 Q12.5 31 16.5 27.5" fill="#123a73"/>
+    <path d="M30 21 Q37 25.5 37.5 31.5 Q33.5 31 29.5 27.5" fill="#123a73"/>
+    <ellipse cx="23" cy="26" rx="9" ry="11.5" fill="#123a73"/>
+    <ellipse cx="23" cy="28.5" rx="5.8" ry="8" fill="#fff" stroke="none"/>
+    <circle cx="20.3" cy="20" r="2" fill="#fff" stroke-width="1.2"/>
+    <circle cx="25.7" cy="20" r="2" fill="#fff" stroke-width="1.2"/>
+    <circle cx="20.5" cy="20.2" r="0.9" fill="#0b1a33" stroke="none"/>
+    <circle cx="25.5" cy="20.2" r="0.9" fill="#0b1a33" stroke="none"/>
+    <path d="M20.7 23 L23 26.2 L25.3 23 Z" fill="#ffd23f" stroke-width="1.3"/>
+  </g>
 </svg>
