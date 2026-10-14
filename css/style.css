@@ -348,7 +348,15 @@ html, body {
   margin: 22px auto 26px;
 }
 
-.site-hero { position: relative; overflow: hidden; }
+/* hero is a two-column grid: text on the left, Play Now on the right */
+.site-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 34%);
+  column-gap: 20px;
+}
+.site-hero > * { grid-column: 1; justify-self: start; }
 .site-kicker { margin: 0; }
 .site-title {
   margin: 4px 0 8px;
@@ -461,12 +469,26 @@ html, body {
   text-align: center;
   text-decoration: none;
 }
-/* Play Now button in each project site's hero */
-.side-cta.site-play {
-  display: inline-block;
-  margin: 18px 0 0;
-  padding: 10px 28px;
-  font-size: 17px;
+/* Play Now button on the right side of each project site's hero */
+.site-hero > .side-cta.site-play {
+  padding: 16px 40px;
+  font-size: 24px;
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+}
+/* narrow windows: drop it back under the facts */
+@container (max-width: 640px) {
+  .site-hero { grid-template-columns: 1fr; }
+  .site-hero > .side-cta.site-play {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    margin-top: 18px;
+  }
 }
 .site-footer {
   padding: 14px 16px 12px;
