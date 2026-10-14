@@ -9,7 +9,7 @@ index.html      All the markup: desktop icons, every window's content, taskbar, 
 css/xp.css      The "window chrome" system — title bars, buttons, the .xp-window box itself.
                 Reusable: any element with class="xp-window" + the title-bar markup gets full XP styling.
 css/style.css   Everything specific to THIS desktop: wallpaper, taskbar, start menu, icon
-                layout, the project mini-sites, and content styling (game embed box, mobile layout).
+                layout, the project mini-sites, and content styling (trailer embed, mobile layout).
 js/main.js      The window manager. One IIFE, no framework. Handles: opening/closing/minimizing
                 windows, dragging by the title bar, z-order/focus, the taskbar buttons, the start
                 menu, the clock, and the boot-screen intro.
@@ -33,23 +33,23 @@ Each project is a single **browser-style window** holding a whole mini website, 
 - an `.explorer-bar` (the "Address" strip, pinned at the top), then
 - a `.site-page` (the scrolling page) holding a fixed-width `.site-wrap`, laid out like a mid-2000s fan site: a `.site-hero` banner, a sticky `.site-nav` jump bar, then `.site-columns` with the content (`.site-main`, one boxed `.site-section` per topic) and a `.site-sidebar` of little `.side-box` panels, and finally a `.site-footer` with fake 88x31 `.web-badges`.
 
-Deckborn's sections are Play (the embedded build), Devlogs, GDD, and Links; Wrong Bird's are About, Screenshots, GDD, and Links.
+Deckborn's sections are Trailer (an embedded YouTube video), Devlogs, GDD, and Links; Wrong Bird's are About, Screenshots, GDD, and Links.
 
 The nav links carry `data-scroll-to="<section id>"`; `main.js` scrolls the page *inside* the window (a plain `#anchor` jump would also scroll the desktop). Any link with `data-scroll-to` inside a `.site-page` works this way (the sidebar's devlog links use it too), so no JS changes are needed to add a section. Just add the section and a nav link.
 
 Styling lives under `PROJECT SITES` in `css/style.css`. The shared rules there only handle layout; each game then has its own themed block:
 
-- **Deckborn: fantasy.** A starry night banner, a gilded nav bar, a "town crier" ticker (a CSS stand-in for `<marquee>`; update its text when a new devlog goes up), parchment panels under royal-purple title bars, Cinzel / IM Fell English type, and a Quest Log in the sidebar. The palette is the pop-up ad's purple and gold, set as `--db-*` variables on `.site-deckborn`.
+- **Deckborn: fantasy.** A starry night banner, a gilded nav bar, parchment panels under royal-purple title bars, Cinzel / IM Fell English type, and a Quest Log in the sidebar. The palette is the pop-up ad's purple and gold, set as `--db-*` variables on `.site-deckborn`.
 - **Wrong Bird: cartoon.** Sky and falling snow, Luckiest Guy / Fredoka type with chunky outlines, glossy gel buttons, taped-down polaroid screenshots, and a CSS-only sidebar poll. The palette is set as `--wb-*` variables on `.site-wrongbird`.
 
-The web fonts come from Google Fonts (linked in `<head>`); each stack falls back to classic web-safe fonts. When the window gets narrower than 640px (resized, or on a phone), a container query drops the sidebar under the content. All the motion (ticker, twinkling stars, snow) turns off under `prefers-reduced-motion: reduce`. The visitor counters are static numbers, just for the 2005 look.
+The web fonts come from Google Fonts (linked in `<head>`); each stack falls back to classic web-safe fonts. When the window gets narrower than 640px (resized, or on a phone), a container query drops the sidebar under the content. All the motion (twinkling stars, snow) turns off under `prefers-reduced-motion: reduce`.
 
 ### Adding a devlog entry
 
 Devlogs live inline in Deckborn's `#deckborn-devlogs` section, newest first.
 
 1. Copy an existing `<article class="devlog" id="deckborn-devlog-N">`, put it at the top of the list, give it the next id, and fill in the header (`Entry NN`, title, `<time>`) and body (`<h4>` headings, `<ul>` bullets, and a closing `<h4 class="devlog-reflection-head">Reflection</h4>` + `<p class="devlog-reflection">`).
-2. Add a matching line to the `.devlog-index` list at the top of the section (and update the sidebar's "Latest Chronicles" box and the ticker text): `<li><a href="#deckborn-devlog-N" data-scroll-to="deckborn-devlog-N"><span>Mon D</span> Title</a></li>`.
+2. Add a matching line to the `.devlog-index` list at the top of the section (and update the sidebar's "Latest Chronicles" box): `<li><a href="#deckborn-devlog-N" data-scroll-to="deckborn-devlog-N"><span>Mon D</span> Title</a></li>`.
 
 ### Updating GDD content
 
@@ -76,15 +76,9 @@ All the animation (marquee, blinking kicker, pulsing button, pop-in) is disabled
 
 Because the ad has no minimize/maximize button, `main.js` binds the title-bar controls through `bindControl()`, which skips any control a window doesn't have. Windows can safely omit controls.
 
-## Swapping in a real itch.io embed
+## Changing the Deckborn trailer
 
-Deckborn's embed is a direct `<iframe>` pointing at itch.io's HTML5 build URL (found by inspecting the "Run game" button's HTML on the itch.io page — it's the `data-iframe` attribute). If Clay re-uploads a new build to itch.io, that URL will change. To update it:
-
-1. Go to the game's itch.io page, view page source, search for `data-iframe`.
-2. Copy the `src="..."` value out of the embedded `<iframe>` markup.
-3. Paste it into the `data-src` of the `<iframe>` in the `#deckborn-play` section of `index.html`.
-
-Alternatively, itch.io's dashboard (Edit game → Distribute → Embed options) gives an official embed snippet you can drop in wholesale.
+The trailer is a YouTube embed in the `#deckborn-trailer` section of `index.html`. To swap it, replace the video ID (the part after `watch?v=`) in both the `<iframe data-src="https://www.youtube-nocookie.com/embed/VIDEO_ID">` and the "Watch on YouTube" button's link. Like the GDD iframes, `main.js` loads it when the window opens and unloads it on close, so the video stops when the window is closed.
 
 ## Updating copy
 

@@ -55,12 +55,12 @@
   // Closing a window only hides it in CSS — the iframe underneath (and any
   // audio it's playing) keeps running unless we actually unload it. We stash
   // the real src on close and restore it on the next open/re-open. A project
-  // site holds more than one (game + GDD), so handle every iframe in it.
+  // site holds more than one (trailer + GDD), so handle every iframe in it.
   function restoreIframe(win) {
-    // On mobile the embeds sit in desktop-only wrappers, so don't spend
-    // bandwidth loading a game or PDF nobody can see.
-    if (isMobile()) return;
     win.querySelectorAll('iframe').forEach(function (iframe) {
+      // On mobile the PDF embeds sit in desktop-only wrappers, so don't
+      // spend bandwidth loading something nobody can see.
+      if (isMobile() && iframe.closest('.desktop-only')) return;
       if (iframe.dataset.src && iframe.src !== iframe.dataset.src) {
         iframe.src = iframe.dataset.src;
       }
