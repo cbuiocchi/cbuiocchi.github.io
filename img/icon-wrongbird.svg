@@ -17,26 +17,32 @@
     <circle cx="34" cy="19" r="0.9" fill="#fff" fill-opacity="0.8"/>
     <circle cx="8.5" cy="22" r="0.9" fill="#fff" fill-opacity="0.8"/>
     <circle cx="15" cy="6.5" r="0.8" fill="#fff" fill-opacity="0.8"/>
-    <!-- snowdrift -->
-    <path d="M3 37 Q14 32 24 36 T43 35 V43 H3 Z" fill="#f2fbff" stroke="#0b1a33" stroke-width="2"/>
+    <!-- cloud bank -->
+    <path d="M3 39 q3 -5 8 -3 q2 -5 8 -3 q3 -4 8 -1 q4 -3 8 1 q5 -1 8 3 V43 H3 Z" fill="#f2fbff" stroke="#0b1a33" stroke-width="2"/>
   </g>
   <rect x="3" y="3" width="40" height="40" rx="9" fill="none" stroke="#0b1a33" stroke-width="2.5"/>
-  <!-- penguin, leaning in confusion -->
-  <g transform="rotate(-8 23 30)" stroke="#0b1a33" stroke-width="2" stroke-linejoin="round">
-    <path d="M17.5 38.5 h4 M24.5 38.5 h4" stroke="#e8b400" stroke-width="3" stroke-linecap="round"/>
-    <ellipse cx="23" cy="27" rx="9" ry="11.5" fill="#123a73"/>
-    <ellipse cx="23" cy="29.5" rx="5.6" ry="8" fill="#fff" stroke="none"/>
-    <path d="M14.5 25 q-3.5 4 -2 8.5" fill="none" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="20.3" cy="20.5" r="2.2" fill="#fff" stroke-width="1.2"/>
-    <circle cx="25.7" cy="20.5" r="2.2" fill="#fff" stroke-width="1.2"/>
-    <circle cx="20.8" cy="20.8" r="1" fill="#0b1a33" stroke="none"/>
-    <circle cx="25.2" cy="20.2" r="1" fill="#0b1a33" stroke="none"/>
-    <path d="M20.5 23.6 L23 27.2 L25.5 23.6 Z" fill="#ffd23f" stroke-width="1.3"/>
+  <!-- speed lines -->
+  <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+    <path d="M5.5 29 h4.5"/>
+    <path d="M6.5 34 h5"/>
+    <path d="M7 24 h3.5"/>
+  </g>
+  <!-- penguin, flapping up and to the right -->
+  <g transform="translate(22.5 27) rotate(-22) scale(0.88)" stroke="#0b1a33" stroke-width="2" stroke-linejoin="round">
+    <path d="M-12.5 1 l-3.2 -1.6 M-12.5 3 l-3.4 1.4" stroke="#e8b400" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M-12.5 2 l-1.5 -1.5 M-12.5 2 l-1.6 1.6" stroke-width="1.2" stroke-linecap="round"/>
+    <ellipse cx="0" cy="1" rx="12" ry="7" fill="#123a73"/>
+    <ellipse cx="0.5" cy="3.6" rx="9" ry="3.6" fill="#fff" stroke="none"/>
+    <circle cx="9.5" cy="-2.5" r="5.6" fill="#123a73"/>
+    <circle cx="11.4" cy="-3.8" r="2.1" fill="#fff" stroke-width="1.2"/>
+    <circle cx="12" cy="-3.9" r="1" fill="#0b1a33" stroke="none"/>
+    <path d="M14.2 -2.6 L19.2 -1 L14.4 0.9 Z" fill="#ffd23f" stroke-width="1.3"/>
+    <path d="M-3 -4.5 Q-7 -14 -1 -17 Q1 -10 4 -5" fill="#123a73"/>
   </g>
   <!-- question-mark speech bubble -->
   <g stroke="#0b1a33" stroke-width="1.8" stroke-linejoin="round">
-    <path d="M33 6.5 h7 a3 3 0 0 1 3 3 v4.5 a3 3 0 0 1 -3 3 h-2.5 l-3 3 v-3 h-1.5 a3 3 0 0 1 -3 -3 v-4.5 a3 3 0 0 1 3 -3 z" fill="#ffd23f"/>
-    <path d="M34.5 10.2 q0.3 -2 2.2 -2 q2 0 2 1.8 q0 1.3 -1.6 1.9 q-0.5 0.3 -0.5 1.2" fill="none" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M33 4.5 h7 a3 3 0 0 1 3 3 v4.5 a3 3 0 0 1 -3 3 h-1.5 v3 l-3 -3 h-2.5 a3 3 0 0 1 -3 -3 v-4.5 a3 3 0 0 1 3 -3 z" fill="#ffd23f"/>
+    <path d="M34.5 8.2 q0.3 -2 2.2 -2 q2 0 2 1.8 q0 1.3 -1.6 1.9 q-0.5 0.3 -0.5 1.2" fill="none" stroke-width="1.4" stroke-linecap="round"/>
   </g>
-  <circle cx="36.6" cy="14.9" r="0.8" fill="#0b1a33"/>
+  <circle cx="36.6" cy="12.9" r="0.8" fill="#0b1a33"/>
 </svg>
