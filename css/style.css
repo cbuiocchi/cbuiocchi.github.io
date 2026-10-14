@@ -200,8 +200,8 @@ html, body {
   width: 220px;
   height: 220px;
 }
-/* kid photo + favorite-games roll, centered together under the text */
-.welcome-bottom {
+/* About Me: kid photo + favorite-games roll, centered together under the text */
+.about-bottom {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
