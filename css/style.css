@@ -188,12 +188,6 @@ html, body {
   align-items: flex-start;
   gap: 20px;
 }
-.welcome-photos {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-shrink: 0;
-}
 .welcome-photo {
   width: 150px;
   height: 150px;
@@ -201,6 +195,14 @@ html, body {
   object-fit: cover;
   border: 2px solid #0a246a;
   flex-shrink: 0;
+}
+.welcome-photo-main {
+  width: 220px;
+  height: 220px;
+}
+.welcome-photo-kid {
+  display: block;
+  margin: 16px auto 0;
 }
 .welcome-text { min-width: 0; }
 .welcome-text > p:first-child { margin-top: 0; }
