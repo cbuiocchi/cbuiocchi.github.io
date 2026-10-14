@@ -188,12 +188,6 @@ html, body {
   align-items: flex-start;
   gap: 20px;
 }
-.welcome-photos {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-shrink: 0;
-}
 .welcome-photo {
   width: 150px;
   height: 150px;
@@ -202,7 +196,61 @@ html, body {
   border: 2px solid #0a246a;
   flex-shrink: 0;
 }
+.welcome-photo-main {
+  width: 220px;
+  height: 220px;
+}
+/* kid photo + favorite-games roll, centered together under the text */
+.welcome-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+}
+.fav-games {
+  width: 260px;
+  max-width: 100%;
+  border: 2px solid #0a246a;
+  background: #fff;
+}
+.fav-games-title {
+  padding: 4px 8px;
+  background: #0a246a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+/* fixed-height viewport the list rolls through like end credits */
+.fav-games-window {
+  height: 120px;
+  overflow: hidden;
+}
+.fav-games-track { animation: fav-games-roll 50s linear infinite; }
+.fav-games-window:hover .fav-games-track { animation-play-state: paused; }
+.fav-games-track ul {
+  margin: 0;
+  padding: 6px 10px;
+  list-style: none;
+  text-align: center;
+}
+.fav-games-track li { padding: 3px 0; }
+@keyframes fav-games-roll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fav-games-window { overflow-y: auto; }
+  .fav-games-track { animation: none; }
+  .fav-games-track ul[aria-hidden] { display: none; }
+}
 .welcome-text { min-width: 0; }
+@media (max-width: 560px) {
+  .welcome-layout { flex-direction: column; align-items: center; }
+  .welcome-photo-main { width: 180px; height: 180px; }
+}
 .welcome-text > p:first-child { margin-top: 0; }
 
 .welcome-tour {
