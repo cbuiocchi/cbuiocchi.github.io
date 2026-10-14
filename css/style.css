@@ -634,43 +634,6 @@ html, body {
   color: var(--db-gold);
 }
 
-/* a fan of three cards floating in the banner */
-.site-deckborn .hero-cards {
-  position: absolute;
-  top: 26px;
-  right: 46px;
-  width: 140px;
-  height: 110px;
-  animation: db-float 5s ease-in-out infinite;
-}
-.site-deckborn .hero-card {
-  position: absolute;
-  left: 38px;
-  top: 0;
-  width: 64px;
-  height: 92px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 50% 40%, var(--db-purple-lt), var(--db-purple-dk) 75%);
-  border: 2px solid var(--db-gold);
-  border-radius: 7px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55), 0 0 12px rgba(245, 197, 66, 0.3);
-  color: var(--db-gold);
-  font-size: 26px;
-  text-shadow: 0 0 8px rgba(245, 197, 66, 0.8);
-  transform-origin: 50% 130%;
-}
-.site-deckborn .hero-card::before {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border: 1px solid rgba(245, 197, 66, 0.55);
-  border-radius: 4px;
-}
-.site-deckborn .hero-card:nth-child(1) { transform: translateX(-34px) rotate(-16deg); }
-.site-deckborn .hero-card:nth-child(3) { transform: translateX(34px) rotate(16deg); }
-
 /* gilded nav bar */
 .site-deckborn .site-nav {
   background: linear-gradient(180deg, #fff1b8 0%, #e9c457 40%, var(--db-gold-dk) 52%, #dcae38 100%);
@@ -887,24 +850,17 @@ html, body {
 .site-deckborn .web-badges b { color: var(--db-gold); }
 
 @keyframes db-twinkle { from { opacity: 0.55; } to { opacity: 1; } }
-@keyframes db-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
 @keyframes db-ticker { to { transform: translateX(-100%); } }
 
 @container (max-width: 640px) {
   .site-deckborn .site-hero { padding: 22px 16px 18px; }
-  .site-deckborn .hero-cards { top: 14px; right: 6px; transform: scale(0.6); transform-origin: top right; animation: none; }
-  .site-deckborn .site-kicker,
-  .site-deckborn .site-title { padding-right: 96px; }
   .site-deckborn .site-nav a { padding: 10px 12px; letter-spacing: 1px; }
 }
 
 /* ================= WRONG BIRD: cartoon ================= */
-/* A 2006 kids' game site: sky and snow, a cartoon penguin in flight
-   goggles, chunky outlined type, glossy gel buttons, polaroid
-   screenshots, and a poll that nobody's results are saved from. */
+/* A 2006 kids' game site: sky and snow, chunky outlined type, glossy gel
+   buttons, polaroid screenshots, and a poll that nobody's results are
+   saved from. */
 .site-wrongbird {
   --wb-navy:     #0b1a33;
   --wb-deep:     #123a73;
@@ -938,59 +894,14 @@ html, body {
   box-shadow: 8px 8px 0 rgba(11, 26, 51, 0.4);
 }
 
-/* banner: sky, sun, clouds, snow hills and our pilot */
+/* banner: open sky */
 .site-wrongbird .site-hero {
-  min-height: 236px;
-  padding: 30px 250px 52px 28px;
+  padding: 30px 28px 28px;
   border-radius: 18px 18px 0 0;
-  background:
-    radial-gradient(circle at 70% 20%, #fff8c4 0 26px, rgba(255, 236, 140, 0.55) 28px, transparent 64px),
-    linear-gradient(180deg, #1e93db 0%, #5cc4f5 60%, #b8ebff 100%);
+  border-bottom: var(--wb-outline);
+  background: linear-gradient(180deg, #1e93db 0%, #5cc4f5 60%, #b8ebff 100%);
   color: #fff;
 }
-.site-wrongbird .site-hero::after {   /* snowy hills */
-  content: "";
-  position: absolute;
-  left: -10px;
-  right: -10px;
-  bottom: -2px;
-  height: 52px;
-  background:
-    radial-gradient(ellipse 34% 100% at 18% 100%, #fff 97%, transparent 100%),
-    radial-gradient(ellipse 40% 80% at 62% 100%, #e9f8ff 97%, transparent 100%),
-    radial-gradient(ellipse 30% 110% at 96% 100%, #fff 97%, transparent 100%);
-  filter: drop-shadow(0 -3px 0 var(--wb-navy));
-}
-.site-wrongbird .hero-cloud {
-  position: absolute;
-  width: 84px;
-  height: 26px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 18px -13px 0 3px #fff, 44px -6px 0 0 #fff;
-  opacity: 0.95;
-  animation: wb-drift 18s ease-in-out infinite alternate;
-}
-.site-wrongbird .hero-cloud-1 { top: 34px; left: 52%; }
-.site-wrongbird .hero-cloud-2 { top: 112px; left: 80%; transform: scale(0.7); animation-duration: 24s; }
-.site-wrongbird .hero-penguin {
-  position: absolute;
-  top: 20px;
-  right: 46px;
-  width: 176px;
-  height: 176px;
-  z-index: 1;
-  filter: drop-shadow(4px 6px 0 rgba(11, 26, 51, 0.25));
-  animation: wb-bob 2.4s ease-in-out infinite;
-}
-.site-wrongbird .penguin-wing {
-  transform-box: view-box;
-  animation: wb-flap 0.32s ease-in-out infinite alternate;
-}
-.site-wrongbird .penguin-wing-l { transform-origin: 60px 104px; }
-.site-wrongbird .penguin-wing-r { transform-origin: 140px 104px; animation-name: wb-flap-r; }
-
-.site-wrongbird .site-hero > :not(.hero-cloud):not(.hero-penguin) { position: relative; z-index: 2; }
 .site-wrongbird .site-kicker {
   display: inline-block;
   padding: 2px 12px;
@@ -1297,31 +1208,16 @@ html, body {
 @keyframes wb-snow {
   to { background-position: 64px 640px, 55px 401px, 0 0; }
 }
-@keyframes wb-bob {
-  0%, 100% { transform: translateY(0) rotate(-6deg); }
-  50% { transform: translateY(-10px) rotate(4deg); }
-}
-@keyframes wb-flap { from { transform: rotate(-22deg); } to { transform: rotate(14deg); } }
-@keyframes wb-flap-r { from { transform: rotate(22deg); } to { transform: rotate(-14deg); } }
-@keyframes wb-drift { to { translate: -40px 0; } }
 @keyframes wb-pulse { from { transform: scale(0.92) rotate(-8deg); } to { transform: scale(1.08) rotate(6deg); } }
 
 @container (max-width: 640px) {
-  .site-wrongbird .site-hero { min-height: 0; padding: 20px 16px 50px; }
-  .site-wrongbird .hero-penguin { top: 10px; right: 4px; width: 104px; height: 104px; }
-  .site-wrongbird .site-kicker,
-  .site-wrongbird .site-title { margin-right: 92px; }
-  .site-wrongbird .hero-cloud-1 { left: 30%; top: 14px; }
+  .site-wrongbird .site-hero { padding: 20px 16px 22px; }
   .site-wrongbird .site-nav a { padding: 5px 14px; font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .site-deckborn .site-hero::before,
-  .site-deckborn .hero-cards,
   .site-wrongbird .site-page,
-  .site-wrongbird .hero-cloud,
-  .site-wrongbird .hero-penguin,
-  .site-wrongbird .penguin-wing,
   .site-wrongbird .new-burst { animation: none; }
   .site-deckborn .site-ticker { white-space: normal; padding: 4px 12px; text-align: center; }
   .site-deckborn .site-ticker span { padding-left: 0; animation: none; }

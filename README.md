@@ -39,10 +39,10 @@ The nav links carry `data-scroll-to="<section id>"`; `main.js` scrolls the page 
 
 Styling lives under `PROJECT SITES` in `css/style.css`. The shared rules there only handle layout; each game then has its own themed block:
 
-- **Deckborn: fantasy.** A starry night banner with a floating fan of cards, a gilded nav bar, a "town crier" ticker (a CSS stand-in for `<marquee>`; update its text when a new devlog goes up), parchment panels under royal-purple title bars, Cinzel / IM Fell English type, and a Quest Log in the sidebar. The palette is the pop-up ad's purple and gold, set as `--db-*` variables on `.site-deckborn`.
-- **Wrong Bird: cartoon.** Sky and falling snow, an inline-SVG cartoon penguin in flight goggles flapping in the banner, Luckiest Guy / Fredoka type with chunky outlines, glossy gel buttons, taped-down polaroid screenshots, and a CSS-only sidebar poll. The palette is set as `--wb-*` variables on `.site-wrongbird`.
+- **Deckborn: fantasy.** A starry night banner, a gilded nav bar, a "town crier" ticker (a CSS stand-in for `<marquee>`; update its text when a new devlog goes up), parchment panels under royal-purple title bars, Cinzel / IM Fell English type, and a Quest Log in the sidebar. The palette is the pop-up ad's purple and gold, set as `--db-*` variables on `.site-deckborn`.
+- **Wrong Bird: cartoon.** Sky and falling snow, Luckiest Guy / Fredoka type with chunky outlines, glossy gel buttons, taped-down polaroid screenshots, and a CSS-only sidebar poll. The palette is set as `--wb-*` variables on `.site-wrongbird`.
 
-The web fonts come from Google Fonts (linked in `<head>`); each stack falls back to classic web-safe fonts. When the window gets narrower than 640px (resized, or on a phone), a container query drops the sidebar under the content. All the motion (ticker, twinkling stars, penguin, snow) turns off under `prefers-reduced-motion: reduce`. The visitor counters are static numbers, just for the 2005 look.
+The web fonts come from Google Fonts (linked in `<head>`); each stack falls back to classic web-safe fonts. When the window gets narrower than 640px (resized, or on a phone), a container query drops the sidebar under the content. All the motion (ticker, twinkling stars, snow) turns off under `prefers-reduced-motion: reduce`. The visitor counters are static numbers, just for the 2005 look.
 
 ### Adding a devlog entry
 
