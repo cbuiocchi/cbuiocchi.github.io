@@ -353,7 +353,7 @@ html, body {
   position: relative;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr minmax(240px, 34%);
   column-gap: 20px;
 }
 .site-hero > * { grid-column: 1; justify-self: start; }
@@ -470,16 +470,14 @@ html, body {
   text-decoration: none;
 }
 /* Play Now button on the right side of each project site's hero */
-.side-cta.site-play {
-  padding: 10px 28px;
-  font-size: 17px;
-  white-space: nowrap;
-}
 .site-hero > .side-cta.site-play {
+  padding: 16px 40px;
+  font-size: 24px;
+  white-space: nowrap;
   grid-column: 2;
   grid-row: 1 / span 4;
   align-self: center;
-  justify-self: end;
+  justify-self: center;
   margin: 0;
 }
 /* narrow windows: drop it back under the facts */
