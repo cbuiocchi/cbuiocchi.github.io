@@ -228,7 +228,7 @@ html, body {
   height: 120px;
   overflow: hidden;
 }
-.fav-games-track { animation: fav-games-roll 18s linear infinite; }
+.fav-games-track { animation: fav-games-roll 50s linear infinite; }
 .fav-games-window:hover .fav-games-track { animation-play-state: paused; }
 .fav-games-track ul {
   margin: 0;
