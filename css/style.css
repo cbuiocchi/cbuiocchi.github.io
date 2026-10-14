@@ -188,9 +188,15 @@ html, body {
   align-items: flex-start;
   gap: 20px;
 }
+.welcome-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
 .welcome-photo {
-  width: 170px;
-  height: 170px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #0a246a;
