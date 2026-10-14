@@ -181,19 +181,6 @@ html, body {
 }
 
 /* ============ WINDOW CONTENT EXTRAS ============ */
-.game-embed-wrap {
-  width: 100%;
-  aspect-ratio: 640 / 360;
-  background: #000;
-  border: 1px solid #666;
-  margin-bottom: 12px;
-}
-.game-embed-wrap iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
 .pitch { margin: 0 0 12px; }
 
 .welcome-layout {
@@ -416,6 +403,18 @@ html, body {
 .site-section .link-row { flex-wrap: wrap; margin-bottom: 16px; }
 .site-note { padding: 8px 12px; }
 
+.site-video {
+  aspect-ratio: 16 / 9;
+  margin-bottom: 14px;
+  background: #000;
+}
+.site-video iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
 .site-pdf {
   height: 520px;
   margin-bottom: 16px;
@@ -462,19 +461,6 @@ html, body {
   text-align: center;
   text-decoration: none;
 }
-.hit-counter {
-  display: flex;
-  justify-content: center;
-  gap: 2px;
-  margin: 2px 0 4px !important;
-}
-.hit-counter span {
-  display: inline-block;
-  width: 18px;
-  text-align: center;
-  font: bold 15px/24px "Courier New", monospace;
-}
-
 .site-footer {
   padding: 14px 16px 12px;
   font-size: 11px;
@@ -539,8 +525,8 @@ html, body {
 
 /* ================= DECKBORN: fantasy ================= */
 /* An old RPG fan site: gold filigree frame, a starry night banner, a
-   gilded nav bar, a town-crier ticker, and parchment panels under royal
-   purple title bars. Same purple + gold as the pop-up ad. */
+   gilded nav bar, and parchment panels under royal-purple title bars.
+   Same purple + gold as the pop-up ad. */
 .site-deckborn {
   --db-night:      #120822;
   --db-purple-dk:  #23103f;
@@ -662,24 +648,6 @@ html, body {
   text-shadow: 0 0 6px rgba(245, 197, 66, 0.6);
 }
 
-/* town-crier ticker (a CSS stand-in for <marquee>) */
-.site-deckborn .site-ticker {
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 4px 0;
-  background: var(--db-purple-dk);
-  border-bottom: 1px solid var(--db-frame);
-  color: #f3dc8f;
-  font-family: "IM Fell English", Georgia, serif;
-  font-style: italic;
-  font-size: 13.5px;
-}
-.site-deckborn .site-ticker span {
-  display: inline-block;
-  padding-left: 100%;
-  animation: db-ticker 32s linear infinite;
-}
-
 .site-deckborn .site-columns {
   background: radial-gradient(ellipse at 50% 30%, #f8edcf 0%, #efdfb2 60%, #dcc28a 100%);
 }
@@ -765,7 +733,7 @@ html, body {
   letter-spacing: 1px;
 }
 
-.site-deckborn .game-embed-wrap,
+.site-deckborn .site-video,
 .site-deckborn .site-pdf {
   border: 3px solid var(--db-frame);
   outline: 1px solid #1a0b08;
@@ -830,11 +798,6 @@ html, body {
 .site-deckborn .quest-log li.done { color: #6e5a3a; }
 .site-deckborn .quest-log li.done::before { content: "\2611"; color: #2f7a3a; }
 .site-deckborn .quest-log li:not(.done) { font-weight: bold; color: var(--db-purple); }
-.site-deckborn .hit-counter span {
-  background: linear-gradient(180deg, #1a0b08 0%, #3a2414 50%, #1a0b08 100%);
-  border: 1px solid var(--db-frame);
-  color: var(--db-gold);
-}
 .site-deckborn .side-small { color: #7a5a2a; font-style: italic; }
 
 .site-deckborn .site-footer {
@@ -850,7 +813,6 @@ html, body {
 .site-deckborn .web-badges b { color: var(--db-gold); }
 
 @keyframes db-twinkle { from { opacity: 0.55; } to { opacity: 1; } }
-@keyframes db-ticker { to { transform: translateX(-100%); } }
 
 @container (max-width: 640px) {
   .site-deckborn .site-hero { padding: 22px 16px 18px; }
@@ -1170,13 +1132,6 @@ html, body {
   font-size: 12.5px;
 }
 .site-wrongbird .side-poll:has(input:checked) .poll-thanks { display: block; }
-.site-wrongbird .hit-counter span {
-  background: var(--wb-yellow);
-  border: 2px solid var(--wb-navy);
-  border-radius: 5px;
-  color: var(--wb-navy);
-  font: 17px/24px "Luckiest Guy", Impact, sans-serif;
-}
 
 .site-wrongbird .site-footer {
   position: relative;
@@ -1219,8 +1174,6 @@ html, body {
   .site-deckborn .site-hero::before,
   .site-wrongbird .site-page,
   .site-wrongbird .new-burst { animation: none; }
-  .site-deckborn .site-ticker { white-space: normal; padding: 4px 12px; text-align: center; }
-  .site-deckborn .site-ticker span { padding-left: 0; animation: none; }
 }
 
 .mobile-only { display: none; }
@@ -1586,8 +1539,6 @@ button, .xp-button-link, a { touch-action: manipulation; }
   .title-bar-controls button[data-action="maximize"] { display: none; }
 
   .window-body { font-size: 14px; }
-
-  .game-embed-wrap { aspect-ratio: 4 / 3; }
 
   /* On a phone the window grows to fit, so the page scrolls with the
      document instead of inside the window. */

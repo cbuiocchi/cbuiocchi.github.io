@@ -125,7 +125,7 @@
         <div class="welcome-text">
           <p>Hi, I'm Clay Buiocchi (they/them). Welcome to my desktop.</p>
           <ul class="welcome-tour">
-            <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are the two games I'm building. Each one opens a mini site with everything on one page: playable build, devlogs, design doc, and screenshots.</li>
+            <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are the two games I'm building. Each one opens a mini site with everything on one page: trailer, devlogs, design doc, and screenshots.</li>
             <li><a href="#" data-window="win-about"><strong>About Me</strong></a> covers who I am and what I care about.</li>
             <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> has my full skills, projects, and experience.</li>
             <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> is where to find me and how to reach out.</li>
@@ -176,30 +176,27 @@
         </header>
 
         <nav class="site-nav" aria-label="Deckborn sections">
-          <a href="#deckborn-play" data-scroll-to="deckborn-play">Play</a>
+          <a href="#deckborn-trailer" data-scroll-to="deckborn-trailer">Trailer</a>
           <a href="#deckborn-devlogs" data-scroll-to="deckborn-devlogs">Devlogs</a>
           <a href="#deckborn-gdd" data-scroll-to="deckborn-gdd">GDD</a>
           <a href="#deckborn-links" data-scroll-to="deckborn-links">Links</a>
         </nav>
 
-        <div class="site-ticker" aria-hidden="true"><span>&#10022; Hear ye! Entry 09, &ldquo;The Return Transition Bug,&rdquo; is posted in the Devlogs &#10022; The vertical slice marches toward Fall 2026 &#10022; The prototype awaits thee on itch.io &#10022;</span></div>
-
         <div class="site-columns">
         <main class="site-main">
-        <section class="site-section" id="deckborn-play">
-          <h3 class="site-section-title"><img src="img/icon-deckborn.svg" alt="">Play the prototype</h3>
-          <div class="game-embed-wrap desktop-only">
+        <section class="site-section" id="deckborn-trailer">
+          <h3 class="site-section-title"><img src="img/icon-deckborn.svg" alt="">Watch the trailer</h3>
+          <div class="site-video">
             <iframe
-              data-src="https://html-classic.itch.zone/html/18150834/index.html?v=1782816422"
+              data-src="https://www.youtube-nocookie.com/embed/V0dI7mSTQ5Y"
+              allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowfullscreen
-              allow="autoplay; fullscreen; gamepad"
-              title="Deckborn Prototype - playable build">
-            </iframe>
+              referrerpolicy="strict-origin-when-cross-origin"
+              title="Deckborn trailer"></iframe>
           </div>
-          <p class="mobile-only site-note">The playable build runs in the browser on desktop. On a phone, grab it from the itch.io page below.</p>
           <p class="pitch">Deckborn is an RPG with deckbuilding combat &mdash; a bigger-scope take on the genre inspired by classic JRPGs like Final Fantasy 7. It's a solo project built in Unreal Engine 5, with a basic turn-based card combat system and a small overworld to explore. Currently in production, targeting a polished vertical slice by Fall 2026.</p>
           <div class="link-row">
-            <a class="xp-button-link primary" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">View on itch.io &rarr;</a>
+            <a class="xp-button-link primary" href="https://www.youtube.com/watch?v=V0dI7mSTQ5Y" target="_blank" rel="noopener">Watch on YouTube &rarr;</a>
           </div>
         </section>
 
@@ -522,12 +519,7 @@
           </div>
           <div class="side-box">
             <h3 class="side-title">Enter the Realm</h3>
-            <a class="side-cta" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">Play on itch.io</a>
-          </div>
-          <div class="side-box side-counter">
-            <h3 class="side-title">Adventurers</h3>
-            <p class="hit-counter" aria-label="Visitor counter (just for fun)"><span>0</span><span>0</span><span>1</span><span>3</span><span>3</span><span>7</span></p>
-            <p class="side-small">have entered since 2026</p>
+            <a class="side-cta" href="#deckborn-trailer" data-scroll-to="deckborn-trailer">Watch the trailer</a>
           </div>
         </aside>
         </div>
@@ -645,11 +637,6 @@
             <label><input type="radio" name="wb-poll"> Not yet!</label>
             <p class="poll-thanks">Thanks for voting! The penguins are training as we speak.</p>
           </form>
-          <div class="side-box side-counter">
-            <h3 class="side-title">Visitors</h3>
-            <p class="hit-counter" aria-label="Visitor counter (just for fun)"><span>0</span><span>0</span><span>0</span><span>4</span><span>2</span><span>0</span></p>
-            <p class="side-small">and counting!</p>
-          </div>
         </aside>
         </div>
 
