@@ -171,7 +171,7 @@
           <ul class="site-facts">
             <li><strong>Genre</strong> Deckbuilding RPG</li>
             <li><strong>Engine</strong> Unreal Engine 5</li>
-            <li><strong>Status</strong> In production &middot; vertical slice Fall 2026</li>
+            <li><strong>Status</strong> Vertical slice out now on itch.io</li>
           </ul>
         </header>
 
@@ -194,7 +194,7 @@
               referrerpolicy="strict-origin-when-cross-origin"
               title="Deckborn trailer"></iframe>
           </div>
-          <p class="pitch">Deckborn is an RPG with deckbuilding combat &mdash; a bigger-scope take on the genre inspired by classic JRPGs like Final Fantasy 7. It's a solo project built in Unreal Engine 5, with a basic turn-based card combat system and a small overworld to explore. Currently in production, targeting a polished vertical slice by Fall 2026.</p>
+          <p class="pitch">Deckborn is an RPG with deckbuilding combat &mdash; a bigger-scope take on the genre inspired by classic JRPGs like Final Fantasy 7. It's a solo project built in Unreal Engine 5, with a basic turn-based card combat system and a small overworld to explore. The vertical slice released on itch.io on August 31, 2026.</p>
           <div class="link-row">
             <a class="xp-button-link primary" href="https://www.youtube.com/watch?v=V0dI7mSTQ5Y" target="_blank" rel="noopener">Watch on YouTube &rarr;</a>
           </div>
@@ -205,16 +205,209 @@
           <!-- Add a new entry: copy an <article class="devlog"> below (newest
                goes first), then add a matching link to this index. -->
           <ol class="devlog-index">
+            <li><a href="#deckborn-devlog-15" data-scroll-to="deckborn-devlog-15"><span>Aug 31</span> Deckborn Is Out Now</a></li>
+            <li><a href="#deckborn-devlog-14" data-scroll-to="deckborn-devlog-14"><span>Aug 27</span> Card Art and Set Dressing</a></li>
+            <li><a href="#deckborn-devlog-13" data-scroll-to="deckborn-devlog-13"><span>Aug 24</span> Color Identity and the Waterfall Cave</a></li>
+            <li><a href="#deckborn-devlog-12" data-scroll-to="deckborn-devlog-12"><span>Aug 21</span> Cards Queue Up</a></li>
+            <li><a href="#deckborn-devlog-11" data-scroll-to="deckborn-devlog-11"><span>Aug 18</span> First Build, First Playtest</a></li>
+            <li><a href="#deckborn-devlog-10" data-scroll-to="deckborn-devlog-10"><span>Aug 14</span> A Second Chance</a></li>
             <li><a href="#deckborn-devlog-9" data-scroll-to="deckborn-devlog-9"><span>Aug 12</span> The Return Transition Bug</a></li>
-            <li><a href="#deckborn-devlog-8" data-scroll-to="deckborn-devlog-8"><span>Aug 10</span> The Warlord Was Never Fighting Back</a></li>
-            <li><a href="#deckborn-devlog-7" data-scroll-to="deckborn-devlog-7"><span>Aug 9</span> Music, Sound, and the Tutorial Hand</a></li>
-            <li><a href="#deckborn-devlog-6" data-scroll-to="deckborn-devlog-6"><span>Aug 5</span> The Poison Was Never the Bug</a></li>
+            <li><a href="#deckborn-devlog-8" data-scroll-to="deckborn-devlog-8"><span>Aug 10</span> The Warlord Fights Back</a></li>
+            <li><a href="#deckborn-devlog-7" data-scroll-to="deckborn-devlog-7"><span>Aug 9</span> Music and Combat Sound</a></li>
+            <li><a href="#deckborn-devlog-6" data-scroll-to="deckborn-devlog-6"><span>Aug 5</span> Health Bars and Damage Timing</a></li>
             <li><a href="#deckborn-devlog-5" data-scroll-to="deckborn-devlog-5"><span>Jul 30</span> Base Camp and the Orc Nerf</a></li>
             <li><a href="#deckborn-devlog-4" data-scroll-to="deckborn-devlog-4"><span>Jul 26</span> Fixing Combat Timing</a></li>
             <li><a href="#deckborn-devlog-3" data-scroll-to="deckborn-devlog-3"><span>Jul 25</span> Dungeon, Cards, and AI</a></li>
             <li><a href="#deckborn-devlog-2" data-scroll-to="deckborn-devlog-2"><span>Jul 17</span> Cutting the Village Hub</a></li>
             <li><a href="#deckborn-devlog-1" data-scroll-to="deckborn-devlog-1"><span>Jul 6</span> First Playable Fight</a></li>
           </ol>
+
+      <article class="devlog" id="deckborn-devlog-15">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 15</span>
+          <h3>Deckborn Is Out Now</h3>
+          <time datetime="2026-08-31">August 31, 2026</time>
+        </header>
+        <p><strong><a href="https://claybuiocchi.itch.io/deckborn-ue5" target="_blank" rel="noopener">Deckborn is out now on itch!</a></strong></p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-14">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 14</span>
+          <h3>Card Art and Set Dressing</h3>
+          <time datetime="2026-08-27">August 27, 2026</time>
+        </header>
+        <h4>Card art</h4>
+        <ul>
+          <li>All 22 cards have art. The art system had been in the code the whole time drawing every card image at zero opacity, so the pictures were rendering invisibly.</li>
+        </ul>
+        <h4>Set dressing</h4>
+        <ul>
+          <li>96 props through the valley: rocks, ferns, flowers, stumps, fallen logs, mushrooms. No new trees, the tree layer was already dense, what was missing was everything at ground level.</li>
+          <li>62 more in the enemy camp, which had been two towers and a campfire on a bare lawn. Crates, barrels, a mess area, bedrolls, a cart. Anything shorter than knee height got cut, it just reads as clutter from this camera height.</li>
+        </ul>
+        <h4>Sound</h4>
+        <ul>
+          <li>Hover and click sounds on every button in the game.</li>
+        </ul>
+        <h4>Card hover</h4>
+        <ul>
+          <li>Hovering a card lifts it, straightens it, and draws it on top of its neighbors. It used to slide toward the middle of the fan and stay buried under every card to its right.</li>
+        </ul>
+        <h4>UI animations</h4>
+        <ul>
+          <li>Nine animations. Bars slide toward their new value instead of snapping, the turn banner takes the color of whose turn it is, the player box flashes when you get hit.</li>
+        </ul>
+        <h4>The Warlord's new plan</h4>
+        <ul>
+          <li>Cut the Card of Power. Instead he's trying to drown the valley in eternal darkness.</li>
+        </ul>
+        <h4>Keyword tooltips</h4>
+        <ul>
+          <li>Hover a keyword to find out what it does. Works on cards in your hand, cards in the shop, cards in the deck menu, enemy intent lines, and your own status readout.</li>
+          <li>Frail, Weak, and Vulnerable are three different penalties and nothing in the game had ever explained any of them.</li>
+        </ul>
+        <h4>Potion slots</h4>
+        <ul>
+          <li>Three color coded slots along the bottom of the player box, instead of text lines floating over the left of the screen.</li>
+        </ul>
+        <h4>Shop header</h4>
+        <ul>
+          <li>Shows a real health bar and a gold chip instead of one long packed line of text. The Remove card button turns into Back while you're picking the card to remove.</li>
+        </ul>
+        <h4>Hero death</h4>
+        <ul>
+          <li>The hero used to freeze mid-idle and get covered by the defeat screen on the same frame they died. They fall now, and the screen waits for it.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>The gold readout is back in exploration, a later rewrite had quietly dropped the line that created it. Victory and defeat screens animate in. Enemy panels restyled to match everything else. The Lizard Warrior stopped stabbing the Bishop Knight in the back of the head.</li>
+        </ul>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-13">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 13</span>
+          <h3>Color Identity and the Waterfall Cave</h3>
+          <time datetime="2026-08-24">August 24, 2026</time>
+        </header>
+        <h4>Color identity</h4>
+        <ul>
+          <li>Royal purple, gold outline, rounded corners, applied to buttons, dialogue boxes, drop slots, health bars, and all four title screens.</li>
+          <li>Title uses royal purple Firlest font with gold outline.</li>
+        </ul>
+        <h4>Dungeon enemies</h4>
+        <ul>
+          <li>Faster, and they notice you from further off. A player can no longer outrun a dungeon enemy.</li>
+        </ul>
+        <h4>Waterfall cave</h4>
+        <ul>
+          <li>There's a cave behind the valley waterfall with a chest in it containing 100 gold.</li>
+        </ul>
+        <h4>Pause during shop</h4>
+        <ul>
+          <li>Pause used to silently do nothing while the shop was open. It works now, and the shop says the clock is paused, since the countdown hides itself inside menus and there was no way to tell it wasn't burning.</li>
+        </ul>
+        <h4>Hit weight</h4>
+        <ul>
+          <li>Impacts scale with damage. A 2 damage chip and a 20 damage hit used to produce the identical flash, punch, and screen shake.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>Enemy weapons sit in their hands correctly now, five of the nine armed enemies were gripping wrong.</li>
+        </ul>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-12">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 12</span>
+          <h3>Cards Queue Up</h3>
+          <time datetime="2026-08-21">August 21, 2026</time>
+        </header>
+        <h4>Cards queue</h4>
+        <ul>
+          <li>Dropping a card no longer locks you out until the swing finishes. Play three in a row and they resolve back to back in the order you dropped them.</li>
+          <li>The hand also used to tuck itself off screen while a card resolved, which hid it during the exact window you'd want to read it. It stays up for the whole player turn now.</li>
+        </ul>
+        <h4>Card snap</h4>
+        <ul>
+          <li>Cards now "snap" into their target slots.</li>
+        </ul>
+        <h4>Shop layout</h4>
+        <ul>
+          <li>Redesigned shop menu UI.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">The card queue is one of the best changes I've implemented so far. The combat was feeling a bit too slow before, but now that players can chain actions, combat can resolve a lot faster. The card "snap" feature is also a small but engaging UX touch.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-11">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 11</span>
+          <h3>First Build, First Playtest</h3>
+          <time datetime="2026-08-18">August 18, 2026</time>
+        </header>
+        <h4>First build, first outside playtest</h4>
+        <ul>
+          <li>Packaged the game for the first time and ran my first playtest!</li>
+          <li>Playtest notes: camera is inverted and too sensitive, energy and gold are hard to find, the dungeon sign is too dark to read, encounter three is too hard.</li>
+        </ul>
+        <h4>Impact numbers</h4>
+        <ul>
+          <li>Numbers pop off whatever got hit, and they show what actually landed after Strength, Vulnerable, and Block.</li>
+          <li>Poison ticks flinch the target, throw a green number, and hold a beat before the turn moves on.</li>
+        </ul>
+        <h4>Card text is accurate</h4>
+        <ul>
+          <li>A card in hand shows what it will actually do. With 3 Strength, Spirit Slash reads "Deal 9 damage" in green. Frail drags your block cards down and tints them red.</li>
+        </ul>
+        <h4>Enemies have weapons</h4>
+        <ul>
+          <li>Every armed enemy in the game had been fighting bare handed since the monster packs went in. The weapons ship as separate pieces and nothing was ever attaching them.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>The Bomb gets lobbed in an arc instead of exploding out of your hand. The Warlord now summons a skeleton and an evil mage to aid him in battle. End Turn and the potions hide during the enemy's turn.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">Gameplay-wise, the first playtest was a major success! Most of the changes that need to be made involve balancing the dungeon encounters and iterating on the UI.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-10">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 10</span>
+          <h3>A Second Chance</h3>
+          <time datetime="2026-08-14">August 14, 2026</time>
+        </header>
+        <h4>Playthrough fixes</h4>
+        <ul>
+          <li>Enemies killed by poison still got their attack off. The death check was running before poison damage landed.</li>
+        </ul>
+        <h4>Telegraphs say everything</h4>
+        <ul>
+          <li>"Next: ATK 4 + Poison 3" instead of "Next: ATK 4," which had been hiding the poison entirely.</li>
+        </ul>
+        <h4>Dungeon layout</h4>
+        <ul>
+          <li>Two chambers, the fork, a third chamber, then the boss.</li>
+          <li>Taking one branch of the fork now seals the other permanently, at both ends. You could previously clear the rat den, walk backwards up the other corridor, and drink the fountain too.</li>
+        </ul>
+        <h4>Second chance</h4>
+        <ul>
+          <li>Die in the dungeon and you wake up outside the shop with one minute on the clock and the dungeon repopulated behind you. Die a second time and the run is over.</li>
+        </ul>
+        <h4>Cards</h4>
+        <ul>
+          <li>Inspiration: discard a card to gain energy. The first card that costs you something other than energy.</li>
+          <li>Shattering Wall reworked to "lose all your block, deal that much damage to every enemy." It was a rare card that did nothing on turn one and built a wall despite being named for shattering one.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>Reworked potion buttons in shop.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">I wanted a way for players to get a second chance without allowing them to get too strong. The player has 1 minute to use the gold they gained from the dungeon so far in order to rework their deck. After that, if they lose, it has more to do with the decisions the player made rather than the game itself.</p>
+      </article>
 
       <article class="devlog" id="deckborn-devlog-9">
         <header class="devlog-head">
@@ -224,7 +417,7 @@
         </header>
         <h4>Return transition</h4>
         <ul>
-          <li>Coming back from a fight, the hero used to pop back in half a second late, fully solid, in a single frame.</li>
+          <li>Coming back from a fight, the hero used to pop in a half second late, fully solid, in one frame.</li>
           <li>Cause: the transition system blocks input, and hiding the player was a side effect of that block.</li>
           <li>Fix: turned off the input block. You can move during the wipe now.</li>
         </ul>
@@ -238,91 +431,57 @@
           <li>Escape or P, works in exploration and combat.</li>
           <li>Fixed: pausing didn't pause the interface, so the valley clock and potions ran straight through it.</li>
         </ul>
-        <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">I chased this bug through three wrong guesses before finding the real one. All of it is proven by logs and footage, none of it by a person actually watching the wipe happen.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-8">
         <header class="devlog-head">
           <span class="devlog-num">Entry 08</span>
-          <h3>The Warlord Was Never Fighting Back</h3>
+          <h3>The Warlord Fights Back</h3>
           <time datetime="2026-08-10">August 10, 2026</time>
         </header>
         <h4>Warlord AI</h4>
         <ul>
-          <li>His three-move cycle was never running. An empty weight list defaults to random odds instead of the sequential pattern.</li>
-          <li>He'd been picking at random this whole time, making him the easiest fight in the dungeon.</li>
-          <li>Fixed. Cleave is two hits (compounds with his own strength buff), guard turn now chips damage.</li>
+          <li>Created a 3 beat combat cycle.</li>
         </ul>
         <h4>Warlord entrance</h4>
         <ul>
-          <li>Walking into the arena cuts the camera to him for four lines before the fight starts.</li>
-          <li>Camera position is computed from his location, so it follows if I move him.</li>
+          <li>Warlord now has an evil monologue when you reach him.</li>
         </ul>
         <h4>Sealed doors</h4>
         <ul>
-          <li>A stone slab drops across the doorway behind you on entry.</li>
-          <li>First seal is a real point of no return, it cuts off the fountain and the way back.</li>
-        </ul>
-        <h4>Lighting</h4>
-        <ul>
-          <li>Relit the dungeon to match the arena: warm ambient near-off, tight bright pools on the walls.</li>
-          <li>This also fixed blown-out combat effects, a dark room with auto exposure was reading every bright effect as a white blob.</li>
+          <li>Dungeon doors seal behind the player. No backtracking allowed!</li>
         </ul>
         <h4>Also</h4>
         <ul>
           <li>Sign posted at the fork. AoE cards now play their impact effect on every target hit, not just one.</li>
         </ul>
-        <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">None of the difficulty tuning has been played, it's arithmetic against numbers pulled from the live project. If the boss overshoots, the second cleave hit is the first thing I'd turn back down.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-7">
         <header class="devlog-head">
           <span class="devlog-num">Entry 07</span>
-          <h3>Music, Sound, and the Tutorial Hand</h3>
+          <h3>Music and Combat Sound</h3>
           <time datetime="2026-08-09">August 9, 2026</time>
         </header>
         <h4>Music</h4>
         <ul>
-          <li>Lives on a layer that survives level loads, so fights no longer restart the track.</li>
-          <li>Boss fights get a unique track, normal fights alternate between two, roll is cached per encounter so it doesn't audibly flip mid-transition.</li>
-          <li>Victory/defeat stings fade at 10 seconds instead of playing out, since the valley trip cuts them off anyway.</li>
+          <li>Music loops in all levels.</li>
+          <li>Victory/defeat music fades at 10 seconds instead of playing out, since the valley spawn cuts them off anyway.</li>
         </ul>
         <h4>Combat sound</h4>
         <ul>
           <li>Cast sound on the cast frame, impact sound on the contact frame.</li>
         </ul>
-        <h4>Jack / controls</h4>
-        <ul>
-          <li>Jack now lives permanently at the road post. Talking to him pulls the camera in.</li>
-          <li>Deck menu moved off E onto Q, freeing E for interact (talk, read signs, start boss fight).</li>
-        </ul>
-        <h4>Tutorial</h4>
-        <ul>
-          <li>Opening hand is stacked to the two cards the tips reference, everything else greys out.</li>
-          <li>Unlocks automatically if nothing in hand matches what the tip wants.</li>
-        </ul>
-        <h4>Also</h4>
-        <ul>
-          <li>Potions pulled back out of exploration, combat-only item again.</li>
-        </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">Stacking the tutorial's opening hand felt like a small trick, but it's the difference between a tip that's advice and a tip that's a play you actually run.</p>
+        <p class="devlog-reflection">The addition of sound is really bringing everything together!</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-6">
         <header class="devlog-head">
           <span class="devlog-num">Entry 06</span>
-          <h3>The Poison Was Never the Bug</h3>
+          <h3>Health Bars and Damage Timing</h3>
           <time datetime="2026-08-05">August 5, 2026</time>
         </header>
-        <h4>Poison / UI refresh bug</h4>
-        <ul>
-          <li>Poison was actually working the whole time. The combat UI just only refreshed on player input.</li>
-          <li>So poison ticks, enemy attacks, block decay, all landed silently and snapped to true a click later.</li>
-          <li>Fixed: UI refreshes on the beat now, poison tick makes the target visibly flinch.</li>
-        </ul>
         <h4>Health bars</h4>
         <ul>
           <li>Moved off-screen bars onto the enemies, anchored to each creature's height.</li>
@@ -334,10 +493,10 @@
         </ul>
         <h4>Also</h4>
         <ul>
-          <li>Post-fight gold summary. Tutorial fight (5 non-blocking tips, replays every run). One-use healing fountain at the dungeon entrance. Pulled 120 dead nodes out of the Blueprint code.</li>
+          <li>Post-fight victory/defeat screen. Tutorial fight (5 non-blocking tips, replays every run). One-use healing fountain at the dungeon entrance.</li>
         </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">Poison was never the bug. The interface only telling the truth on click was, and that's a good reminder that a silent system reads as a broken one.</p>
+        <p class="devlog-reflection">I decided to add a simple tutorial to the game in which the player fights a slime using their starter deck after leaving the base camp. I didn't want to assume the player has played games like Slay the Spire. The Jack dialogue and timer are after the tutorial.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-5">
@@ -349,29 +508,28 @@
         <h4>Base camp</h4>
         <ul>
           <li>Valley now opens on a camp (fire, tents, canopy, banner gate) instead of an empty field.</li>
+          <li>Fenced path leads to hill with NPC.</li>
         </ul>
         <h4>Jack / run clock</h4>
         <ul>
           <li>Press E to talk to Jack, finishing his dialogue is what starts the run clock.</li>
-          <li>Means the clock doesn't start until someone's explained it, and wandering off first doesn't put you on a silent timer.</li>
         </ul>
         <h4>Menus</h4>
         <ul>
           <li>Main menu's Play button had never actually been wired to anything.</li>
-          <li>Victory/defeat are real screens now, stay up until clicked.</li>
-          <li>Cut character creation, there's no class system left for it to serve.</li>
+          <li>Victory/defeat screens.</li>
         </ul>
         <h4>Orc nerf</h4>
         <ul>
-          <li>Strength is added per hit, never decays, no cap, and his best attack hits twice.</li>
-          <li>His rage move was climbing about half a strength a turn forever, out-damaging your whole health pool by turn 5.</li>
+          <li>Waaaayyy too strong.</li>
+          <li>His rage was ramping up his damage way too fast, so attacks and buffs are more spaced out.</li>
         </ul>
         <h4>Also</h4>
         <ul>
           <li>Roaming enemies no longer wander into the shop yard.</li>
         </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">The Orc nerf is the one worth remembering: when an enemy feels unfair, check the growth rate before you touch the flat numbers.</p>
+        <p class="devlog-reflection">I added an NPC with dialogue that explains the player's goal of defeating the Warlord before triggering the timer.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-4">
@@ -382,7 +540,7 @@
         </header>
         <h4>Hero animation</h4>
         <ul>
-          <li>Attacks swing, defense braces, utility gestures, most cards override with a unique animation.</li>
+          <li>Each card has its own player animation.</li>
         </ul>
         <h4>Timing fix</h4>
         <ul>
@@ -391,14 +549,14 @@
         </ul>
         <h4>Run clock</h4>
         <ul>
-          <li>Added a countdown to the valley. No timer meant infinite money.</li>
+          <li>Added a countdown to the valley. No timer = infinite money.</li>
         </ul>
         <h4>Dungeon fork</h4>
         <ul>
           <li>Two paths in the dungeon: left is an elite rat encounter with a rare card drop, right is a healing fountain. Taking one closes the other.</li>
         </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">Combat used to be a spreadsheet with a camera pointed at it. None of this timing work has been watched by a person yet, so I can prove it fires correctly and I still don't know if it feels good.</p>
+        <p class="devlog-reflection">I made the difficult decision to add a timer to the game, even though doing so essentially makes my game a roguelike (which I've been avoiding). However, I believe that if there is no timer, the game will have no balance and the player could get bored. I think a timer is the appropriate choice for a vertical slice.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-3">
@@ -412,9 +570,13 @@
           <li>Each enemy now picks from weighted moves, favors defense when hurt, won't repeat a move twice in a row.</li>
           <li>In the valley they notice, chase, and give up and return home if you outrun them.</li>
         </ul>
+        <h4>Combat camera</h4>
+        <ul>
+          <li>Cut camera swoops in favor of a stationary camera (the camera movements were unnecessary and nauseating).</li>
+        </ul>
         <h4>Cards</h4>
         <ul>
-          <li>Rebuilt around ~20 cards.</li>
+          <li>Designed 20 cards, some of which introduce new mechanics such as poison and strength.</li>
         </ul>
         <h4>Shop</h4>
         <ul>
@@ -422,11 +584,11 @@
         </ul>
         <h4>Dungeon</h4>
         <ul>
-          <li>Built as a 6-enemy gauntlet into the Warlord, who telegraphs his 3-move cycle.</li>
-          <li>Lit and dressed: torches, columns, walls raised to ~4x height (camera angle exposed the old ones).</li>
+          <li>Designed dungeon level.</li>
+          <li>Built as a 6-enemy gauntlet into the Warlord.</li>
         </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">None of it has been played by an actual person yet, including me. I wanted the world to stop feeling like it was running on rails, and this is the first stretch where that's actually true.</p>
+        <p class="devlog-reflection">The cards have been made and combat is running very smoothly! I also have three different starter enemies: a slime, a spider, and a spiky turtle thing. Each has their own individual move set. They spawn adjacent to the shop, so the player is encouraged to test out their build on weaker enemies. I'm planning on adding an enemy camp across the river that has harder enemies that are worth more gold.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-2">
@@ -442,10 +604,10 @@
         </ul>
         <h4>Training Grounds cut</h4>
         <ul>
-          <li>Cut the free practice fight (no gold cost, no real HP or death risk) permanently, not just for the current slice. No consequence-free way to test a loadout before heading into the Valley anymore.</li>
+          <li>Cut the free practice fight (no gold cost, no real HP or death risk) permanently, not just for the current slice. Players are encouraged to test their builds on the weaker enemies near the shop instead.</li>
         </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">Cutting a whole zone gives me much more time to polish the most engaging parts of the game: exploration and combat.</p>
+        <p class="devlog-reflection">Originally Deckborn was gonna have three main levels: The Valley, the Dungeon, and the Village. The village would've acted as a player hub, but the scope was just too big. Cutting a whole zone gives me much more time to polish the most engaging parts of the game: exploration and combat.</p>
       </article>
 
       <article class="devlog" id="deckborn-devlog-1">
@@ -456,22 +618,21 @@
         </header>
         <h4>World</h4>
         <ul>
-          <li>Town, valley (roaming enemies), and dungeon (straight gauntlet) are built as three distinct spaces.</li>
-          <li>Wandering into a roaming enemy pulls you straight into a fight.</li>
+          <li>Valley and combat levels designed using the terrain tool.</li>
+          <li>Wandering into an enemy pulls you straight into a fight.</li>
         </ul>
         <h4>Scope</h4>
         <ul>
-          <li>Retargeting for a smaller, polished slice by September.</li>
-          <li>Cut: secret valley areas, the two-step crafting system (now a flat gold-for-cards buy).</li>
+          <li>Cut the card crafting system in favor of a simpler gold-based progression system.</li>
         </ul>
         <h4>Combat core</h4>
         <ul>
           <li>Built and tested headless first, so I could confirm the rules worked before there was anything to look at.</li>
-          <li>Building the actual screen took longer: fanned hand, hover to preview, drag to target.</li>
+          <li>Built the card system using UMG and Blueprints.</li>
           <li>Dragging a card to resolve a fight now works!</li>
         </ul>
         <h4 class="devlog-reflection-head">Reflection</h4>
-        <p class="devlog-reflection">Up until this week I could only watch a fight resolve on its own. This is the first time a fight has actually been won or lost by something I did on screen.</p>
+        <p class="devlog-reflection">I was able to create the foundation for what will become Deckborn. The player can walk around in one level, and when they come into contact with an enemy, they get transported to the combat level. I've only designed a basic attack so far and tested it in order to progress through combat. The enemy is just a punching bag at this point in production, but it will soon have ways to respond to the player.</p>
       </article>
         </section>
 
@@ -502,9 +663,9 @@
           <div class="side-box">
             <h3 class="side-title">Latest Chronicles</h3>
             <ul class="side-list">
-              <li><a href="#deckborn-devlog-9" data-scroll-to="deckborn-devlog-9">The Return Transition Bug</a> <small>Aug 12</small></li>
-              <li><a href="#deckborn-devlog-8" data-scroll-to="deckborn-devlog-8">The Warlord Was Never Fighting Back</a> <small>Aug 10</small></li>
-              <li><a href="#deckborn-devlog-7" data-scroll-to="deckborn-devlog-7">Music, Sound, and the Tutorial Hand</a> <small>Aug 9</small></li>
+              <li><a href="#deckborn-devlog-15" data-scroll-to="deckborn-devlog-15">Deckborn Is Out Now</a> <small>Aug 31</small></li>
+              <li><a href="#deckborn-devlog-14" data-scroll-to="deckborn-devlog-14">Card Art and Set Dressing</a> <small>Aug 27</small></li>
+              <li><a href="#deckborn-devlog-13" data-scroll-to="deckborn-devlog-13">Color Identity and the Waterfall Cave</a> <small>Aug 24</small></li>
             </ul>
           </div>
           <div class="side-box">
@@ -514,7 +675,8 @@
               <li class="done">Dungeon, cards &amp; AI</li>
               <li class="done">Music &amp; sound</li>
               <li class="done">Battle transitions</li>
-              <li>Vertical slice &middot; Fall 2026</li>
+              <li class="done">First outside playtest</li>
+              <li class="done">Released on itch.io &middot; Aug 31</li>
             </ul>
           </div>
           <div class="side-box">
