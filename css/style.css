@@ -203,7 +203,7 @@ html, body {
 /* About Me: favorite-games roll, under the text beside the kid photo */
 .fav-games {
   width: 260px;
-  margin-top: 14px;
+  margin: 14px auto 0;
   max-width: 100%;
   border: 2px solid #0a246a;
   background: #fff;
