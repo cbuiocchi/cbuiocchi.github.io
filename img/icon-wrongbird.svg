@@ -24,6 +24,8 @@
   <!-- penguin, standing -->
   <g stroke="#0b1a33" stroke-width="2" stroke-linejoin="round">
     <path d="M19 37.5 h4 M23 37.5 h4" stroke="#e8b400" stroke-width="3" stroke-linecap="round"/>
+    <path d="M16 21 Q9 25.5 8.5 31.5 Q12.5 31 16.5 27.5" fill="#123a73"/>
+    <path d="M30 21 Q37 25.5 37.5 31.5 Q33.5 31 29.5 27.5" fill="#123a73"/>
     <ellipse cx="23" cy="26" rx="9" ry="11.5" fill="#123a73"/>
     <ellipse cx="23" cy="28.5" rx="5.8" ry="8" fill="#fff" stroke="none"/>
     <circle cx="20.3" cy="20" r="2" fill="#fff" stroke-width="1.2"/>
