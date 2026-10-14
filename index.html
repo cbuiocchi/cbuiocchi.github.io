@@ -6,6 +6,9 @@
 <title>Clay Buiocchi - Game Designer</title>
 <meta name="description" content="Portfolio of Clay Buiocchi, game designer. Deckborn and Wrong Bird prototypes.">
 <link rel="icon" href="img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IM+Fell+English:ital@0;1&family=Luckiest+Guy&family=Fredoka:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="css/xp.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -135,12 +138,13 @@
 
   <!-- ============================================================
        PROJECT SITES — Deckborn & Wrong Bird
-       Each project is one browser-style window holding a mini website:
-       a hero, a sticky jump-nav, then every section (play / devlogs /
-       GDD / links) on a single scrolling page, so nothing is more than
-       a scroll away. Nav links carry data-scroll-to; main.js scrolls the
-       page inside the window. Styling is under .site-* in style.css,
-       with per-project palettes on .site-deckborn / .site-wrongbird.
+       Each project is one browser-style window holding a mid-2000s-style
+       mini website: a banner, a sticky jump-nav, then every section
+       (play / devlogs / GDD / links) in a content column beside a sidebar,
+       all on one scrolling page. Nav links carry data-scroll-to; main.js
+       scrolls the page inside the window. Layout is under .site-* in
+       style.css; .site-deckborn (fantasy) and .site-wrongbird (cartoon)
+       each get their own themed block.
        ============================================================ -->
 
   <!-- ===== Deckborn site ===== -->
@@ -159,8 +163,9 @@
     <div class="window-body site-body">
       <div class="explorer-bar"><span class="explorer-label">Address</span> http://clayxp/projects/deckborn</div>
       <div class="site-page">
+       <div class="site-wrap">
         <header class="site-hero">
-          <p class="site-kicker">A Clay Buiocchi project</p>
+          <p class="site-kicker">&#10022; A Clay Buiocchi Project &#10022;</p>
           <h2 class="site-title">Deckborn</h2>
           <p class="site-tagline">A 3D deckbuilding RPG, built solo in Unreal Engine 5.</p>
           <ul class="site-facts">
@@ -177,6 +182,10 @@
           <a href="#deckborn-links" data-scroll-to="deckborn-links">Links</a>
         </nav>
 
+        <div class="site-ticker" aria-hidden="true"><span>&#10022; Hear ye! Entry 09, &ldquo;The Return Transition Bug,&rdquo; is posted in the Devlogs &#10022; The vertical slice marches toward Fall 2026 &#10022; The prototype awaits thee on itch.io &#10022;</span></div>
+
+        <div class="site-columns">
+        <main class="site-main">
         <section class="site-section" id="deckborn-play">
           <h3 class="site-section-title"><img src="img/icon-deckborn.svg" alt="">Play the prototype</h3>
           <div class="game-embed-wrap desktop-only">
@@ -490,8 +499,49 @@
             <li><a href="#" data-window="win-contact">Get in touch</a></li>
           </ul>
         </section>
+        </main>
 
-        <footer class="site-footer">&copy; 2026 Clay Buiocchi &middot; best viewed in clayxp Explorer at 800&times;600</footer>
+        <aside class="site-sidebar">
+          <div class="side-box">
+            <h3 class="side-title">Latest Chronicles</h3>
+            <ul class="side-list">
+              <li><a href="#deckborn-devlog-9" data-scroll-to="deckborn-devlog-9">The Return Transition Bug</a> <small>Aug 12</small></li>
+              <li><a href="#deckborn-devlog-8" data-scroll-to="deckborn-devlog-8">The Warlord Was Never Fighting Back</a> <small>Aug 10</small></li>
+              <li><a href="#deckborn-devlog-7" data-scroll-to="deckborn-devlog-7">Music, Sound, and the Tutorial Hand</a> <small>Aug 9</small></li>
+            </ul>
+          </div>
+          <div class="side-box">
+            <h3 class="side-title">Quest Log</h3>
+            <ul class="quest-log">
+              <li class="done">First playable fight</li>
+              <li class="done">Dungeon, cards &amp; AI</li>
+              <li class="done">Music &amp; sound</li>
+              <li class="done">Battle transitions</li>
+              <li>Vertical slice &middot; Fall 2026</li>
+            </ul>
+          </div>
+          <div class="side-box">
+            <h3 class="side-title">Enter the Realm</h3>
+            <a class="side-cta" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">Play on itch.io</a>
+          </div>
+          <div class="side-box side-counter">
+            <h3 class="side-title">Adventurers</h3>
+            <p class="hit-counter" aria-label="Visitor counter (just for fun)"><span>0</span><span>0</span><span>1</span><span>3</span><span>3</span><span>7</span></p>
+            <p class="side-small">have entered since 2026</p>
+          </div>
+        </aside>
+        </div>
+
+        <footer class="site-footer">
+          <ul class="web-badges" aria-hidden="true">
+            <li>Unreal <b>Engine 5</b></li>
+            <li>Made <b>solo</b></li>
+            <li>HTML <b>valid?</b></li>
+            <li>800&times;600 <b>ok</b></li>
+          </ul>
+          <p>&copy; 2026 Clay Buiocchi &middot; best viewed in clayxp Explorer at 800&times;600</p>
+        </footer>
+       </div>
       </div>
     </div>
   </section>
@@ -512,6 +562,7 @@
     <div class="window-body site-body">
       <div class="explorer-bar"><span class="explorer-label">Address</span> http://clayxp/projects/wrong-bird</div>
       <div class="site-page">
+       <div class="site-wrap">
         <header class="site-hero">
           <p class="site-kicker">A Clay Buiocchi project</p>
           <h2 class="site-title">Wrong Bird</h2>
@@ -530,6 +581,8 @@
           <a href="#wrongbird-links" data-scroll-to="wrongbird-links">Links</a>
         </nav>
 
+        <div class="site-columns">
+        <main class="site-main">
         <section class="site-section" id="wrongbird-about">
           <h3 class="site-section-title"><img src="img/icon-wrongbird.svg" alt="">About the game</h3>
           <p class="pitch">Wrong Bird is a pet raising simulator with roguelite mechanics in which you train penguins to fly. Built to learn UI/UX and RNG-driven systems; the training-loop prototype was completed in May 2026, with a distance-launching loop and full vertical slice targeted for Fall 2026.</p>
@@ -572,8 +625,44 @@
             <li><a href="#" data-window="win-contact">Get in touch</a></li>
           </ul>
         </section>
+        </main>
 
-        <footer class="site-footer">&copy; 2026 Clay Buiocchi &middot; best viewed in clayxp Explorer at 800&times;600</footer>
+        <aside class="site-sidebar">
+          <div class="side-box side-fact">
+            <h3 class="side-title">Penguin Fact!</h3>
+            <p>Penguins can't fly. <em>Yet.</em> Your job is to fix that.</p>
+          </div>
+          <div class="side-box">
+            <h3 class="side-title">Get the Game</h3>
+            <a class="side-cta" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener"><span class="new-burst" aria-hidden="true">NEW!</span>Download</a>
+            <p class="side-small">Windows &middot; 501 MB</p>
+          </div>
+          <form class="side-box side-poll" onsubmit="return false">
+            <h3 class="side-title">Quick Poll</h3>
+            <p class="poll-q">Can penguins fly?</p>
+            <label><input type="radio" name="wb-poll"> Yes</label>
+            <label><input type="radio" name="wb-poll"> No</label>
+            <label><input type="radio" name="wb-poll"> Not yet!</label>
+            <p class="poll-thanks">Thanks for voting! The penguins are training as we speak.</p>
+          </form>
+          <div class="side-box side-counter">
+            <h3 class="side-title">Visitors</h3>
+            <p class="hit-counter" aria-label="Visitor counter (just for fun)"><span>0</span><span>0</span><span>0</span><span>4</span><span>2</span><span>0</span></p>
+            <p class="side-small">and counting!</p>
+          </div>
+        </aside>
+        </div>
+
+        <footer class="site-footer">
+          <ul class="web-badges" aria-hidden="true">
+            <li>Unreal <b>Engine 5</b></li>
+            <li>100% <b>penguin</b></li>
+            <li>No birds <b>harmed</b></li>
+            <li>800&times;600 <b>ok</b></li>
+          </ul>
+          <p>&copy; 2026 Clay Buiocchi &middot; best viewed in clayxp Explorer at 800&times;600</p>
+        </footer>
+       </div>
       </div>
     </div>
   </section>

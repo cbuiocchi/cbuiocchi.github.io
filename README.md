@@ -31,20 +31,25 @@ A window can preset its opening size/position with optional `data-width` / `data
 Each project is a single **browser-style window** holding a whole mini website, so a visitor sees everything about a game on one scrolling page instead of clicking through folders. `#win-deckborn` and `#win-wrongbird` are `<section class="xp-window browser-window site-…">` blocks whose body is `<div class="window-body site-body">` containing:
 
 - an `.explorer-bar` (the "Address" strip, pinned at the top), then
-- a `.site-page` (the scrolling page): a `.site-hero` banner, a sticky `.site-nav` jump bar, one `.site-section` per topic, and a `.site-footer`.
+- a `.site-page` (the scrolling page) holding a fixed-width `.site-wrap`, laid out like a mid-2000s fan site: a `.site-hero` banner, a sticky `.site-nav` jump bar, then `.site-columns` with the content (`.site-main`, one boxed `.site-section` per topic) and a `.site-sidebar` of little `.side-box` panels, and finally a `.site-footer` with fake 88x31 `.web-badges`.
 
 Deckborn's sections are Play (the embedded build), Devlogs, GDD, and Links; Wrong Bird's are About, Screenshots, GDD, and Links.
 
-The nav links carry `data-scroll-to="<section id>"`; `main.js` scrolls the page *inside* the window (a plain `#anchor` jump would also scroll the desktop). Any link with `data-scroll-to` inside a `.site-page` works this way, so no JS changes are needed to add a section. Just add the section and a nav link.
+The nav links carry `data-scroll-to="<section id>"`; `main.js` scrolls the page *inside* the window (a plain `#anchor` jump would also scroll the desktop). Any link with `data-scroll-to` inside a `.site-page` works this way (the sidebar's devlog links use it too), so no JS changes are needed to add a section. Just add the section and a nav link.
 
-Styling lives under `PROJECT SITES` in `css/style.css`. Each project sets its own palette through `--site-*` variables on `.site-deckborn` / `.site-wrongbird` (Deckborn reuses the pop-up ad's purple and gold; Wrong Bird uses the cover art's ice blue with an orange accent).
+Styling lives under `PROJECT SITES` in `css/style.css`. The shared rules there only handle layout; each game then has its own themed block:
+
+- **Deckborn: fantasy.** A starry night banner, a gilded nav bar, a "town crier" ticker (a CSS stand-in for `<marquee>`; update its text when a new devlog goes up), parchment panels under royal-purple title bars, Cinzel / IM Fell English type, and a Quest Log in the sidebar. The palette is the pop-up ad's purple and gold, set as `--db-*` variables on `.site-deckborn`.
+- **Wrong Bird: cartoon.** Sky and falling snow, Luckiest Guy / Fredoka type with chunky outlines, glossy gel buttons, taped-down polaroid screenshots, and a CSS-only sidebar poll. The palette is set as `--wb-*` variables on `.site-wrongbird`.
+
+The web fonts come from Google Fonts (linked in `<head>`); each stack falls back to classic web-safe fonts. When the window gets narrower than 640px (resized, or on a phone), a container query drops the sidebar under the content. All the motion (ticker, twinkling stars, snow) turns off under `prefers-reduced-motion: reduce`. The visitor counters are static numbers, just for the 2005 look.
 
 ### Adding a devlog entry
 
 Devlogs live inline in Deckborn's `#deckborn-devlogs` section, newest first.
 
 1. Copy an existing `<article class="devlog" id="deckborn-devlog-N">`, put it at the top of the list, give it the next id, and fill in the header (`Entry NN`, title, `<time>`) and body (`<h4>` headings, `<ul>` bullets, and a closing `<h4 class="devlog-reflection-head">Reflection</h4>` + `<p class="devlog-reflection">`).
-2. Add a matching line to the `.devlog-index` list at the top of the section: `<li><a href="#deckborn-devlog-N" data-scroll-to="deckborn-devlog-N"><span>Mon D</span> Title</a></li>`.
+2. Add a matching line to the `.devlog-index` list at the top of the section (and update the sidebar's "Latest Chronicles" box and the ticker text): `<li><a href="#deckborn-devlog-N" data-scroll-to="deckborn-devlog-N"><span>Mon D</span> Title</a></li>`.
 
 ### Updating GDD content
 
@@ -52,7 +57,7 @@ Both GDDs are real PDFs at the repo root: `Deckborn_GDD.pdf` and `Wrong_Bird_GDD
 
 ### Adding a third project
 
-1. Copy one of the site `<section>` blocks, give it a new id (`win-newgame`) and a new `site-newgame` class, and define its `--site-*` palette in `style.css`.
+1. Copy one of the site `<section>` blocks, give it a new id (`win-newgame`) and a new `site-newgame` class, and write a themed `.site-newgame` block in `style.css` (the shared layout rules work without one, but they're deliberately undressed).
 2. Add a desktop icon button (`data-window="win-newgame"`) in `.desktop-icons` and a matching start-menu entry.
 3. Draw or reuse SVG icons in `img/` (there's a folder icon per project for the desktop, plus shared `icon-notepad`, `icon-gdd`, `icon-screenshots` used as section icons).
 
