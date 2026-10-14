@@ -200,17 +200,10 @@ html, body {
   width: 220px;
   height: 220px;
 }
-/* About Me: kid photo + favorite-games roll, centered together under the text */
-.about-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 18px;
-  margin-top: 16px;
-}
+/* About Me: favorite-games roll, under the text beside the kid photo */
 .fav-games {
   width: 260px;
+  margin-top: 14px;
   max-width: 100%;
   border: 2px solid #0a246a;
   background: #fff;
