@@ -304,7 +304,7 @@ html, body {
 /* A project is one window holding a whole mini website, laid out the way a
    fan site would have been in 2005: a fixed-width page centered on a tiled
    background, a banner, a sticky nav bar, a content column with a sidebar of
-   little boxes, and a footer full of 88x31 badges. The shared rules below
+   little boxes, and a footer. The shared rules below
    only do layout; each game dresses it in its own theme further down
    (.site-deckborn = fantasy, .site-wrongbird = cartoon). */
 .site-body {
@@ -495,29 +495,6 @@ html, body {
   text-align: center;
 }
 .site-footer p { margin: 0; }
-
-/* the little 88x31 buttons every mid-2000s site had in its footer */
-.web-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin: 0 0 10px;
-  padding: 0;
-  list-style: none;
-}
-.web-badges li {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 88px;
-  height: 31px;
-  font: bold 8px/1.15 Verdana, Tahoma, sans-serif;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  text-align: center;
-}
-.web-badges b { font-size: 10px; }
 
 /* ---- devlogs: an index of entries, then every entry in full ---- */
 .devlog-index { margin: 0 0 20px; padding: 10px 14px; list-style: none; }
@@ -833,12 +810,6 @@ html, body {
   border-top: 3px solid var(--db-frame);
   color: #c9b8e8;
 }
-.site-deckborn .web-badges li {
-  background: linear-gradient(180deg, #2a0f55, #120822);
-  border: 1px solid var(--db-frame);
-  color: #d9c58e;
-}
-.site-deckborn .web-badges b { color: var(--db-gold); }
 
 @keyframes db-twinkle { from { opacity: 0.55; } to { opacity: 1; } }
 
@@ -1153,13 +1124,6 @@ html, body {
   background: linear-gradient(135deg, #fff 25%, transparent 25%) 0 0 / 16px 12px,
               linear-gradient(225deg, #fff 25%, transparent 25%) 0 0 / 16px 12px;
 }
-.site-wrongbird .web-badges li {
-  background: linear-gradient(180deg, #fff 0%, #d7f1ff 50%, #b5e3fb 51%, #e2f6ff 100%);
-  border: 2px solid var(--wb-navy);
-  border-radius: 6px;
-  color: var(--wb-navy);
-}
-.site-wrongbird .web-badges b { color: var(--wb-blue); }
 
 @keyframes wb-snow {
   to { background-position: 64px 640px, 55px 401px, 0 0; }

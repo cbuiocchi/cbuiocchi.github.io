@@ -31,7 +31,7 @@ A window can preset its opening size/position with optional `data-width` / `data
 Each project is a single **browser-style window** holding a whole mini website, so a visitor sees everything about a game on one scrolling page instead of clicking through folders. `#win-deckborn` and `#win-wrongbird` are `<section class="xp-window browser-window site-…">` blocks whose body is `<div class="window-body site-body">` containing:
 
 - an `.explorer-bar` (the "Address" strip, pinned at the top), then
-- a `.site-page` (the scrolling page) holding a fixed-width `.site-wrap`, laid out like a mid-2000s fan site: a `.site-hero` banner, a sticky `.site-nav` jump bar, then `.site-columns` with the content (`.site-main`, one boxed `.site-section` per topic) and a `.site-sidebar` of little `.side-box` panels, and finally a `.site-footer` with fake 88x31 `.web-badges`.
+- a `.site-page` (the scrolling page) holding a fixed-width `.site-wrap`, laid out like a mid-2000s fan site: a `.site-hero` banner, a sticky `.site-nav` jump bar, then `.site-columns` with the content (`.site-main`, one boxed `.site-section` per topic) and a `.site-sidebar` of little `.side-box` panels, and finally a `.site-footer`.
 
 Deckborn's sections are Trailer (an embedded YouTube video), Devlogs, GDD, and Links; Wrong Bird's are About, Screenshots, GDD, and Links.
 
