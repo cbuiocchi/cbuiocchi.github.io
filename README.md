@@ -33,7 +33,7 @@ Each project is a single **browser-style window** holding a whole mini website, 
 - an `.explorer-bar` (the "Address" strip, pinned at the top), then
 - a `.site-page` (the scrolling page) holding a fixed-width `.site-wrap`, laid out like a mid-2000s fan site: a `.site-hero` banner, a sticky `.site-nav` jump bar, then `.site-columns` with the content (`.site-main`, one boxed `.site-section` per topic) and a `.site-sidebar` of little `.side-box` panels, and finally a `.site-footer`.
 
-Deckborn's sections are Trailer (an embedded YouTube video), Devlogs, GDD, and Links; Wrong Bird's are About, Screenshots, GDD, and Links.
+Deckborn's sections are Trailer (an embedded YouTube video), Devlogs, GDD, and Links; Wrong Bird's are Trailer (also a YouTube embed), Screenshots, GDD, and Links.
 
 The nav links carry `data-scroll-to="<section id>"`; `main.js` scrolls the page *inside* the window (a plain `#anchor` jump would also scroll the desktop). Any link with `data-scroll-to` inside a `.site-page` works this way (the sidebar's devlog links use it too), so no JS changes are needed to add a section. Just add the section and a nav link.
 
@@ -76,9 +76,9 @@ All the animation (marquee, blinking kicker, pulsing button, pop-in) is disabled
 
 Because the ad has no minimize/maximize button, `main.js` binds the title-bar controls through `bindControl()`, which skips any control a window doesn't have. Windows can safely omit controls.
 
-## Changing the Deckborn trailer
+## Changing a trailer
 
-The trailer is a YouTube embed in the `#deckborn-trailer` section of `index.html`. To swap it, replace the video ID (the part after `watch?v=`) in both the `<iframe data-src="https://www.youtube-nocookie.com/embed/VIDEO_ID">` and the "Watch on YouTube" button's link. Like the GDD iframes, `main.js` loads it when the window opens and unloads it on close, so the video stops when the window is closed.
+Each trailer is a YouTube embed, in the `#deckborn-trailer` and `#wrongbird-trailer` sections of `index.html`. To swap one, replace the video ID (the part after `watch?v=`) in both the `<iframe data-src="https://www.youtube-nocookie.com/embed/VIDEO_ID">` and the "Watch on YouTube" button's link. Like the GDD iframes, `main.js` loads it when the window opens and unloads it on close, so the video stops when the window is closed.
 
 ## Updating copy
 

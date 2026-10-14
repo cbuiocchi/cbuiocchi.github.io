@@ -1062,6 +1062,7 @@ html, body {
 }
 .site-wrongbird .site-gallery img { border: 2px solid var(--wb-navy); }
 
+.site-wrongbird .site-video,
 .site-wrongbird .site-pdf {
   border: var(--wb-outline);
   border-radius: 12px;
