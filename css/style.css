@@ -461,6 +461,13 @@ html, body {
   text-align: center;
   text-decoration: none;
 }
+/* Play Now button in each project site's hero */
+.side-cta.site-play {
+  display: inline-block;
+  margin: 18px 0 0;
+  padding: 10px 28px;
+  font-size: 17px;
+}
 .site-footer {
   padding: 14px 16px 12px;
   font-size: 11px;
