@@ -298,7 +298,6 @@ html, body {
 }
 .resume-bullets li { margin-bottom: 3px; }
 
-.download-note { margin-bottom: 12px; }
 .link-row { display: flex; gap: 10px; }
 
 /* ============ PROJECT SITES (browser-style windows) ============ */
@@ -1041,14 +1040,6 @@ html, body {
 .site-wrongbird .side-box a { color: #1466b8; font-weight: bold; }
 .site-wrongbird .site-section a:hover { color: var(--wb-navy); }
 .site-wrongbird .pitch { font-size: 14.5px; }
-.site-wrongbird .download-note p {
-  display: inline-block;
-  padding: 2px 10px;
-  background: #fff4c4;
-  border: 2px dashed var(--wb-gold);
-  border-radius: 8px;
-}
-
 /* glossy gel buttons */
 .site-wrongbird .site-section .xp-button-link,
 .site-wrongbird .side-cta {
