@@ -9,7 +9,7 @@ index.html      All the markup: desktop icons, every window's content, taskbar, 
 css/xp.css      The "window chrome" system — title bars, buttons, the .xp-window box itself.
                 Reusable: any element with class="xp-window" + the title-bar markup gets full XP styling.
 css/style.css   Everything specific to THIS desktop: wallpaper, taskbar, start menu, icon
-                layout, and content styling (screenshot strips, the game embed box, mobile layout).
+                layout, the project mini-sites, and content styling (game embed box, mobile layout).
 js/main.js      The window manager. One IIFE, no framework. Handles: opening/closing/minimizing
                 windows, dragging by the title bar, z-order/focus, the taskbar buttons, the start
                 menu, the clock, and the boot-screen intro.
@@ -26,32 +26,37 @@ Every window is a `<section class="xp-window" id="win-something">` in `index.htm
 
 A window can preset its opening size/position with optional `data-width` / `data-height` / `data-left` / `data-top` attributes on the `<section>` (in px). Without them it opens at the cascaded 620×480 default.
 
-## Folders (Deckborn & Wrong Bird)
+## Project sites (Deckborn & Wrong Bird)
 
-The two projects are **folders**, not single windows. A folder is an Explorer-style window whose body is `<div class="window-body folder-body">` containing an `.explorer-bar` (the "Address" strip) and a `.folder-view` grid of `.folder-item` icons. Each icon is either:
-- a `<button class="folder-item" data-window="win-…">` that opens a **child window**, or
-- an `<a class="folder-item" href="…">` external shortcut (e.g. the itch.io link).
+Each project is a single **browser-style window** holding a whole mini website, so a visitor sees everything about a game on one scrolling page instead of clicking through folders. `#win-deckborn` and `#win-wrongbird` are `<section class="xp-window browser-window site-…">` blocks whose body is `<div class="window-body site-body">` containing:
 
-Any element with `data-window="win-X"` opens window `win-X` — this is the same mechanism the desktop icons use, so folder icons need **no JS**. The child windows (game / devlogs / GDD / screenshots) are just more `<section class="xp-window">` blocks living in `index.html`; each project's set is grouped under a comment banner.
+- an `.explorer-bar` (the "Address" strip, pinned at the top), then
+- a `.site-page` (the scrolling page): a `.site-hero` banner, a sticky `.site-nav` jump bar, one `.site-section` per topic, and a `.site-footer`.
 
-Naming convention: `win-deckborn` is the folder; its children are `win-deckborn-game`, `win-deckborn-devlogs`, `win-deckborn-gdd`, and devlog entries `win-deckborn-devlog-N`. Wrong Bird mirrors this, minus a Devlogs folder (it has none yet), plus `win-wrongbird-shots` for screenshots.
+Deckborn's sections are Play (the embedded build), Devlogs, GDD, and Links; Wrong Bird's are About, Screenshots, GDD, and Links.
+
+The nav links carry `data-scroll-to="<section id>"`; `main.js` scrolls the page *inside* the window (a plain `#anchor` jump would also scroll the desktop). Any link with `data-scroll-to` inside a `.site-page` works this way, so no JS changes are needed to add a section. Just add the section and a nav link.
+
+Styling lives under `PROJECT SITES` in `css/style.css`. Each project sets its own palette through `--site-*` variables on `.site-deckborn` / `.site-wrongbird` (Deckborn reuses the pop-up ad's purple and gold; Wrong Bird uses the cover art's ice blue with an orange accent).
 
 ### Adding a devlog entry
 
-1. Copy an existing `<section class="xp-window" id="win-deckborn-devlog-1" …>` block, give it a new id (`…-devlog-2`), update `data-title`, and fill in the `.notepad-body` text.
-2. In that project's Devlogs folder (`#win-deckborn-devlogs .folder-view`), add a matching `<button class="folder-item" data-window="win-deckborn-devlog-2">`.
+Devlogs live inline in Deckborn's `#deckborn-devlogs` section, newest first.
 
-### Adding GDD content
+1. Copy an existing `<article class="devlog" id="deckborn-devlog-N">`, put it at the top of the list, give it the next id, and fill in the header (`Entry NN`, title, `<time>`) and body (`<h4>` headings, `<ul>` bullets, and a closing `<h4 class="devlog-reflection-head">Reflection</h4>` + `<p class="devlog-reflection">`).
+2. Add a matching line to the `.devlog-index` list at the top of the section: `<li><a href="#deckborn-devlog-N" data-scroll-to="deckborn-devlog-N"><span>Mon D</span> Title</a></li>`.
 
-Both GDDs are real PDFs at the repo root: `Deckborn_GDD.pdf` and `Wrong_Bird_GDD.pdf`. `#win-deckborn-gdd` and `#win-wrongbird-gdd` are each a `.pdf-viewer` window: a toolbar with a one-line summary plus "Open in new tab" / "Download PDF" buttons, and an embedded `<iframe data-src="…_GDD.pdf">` that `main.js` only loads when the window opens (and skips on mobile, where the buttons are shown instead). To update one, overwrite its PDF — keep it small (the committed copies have their images recompressed to JPEG: Deckborn ~2MB vs. a 16MB export, Wrong Bird ~1.3MB vs. 15MB).
+### Updating GDD content
 
-### Adding a third project folder
+Both GDDs are real PDFs at the repo root: `Deckborn_GDD.pdf` and `Wrong_Bird_GDD.pdf`. Each site's GDD section has a one-line summary, "Open in new tab" / "Download PDF" buttons, and an embedded `<iframe data-src="…_GDD.pdf" loading="lazy">`. `main.js` loads every `data-src` iframe in a window when it opens (and unloads them on close); `loading="lazy"` holds the PDF off until it's scrolled near. On mobile the embeds are hidden and only the buttons show. To update one, overwrite its PDF. Keep it small (the committed copies have their images recompressed to JPEG: Deckborn ~2MB vs. a 16MB export, Wrong Bird ~1.3MB vs. 15MB).
 
-1. Add a folder `<section class="xp-window" id="win-newgame" …>` (copy Deckborn's folder block) plus its child windows.
+### Adding a third project
+
+1. Copy one of the site `<section>` blocks, give it a new id (`win-newgame`) and a new `site-newgame` class, and define its `--site-*` palette in `style.css`.
 2. Add a desktop icon button (`data-window="win-newgame"`) in `.desktop-icons` and a matching start-menu entry.
-3. Draw or reuse SVG icons in `img/` (there's a folder icon per project, plus shared `icon-notepad`, `icon-gdd`, `icon-screenshots`).
+3. Draw or reuse SVG icons in `img/` (there's a folder icon per project for the desktop, plus shared `icon-notepad`, `icon-gdd`, `icon-screenshots` used as section icons).
 
-No JS changes needed — `main.js` discovers windows and triggers by their `data-window` attribute automatically.
+No JS changes needed. `main.js` discovers windows and triggers by their `data-window` attribute automatically.
 
 ## The Deckborn pop-up ad
 
@@ -72,7 +77,7 @@ Deckborn's embed is a direct `<iframe>` pointing at itch.io's HTML5 build URL (f
 
 1. Go to the game's itch.io page, view page source, search for `data-iframe`.
 2. Copy the `src="..."` value out of the embedded `<iframe>` markup.
-3. Paste it into the `<iframe src="...">` in the `#win-deckborn` window in `index.html`.
+3. Paste it into the `data-src` of the `<iframe>` in the `#deckborn-play` section of `index.html`.
 
 Alternatively, itch.io's dashboard (Edit game → Distribute → Embed options) gives an official embed snippet you can drop in wholesale.
 
@@ -80,7 +85,7 @@ Alternatively, itch.io's dashboard (Edit game → Distribute → Embed options) 
 
 - **Bio** — edit the paragraphs inside `#win-about .window-body` directly in `index.html`.
 - **Contact info** — edit `#win-contact .window-body` (itch.io, email, and LinkedIn links all live there; LinkedIn is mirrored in the Start menu's external links list too).
-- **Game pitches** — edit the `<p class="pitch">` text in each game's window.
+- **Game pitches** — edit the `<p class="pitch">` text in each project site (and the `.site-hero` tagline and facts above it).
 
 ## Running locally
 

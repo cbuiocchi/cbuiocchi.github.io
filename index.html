@@ -122,7 +122,7 @@
         <div class="welcome-text">
           <p>Hi, I'm Clay Buiocchi (they/them). Welcome to my desktop.</p>
           <ul class="welcome-tour">
-            <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are the two games I'm building. Each one's a folder: open it up to play a build, read devlogs, or browse screenshots.</li>
+            <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are the two games I'm building. Each one opens a mini site with everything on one page: playable build, devlogs, design doc, and screenshots.</li>
             <li><a href="#" data-window="win-about"><strong>About Me</strong></a> covers who I am and what I care about.</li>
             <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> has my full skills, projects, and experience.</li>
             <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> is where to find me and how to reach out.</li>
@@ -134,51 +134,21 @@
   </section>
 
   <!-- ============================================================
-       DECKBORN — folder + its child windows
-       The folder is an Explorer-style window of icons; each icon
-       opens its own child window (game / devlogs / gdd / shots).
-       Child windows are just more .xp-window sections, opened by the
-       [data-window] buttons inside the folder (wired by main.js).
+       PROJECT SITES — Deckborn & Wrong Bird
+       Each project is one browser-style window holding a mini website:
+       a hero, a sticky jump-nav, then every section (play / devlogs /
+       GDD / links) on a single scrolling page, so nothing is more than
+       a scroll away. Nav links carry data-scroll-to; main.js scrolls the
+       page inside the window. Styling is under .site-* in style.css,
+       with per-project palettes on .site-deckborn / .site-wrongbird.
        ============================================================ -->
 
-  <!-- ===== Deckborn folder ===== -->
-  <section class="xp-window" id="win-deckborn" data-title="Deckborn" data-width="500" data-height="380">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-folder-deckborn.svg" alt="">
-        Deckborn
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body folder-body">
-      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Deckborn</div>
-      <div class="folder-view">
-        <button class="folder-item" data-window="win-deckborn-game">
-          <img src="img/icon-deckborn.svg" alt=""><span>Play Deckborn</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlogs">
-          <img src="img/icon-notepad.svg" alt=""><span>Devlogs</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-gdd">
-          <img src="img/icon-gdd.svg" alt=""><span>GDD &amp; Docs</span>
-        </button>
-        <a class="folder-item" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">
-          <img src="img/icon-itch.svg" alt=""><span>itch.io page</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Play (the playable build) ===== -->
-  <section class="xp-window" id="win-deckborn-game" data-title="Play Deckborn" data-width="620" data-height="480">
+  <!-- ===== Deckborn site ===== -->
+  <section class="xp-window browser-window site-deckborn" id="win-deckborn" data-title="Deckborn" data-width="860" data-height="640">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-deckborn.svg" alt="">
-        Deckborn Prototype.exe
+        Deckborn &mdash; clayxp Explorer
       </div>
       <div class="title-bar-controls">
         <button aria-label="Minimize" data-action="minimize"></button>
@@ -186,427 +156,352 @@
         <button aria-label="Close" data-action="close"></button>
       </div>
     </div>
-    <div class="window-body">
-      <div class="game-embed-wrap desktop-only">
-        <iframe
-          data-src="https://html-classic.itch.zone/html/18150834/index.html?v=1782816422"
-          allowfullscreen
-          allow="autoplay; fullscreen; gamepad"
-          title="Deckborn Prototype - playable build">
-        </iframe>
-      </div>
-      <p class="pitch">Deckborn is an RPG with deckbuilding combat &mdash; a bigger-scope take on the genre inspired by classic JRPGs like Final Fantasy 7. It's a solo project built in Unreal Engine 5, with a basic turn-based card combat system and a small overworld to explore. Currently in production, targeting a polished vertical slice by Fall 2026.</p>
-      <div class="link-row">
-        <a class="xp-button-link" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">View on itch.io &rarr;</a>
+    <div class="window-body site-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> http://clayxp/projects/deckborn</div>
+      <div class="site-page">
+        <header class="site-hero">
+          <p class="site-kicker">A Clay Buiocchi project</p>
+          <h2 class="site-title">Deckborn</h2>
+          <p class="site-tagline">A 3D deckbuilding RPG, built solo in Unreal Engine 5.</p>
+          <ul class="site-facts">
+            <li><strong>Genre</strong> Deckbuilding RPG</li>
+            <li><strong>Engine</strong> Unreal Engine 5</li>
+            <li><strong>Status</strong> In production &middot; vertical slice Fall 2026</li>
+          </ul>
+        </header>
+
+        <nav class="site-nav" aria-label="Deckborn sections">
+          <a href="#deckborn-play" data-scroll-to="deckborn-play">Play</a>
+          <a href="#deckborn-devlogs" data-scroll-to="deckborn-devlogs">Devlogs</a>
+          <a href="#deckborn-gdd" data-scroll-to="deckborn-gdd">GDD</a>
+          <a href="#deckborn-links" data-scroll-to="deckborn-links">Links</a>
+        </nav>
+
+        <section class="site-section" id="deckborn-play">
+          <h3 class="site-section-title"><img src="img/icon-deckborn.svg" alt="">Play the prototype</h3>
+          <div class="game-embed-wrap desktop-only">
+            <iframe
+              data-src="https://html-classic.itch.zone/html/18150834/index.html?v=1782816422"
+              allowfullscreen
+              allow="autoplay; fullscreen; gamepad"
+              title="Deckborn Prototype - playable build">
+            </iframe>
+          </div>
+          <p class="mobile-only site-note">The playable build runs in the browser on desktop. On a phone, grab it from the itch.io page below.</p>
+          <p class="pitch">Deckborn is an RPG with deckbuilding combat &mdash; a bigger-scope take on the genre inspired by classic JRPGs like Final Fantasy 7. It's a solo project built in Unreal Engine 5, with a basic turn-based card combat system and a small overworld to explore. Currently in production, targeting a polished vertical slice by Fall 2026.</p>
+          <div class="link-row">
+            <a class="xp-button-link primary" href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">View on itch.io &rarr;</a>
+          </div>
+        </section>
+
+        <section class="site-section" id="deckborn-devlogs">
+          <h3 class="site-section-title"><img src="img/icon-notepad.svg" alt="">Devlogs</h3>
+          <!-- Add a new entry: copy an <article class="devlog"> below (newest
+               goes first), then add a matching link to this index. -->
+          <ol class="devlog-index">
+            <li><a href="#deckborn-devlog-9" data-scroll-to="deckborn-devlog-9"><span>Aug 12</span> The Return Transition Bug</a></li>
+            <li><a href="#deckborn-devlog-8" data-scroll-to="deckborn-devlog-8"><span>Aug 10</span> The Warlord Was Never Fighting Back</a></li>
+            <li><a href="#deckborn-devlog-7" data-scroll-to="deckborn-devlog-7"><span>Aug 9</span> Music, Sound, and the Tutorial Hand</a></li>
+            <li><a href="#deckborn-devlog-6" data-scroll-to="deckborn-devlog-6"><span>Aug 5</span> The Poison Was Never the Bug</a></li>
+            <li><a href="#deckborn-devlog-5" data-scroll-to="deckborn-devlog-5"><span>Jul 30</span> Base Camp and the Orc Nerf</a></li>
+            <li><a href="#deckborn-devlog-4" data-scroll-to="deckborn-devlog-4"><span>Jul 26</span> Fixing Combat Timing</a></li>
+            <li><a href="#deckborn-devlog-3" data-scroll-to="deckborn-devlog-3"><span>Jul 25</span> Dungeon, Cards, and AI</a></li>
+            <li><a href="#deckborn-devlog-2" data-scroll-to="deckborn-devlog-2"><span>Jul 17</span> Cutting the Village Hub</a></li>
+            <li><a href="#deckborn-devlog-1" data-scroll-to="deckborn-devlog-1"><span>Jul 6</span> First Playable Fight</a></li>
+          </ol>
+
+      <article class="devlog" id="deckborn-devlog-9">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 09</span>
+          <h3>The Return Transition Bug</h3>
+          <time datetime="2026-08-12">August 12, 2026</time>
+        </header>
+        <h4>Return transition</h4>
+        <ul>
+          <li>Coming back from a fight, the hero used to pop back in half a second late, fully solid, in a single frame.</li>
+          <li>Cause: the transition system blocks input, and hiding the player was a side effect of that block.</li>
+          <li>Fix: turned off the input block. You can move during the wipe now.</li>
+        </ul>
+        <h4>New transitions</h4>
+        <ul>
+          <li>Diamond wipe into a fight, iris wipe back out, both retimed onto an ease curve.</li>
+          <li>Loading screen covers the roughly 600ms mid-load gap where no UI exists.</li>
+        </ul>
+        <h4>Pause menu</h4>
+        <ul>
+          <li>Escape or P, works in exploration and combat.</li>
+          <li>Fixed: pausing didn't pause the interface, so the valley clock and potions ran straight through it.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">I chased this bug through three wrong guesses before finding the real one. All of it is proven by logs and footage, none of it by a person actually watching the wipe happen.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-8">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 08</span>
+          <h3>The Warlord Was Never Fighting Back</h3>
+          <time datetime="2026-08-10">August 10, 2026</time>
+        </header>
+        <h4>Warlord AI</h4>
+        <ul>
+          <li>His three-move cycle was never running. An empty weight list defaults to random odds instead of the sequential pattern.</li>
+          <li>He'd been picking at random this whole time, making him the easiest fight in the dungeon.</li>
+          <li>Fixed. Cleave is two hits (compounds with his own strength buff), guard turn now chips damage.</li>
+        </ul>
+        <h4>Warlord entrance</h4>
+        <ul>
+          <li>Walking into the arena cuts the camera to him for four lines before the fight starts.</li>
+          <li>Camera position is computed from his location, so it follows if I move him.</li>
+        </ul>
+        <h4>Sealed doors</h4>
+        <ul>
+          <li>A stone slab drops across the doorway behind you on entry.</li>
+          <li>First seal is a real point of no return, it cuts off the fountain and the way back.</li>
+        </ul>
+        <h4>Lighting</h4>
+        <ul>
+          <li>Relit the dungeon to match the arena: warm ambient near-off, tight bright pools on the walls.</li>
+          <li>This also fixed blown-out combat effects, a dark room with auto exposure was reading every bright effect as a white blob.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>Sign posted at the fork. AoE cards now play their impact effect on every target hit, not just one.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">None of the difficulty tuning has been played, it's arithmetic against numbers pulled from the live project. If the boss overshoots, the second cleave hit is the first thing I'd turn back down.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-7">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 07</span>
+          <h3>Music, Sound, and the Tutorial Hand</h3>
+          <time datetime="2026-08-09">August 9, 2026</time>
+        </header>
+        <h4>Music</h4>
+        <ul>
+          <li>Lives on a layer that survives level loads, so fights no longer restart the track.</li>
+          <li>Boss fights get a unique track, normal fights alternate between two, roll is cached per encounter so it doesn't audibly flip mid-transition.</li>
+          <li>Victory/defeat stings fade at 10 seconds instead of playing out, since the valley trip cuts them off anyway.</li>
+        </ul>
+        <h4>Combat sound</h4>
+        <ul>
+          <li>Cast sound on the cast frame, impact sound on the contact frame.</li>
+        </ul>
+        <h4>Jack / controls</h4>
+        <ul>
+          <li>Jack now lives permanently at the road post. Talking to him pulls the camera in.</li>
+          <li>Deck menu moved off E onto Q, freeing E for interact (talk, read signs, start boss fight).</li>
+        </ul>
+        <h4>Tutorial</h4>
+        <ul>
+          <li>Opening hand is stacked to the two cards the tips reference, everything else greys out.</li>
+          <li>Unlocks automatically if nothing in hand matches what the tip wants.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>Potions pulled back out of exploration, combat-only item again.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">Stacking the tutorial's opening hand felt like a small trick, but it's the difference between a tip that's advice and a tip that's a play you actually run.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-6">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 06</span>
+          <h3>The Poison Was Never the Bug</h3>
+          <time datetime="2026-08-05">August 5, 2026</time>
+        </header>
+        <h4>Poison / UI refresh bug</h4>
+        <ul>
+          <li>Poison was actually working the whole time. The combat UI just only refreshed on player input.</li>
+          <li>So poison ticks, enemy attacks, block decay, all landed silently and snapped to true a click later.</li>
+          <li>Fixed: UI refreshes on the beat now, poison tick makes the target visibly flinch.</li>
+        </ul>
+        <h4>Health bars</h4>
+        <ul>
+          <li>Moved off-screen bars onto the enemies, anchored to each creature's height.</li>
+          <li>Same fix applied to the drag-targets, which had the same problem and were hard to hit on short enemies.</li>
+        </ul>
+        <h4>Damage timing</h4>
+        <ul>
+          <li>Damage numbers now pop on hit, and card damage lands on the contact frame instead of instantly on release.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>Post-fight gold summary. Tutorial fight (5 non-blocking tips, replays every run). One-use healing fountain at the dungeon entrance. Pulled 120 dead nodes out of the Blueprint code.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">Poison was never the bug. The interface only telling the truth on click was, and that's a good reminder that a silent system reads as a broken one.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-5">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 05</span>
+          <h3>Base Camp and the Orc Nerf</h3>
+          <time datetime="2026-07-30">July 30, 2026</time>
+        </header>
+        <h4>Base camp</h4>
+        <ul>
+          <li>Valley now opens on a camp (fire, tents, canopy, banner gate) instead of an empty field.</li>
+        </ul>
+        <h4>Jack / run clock</h4>
+        <ul>
+          <li>Press E to talk to Jack, finishing his dialogue is what starts the run clock.</li>
+          <li>Means the clock doesn't start until someone's explained it, and wandering off first doesn't put you on a silent timer.</li>
+        </ul>
+        <h4>Menus</h4>
+        <ul>
+          <li>Main menu's Play button had never actually been wired to anything.</li>
+          <li>Victory/defeat are real screens now, stay up until clicked.</li>
+          <li>Cut character creation, there's no class system left for it to serve.</li>
+        </ul>
+        <h4>Orc nerf</h4>
+        <ul>
+          <li>Strength is added per hit, never decays, no cap, and his best attack hits twice.</li>
+          <li>His rage move was climbing about half a strength a turn forever, out-damaging your whole health pool by turn 5.</li>
+        </ul>
+        <h4>Also</h4>
+        <ul>
+          <li>Roaming enemies no longer wander into the shop yard.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">The Orc nerf is the one worth remembering: when an enemy feels unfair, check the growth rate before you touch the flat numbers.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-4">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 04</span>
+          <h3>Fixing Combat Timing</h3>
+          <time datetime="2026-07-26">July 26, 2026</time>
+        </header>
+        <h4>Hero animation</h4>
+        <ul>
+          <li>Attacks swing, defense braces, utility gestures, most cards override with a unique animation.</li>
+        </ul>
+        <h4>Timing fix</h4>
+        <ul>
+          <li>Damage, hit flash, screen punch, flinch, and death were all firing on the attack's first frame, so the hero swung at a corpse.</li>
+          <li>Everything's scheduled off real animation length now, including the Aura Strike projectile, which arrives on the damage frame.</li>
+        </ul>
+        <h4>Run clock</h4>
+        <ul>
+          <li>Added a countdown to the valley. No timer meant infinite money.</li>
+        </ul>
+        <h4>Dungeon fork</h4>
+        <ul>
+          <li>Two paths in the dungeon: left is an elite rat encounter with a rare card drop, right is a healing fountain. Taking one closes the other.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">Combat used to be a spreadsheet with a camera pointed at it. None of this timing work has been watched by a person yet, so I can prove it fires correctly and I still don't know if it feels good.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-3">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 03</span>
+          <h3>Dungeon, Cards, and AI</h3>
+          <time datetime="2026-07-25">July 25, 2026</time>
+        </header>
+        <h4>Enemy AI</h4>
+        <ul>
+          <li>Each enemy now picks from weighted moves, favors defense when hurt, won't repeat a move twice in a row.</li>
+          <li>In the valley they notice, chase, and give up and return home if you outrun them.</li>
+        </ul>
+        <h4>Cards</h4>
+        <ul>
+          <li>Rebuilt around ~20 cards.</li>
+        </ul>
+        <h4>Shop</h4>
+        <ul>
+          <li>Gold from fights buys new cards, removes unwanted ones, or heals you.</li>
+        </ul>
+        <h4>Dungeon</h4>
+        <ul>
+          <li>Built as a 6-enemy gauntlet into the Warlord, who telegraphs his 3-move cycle.</li>
+          <li>Lit and dressed: torches, columns, walls raised to ~4x height (camera angle exposed the old ones).</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">None of it has been played by an actual person yet, including me. I wanted the world to stop feeling like it was running on rails, and this is the first stretch where that's actually true.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-2">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 02</span>
+          <h3>Cutting the Village Hub</h3>
+          <time datetime="2026-07-17">July 17, 2026</time>
+        </header>
+        <h4>Village hub cut</h4>
+        <ul>
+          <li>Cut the Village/Town hub as its own zone. Its four prep locations (heal, buy, remove) are consolidated into a single Shop, now a stop inside the Valley instead of a separate space.</li>
+          <li>World is two zones now instead of three: Valley (exploration + Shop) and Dungeon.</li>
+        </ul>
+        <h4>Training Grounds cut</h4>
+        <ul>
+          <li>Cut the free practice fight (no gold cost, no real HP or death risk) permanently, not just for the current slice. No consequence-free way to test a loadout before heading into the Valley anymore.</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">Cutting a whole zone gives me much more time to polish the most engaging parts of the game: exploration and combat.</p>
+      </article>
+
+      <article class="devlog" id="deckborn-devlog-1">
+        <header class="devlog-head">
+          <span class="devlog-num">Entry 01</span>
+          <h3>First Playable Fight</h3>
+          <time datetime="2026-07-06">July 6, 2026</time>
+        </header>
+        <h4>World</h4>
+        <ul>
+          <li>Town, valley (roaming enemies), and dungeon (straight gauntlet) are built as three distinct spaces.</li>
+          <li>Wandering into a roaming enemy pulls you straight into a fight.</li>
+        </ul>
+        <h4>Scope</h4>
+        <ul>
+          <li>Retargeting for a smaller, polished slice by September.</li>
+          <li>Cut: secret valley areas, the two-step crafting system (now a flat gold-for-cards buy).</li>
+        </ul>
+        <h4>Combat core</h4>
+        <ul>
+          <li>Built and tested headless first, so I could confirm the rules worked before there was anything to look at.</li>
+          <li>Building the actual screen took longer: fanned hand, hover to preview, drag to target.</li>
+          <li>Dragging a card to resolve a fight now works!</li>
+        </ul>
+        <h4 class="devlog-reflection-head">Reflection</h4>
+        <p class="devlog-reflection">Up until this week I could only watch a fight resolve on its own. This is the first time a fight has actually been won or lost by something I did on screen.</p>
+      </article>
+        </section>
+
+        <section class="site-section" id="deckborn-gdd">
+          <h3 class="site-section-title"><img src="img/icon-gdd.svg" alt="">Game design document</h3>
+          <p>The full game design document: core loop, Valley and Dungeon structure, combat rules, all 22 cards, 12 enemies, economy, UI, and production scope.</p>
+          <div class="link-row">
+            <a class="xp-button-link" href="Deckborn_GDD.pdf" target="_blank" rel="noopener">Open in new tab</a>
+            <a class="xp-button-link primary" href="Deckborn_GDD.pdf" download>Download PDF &darr;</a>
+          </div>
+          <div class="site-pdf desktop-only">
+            <iframe data-src="Deckborn_GDD.pdf#view=FitH" loading="lazy" title="Deckborn Game Design Document"></iframe>
+          </div>
+        </section>
+
+        <section class="site-section" id="deckborn-links">
+          <h3 class="site-section-title"><img src="img/icon-itch.svg" alt="">Links</h3>
+          <ul class="site-links">
+            <li><a href="https://claybuiocchi.itch.io/deckborn-prototype" target="_blank" rel="noopener">Deckborn on itch.io</a></li>
+            <li><a href="https://claybuiocchi.itch.io" target="_blank" rel="noopener">All of Clay's games on itch.io</a></li>
+            <li><a href="#" data-window="win-wrongbird">Wrong Bird, Clay's other project</a></li>
+            <li><a href="#" data-window="win-contact">Get in touch</a></li>
+          </ul>
+        </section>
+
+        <footer class="site-footer">&copy; 2026 Clay Buiocchi &middot; best viewed in clayxp Explorer at 800&times;600</footer>
       </div>
     </div>
   </section>
 
-  <!-- ===== Deckborn > Devlogs (folder of entries) ===== -->
-  <section class="xp-window" id="win-deckborn-devlogs" data-title="Deckborn Devlogs" data-width="500" data-height="380">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlogs
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body folder-body">
-      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Deckborn \ Devlogs</div>
-      <div class="folder-view">
-        <!-- Add a new entry: copy a <section id="win-deckborn-devlog-N"> below,
-             then add a matching .folder-item button here. -->
-        <button class="folder-item" data-window="win-deckborn-devlog-9">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 09 &mdash; Aug 12: The Return Transition Bug</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-8">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 08 &mdash; Aug 10: The Warlord Was Never Fighting Back</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-7">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 07 &mdash; Aug 9: Music, Sound, and the Tutorial Hand</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-6">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 06 &mdash; Aug 5: The Poison Was Never the Bug</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-5">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 05 &mdash; Jul 30: Base Camp and the Orc Nerf</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-4">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 04 &mdash; Jul 26: Fixing Combat Timing</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-3">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 03 &mdash; Jul 25: Dungeon, Cards, and AI</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-2">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 02 &mdash; Jul 17: Cutting the Village Hub</span>
-        </button>
-        <button class="folder-item" data-window="win-deckborn-devlog-1">
-          <img src="img/icon-notepad.svg" alt=""><span>Entry 01 &mdash; Jul 6: First Playable Fight</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 01 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-1" data-title="Deckborn Devlog 01" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 01.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 01: First Playable Fight ===</p>
-      <p>Date: July 6, 2026</p>
-      <p><strong>World</strong></p>
-      <p>- Town, valley (roaming enemies), and dungeon (straight gauntlet) are built as three distinct spaces.</p>
-      <p>- Wandering into a roaming enemy pulls you straight into a fight.</p>
-      <p><strong>Scope</strong></p>
-      <p>- Retargeting for a smaller, polished slice by September.</p>
-      <p>- Cut: secret valley areas, the two-step crafting system (now a flat gold-for-cards buy).</p>
-      <p><strong>Combat core</strong></p>
-      <p>- Built and tested headless first, so I could confirm the rules worked before there was anything to look at.</p>
-      <p>- Building the actual screen took longer: fanned hand, hover to preview, drag to target.</p>
-      <p>- Dragging a card to resolve a fight now works!</p>
-      <p><strong>Reflection</strong></p>
-      <p>Up until this week I could only watch a fight resolve on its own. This is the first time a fight has actually been won or lost by something I did on screen.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 02 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-2" data-title="Deckborn Devlog 02" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 02.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 02: Cutting the Village Hub ===</p>
-      <p>Date: July 17, 2026</p>
-      <p><strong>Village hub cut</strong></p>
-      <p>- Cut the Village/Town hub as its own zone. Its four prep locations (heal, buy, remove) are consolidated into a single Shop, now a stop inside the Valley instead of a separate space.</p>
-      <p>- World is two zones now instead of three: Valley (exploration + Shop) and Dungeon.</p>
-      <p><strong>Training Grounds cut</strong></p>
-      <p>- Cut the free practice fight (no gold cost, no real HP or death risk) permanently, not just for the current slice. No consequence-free way to test a loadout before heading into the Valley anymore.</p>
-      <p><strong>Reflection</strong></p>
-      <p>Cutting a whole zone gives me much more time to polish the most engaging parts of the game: exploration and combat.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 03 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-3" data-title="Deckborn Devlog 03" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 03.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 03: Dungeon, Cards, and AI ===</p>
-      <p>Date: July 25, 2026</p>
-      <p><strong>Enemy AI</strong></p>
-      <p>- Each enemy now picks from weighted moves, favors defense when hurt, won't repeat a move twice in a row.</p>
-      <p>- In the valley they notice, chase, and give up and return home if you outrun them.</p>
-      <p><strong>Cards</strong></p>
-      <p>- Rebuilt around ~20 cards.</p>
-      <p><strong>Shop</strong></p>
-      <p>- Gold from fights buys new cards, removes unwanted ones, or heals you.</p>
-      <p><strong>Dungeon</strong></p>
-      <p>- Built as a 6-enemy gauntlet into the Warlord, who telegraphs his 3-move cycle.</p>
-      <p>- Lit and dressed: torches, columns, walls raised to ~4x height (camera angle exposed the old ones).</p>
-      <p><strong>Reflection</strong></p>
-      <p>None of it has been played by an actual person yet, including me. I wanted the world to stop feeling like it was running on rails, and this is the first stretch where that's actually true.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 04 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-4" data-title="Deckborn Devlog 04" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 04.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 04: Fixing Combat Timing ===</p>
-      <p>Date: July 26, 2026</p>
-      <p><strong>Hero animation</strong></p>
-      <p>- Attacks swing, defense braces, utility gestures, most cards override with a unique animation.</p>
-      <p><strong>Timing fix</strong></p>
-      <p>- Damage, hit flash, screen punch, flinch, and death were all firing on the attack's first frame, so the hero swung at a corpse.</p>
-      <p>- Everything's scheduled off real animation length now, including the Aura Strike projectile, which arrives on the damage frame.</p>
-      <p><strong>Run clock</strong></p>
-      <p>- Added a countdown to the valley. No timer meant infinite money.</p>
-      <p><strong>Dungeon fork</strong></p>
-      <p>- Two paths in the dungeon: left is an elite rat encounter with a rare card drop, right is a healing fountain. Taking one closes the other.</p>
-      <p><strong>Reflection</strong></p>
-      <p>Combat used to be a spreadsheet with a camera pointed at it. None of this timing work has been watched by a person yet, so I can prove it fires correctly and I still don't know if it feels good.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 05 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-5" data-title="Deckborn Devlog 05" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 05.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 05: Base Camp and the Orc Nerf ===</p>
-      <p>Date: July 30, 2026</p>
-      <p><strong>Base camp</strong></p>
-      <p>- Valley now opens on a camp (fire, tents, canopy, banner gate) instead of an empty field.</p>
-      <p><strong>Jack / run clock</strong></p>
-      <p>- Press E to talk to Jack, finishing his dialogue is what starts the run clock.</p>
-      <p>- Means the clock doesn't start until someone's explained it, and wandering off first doesn't put you on a silent timer.</p>
-      <p><strong>Menus</strong></p>
-      <p>- Main menu's Play button had never actually been wired to anything.</p>
-      <p>- Victory/defeat are real screens now, stay up until clicked.</p>
-      <p>- Cut character creation, there's no class system left for it to serve.</p>
-      <p><strong>Orc nerf</strong></p>
-      <p>- Strength is added per hit, never decays, no cap, and his best attack hits twice.</p>
-      <p>- His rage move was climbing about half a strength a turn forever, out-damaging your whole health pool by turn 5.</p>
-      <p><strong>Also</strong></p>
-      <p>- Roaming enemies no longer wander into the shop yard.</p>
-      <p><strong>Reflection</strong></p>
-      <p>The Orc nerf is the one worth remembering: when an enemy feels unfair, check the growth rate before you touch the flat numbers.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 06 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-6" data-title="Deckborn Devlog 06" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 06.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 06: The Poison Was Never the Bug ===</p>
-      <p>Date: August 5, 2026</p>
-      <p><strong>Poison / UI refresh bug</strong></p>
-      <p>- Poison was actually working the whole time. The combat UI just only refreshed on player input.</p>
-      <p>- So poison ticks, enemy attacks, block decay, all landed silently and snapped to true a click later.</p>
-      <p>- Fixed: UI refreshes on the beat now, poison tick makes the target visibly flinch.</p>
-      <p><strong>Health bars</strong></p>
-      <p>- Moved off-screen bars onto the enemies, anchored to each creature's height.</p>
-      <p>- Same fix applied to the drag-targets, which had the same problem and were hard to hit on short enemies.</p>
-      <p><strong>Damage timing</strong></p>
-      <p>- Damage numbers now pop on hit, and card damage lands on the contact frame instead of instantly on release.</p>
-      <p><strong>Also</strong></p>
-      <p>- Post-fight gold summary. Tutorial fight (5 non-blocking tips, replays every run). One-use healing fountain at the dungeon entrance. Pulled 120 dead nodes out of the Blueprint code.</p>
-      <p><strong>Reflection</strong></p>
-      <p>Poison was never the bug. The interface only telling the truth on click was, and that's a good reminder that a silent system reads as a broken one.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 07 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-7" data-title="Deckborn Devlog 07" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 07.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 07: Music, Sound, and the Tutorial Hand ===</p>
-      <p>Date: August 9, 2026</p>
-      <p><strong>Music</strong></p>
-      <p>- Lives on a layer that survives level loads, so fights no longer restart the track.</p>
-      <p>- Boss fights get a unique track, normal fights alternate between two, roll is cached per encounter so it doesn't audibly flip mid-transition.</p>
-      <p>- Victory/defeat stings fade at 10 seconds instead of playing out, since the valley trip cuts them off anyway.</p>
-      <p><strong>Combat sound</strong></p>
-      <p>- Cast sound on the cast frame, impact sound on the contact frame.</p>
-      <p><strong>Jack / controls</strong></p>
-      <p>- Jack now lives permanently at the road post. Talking to him pulls the camera in.</p>
-      <p>- Deck menu moved off E onto Q, freeing E for interact (talk, read signs, start boss fight).</p>
-      <p><strong>Tutorial</strong></p>
-      <p>- Opening hand is stacked to the two cards the tips reference, everything else greys out.</p>
-      <p>- Unlocks automatically if nothing in hand matches what the tip wants.</p>
-      <p><strong>Also</strong></p>
-      <p>- Potions pulled back out of exploration, combat-only item again.</p>
-      <p><strong>Reflection</strong></p>
-      <p>Stacking the tutorial's opening hand felt like a small trick, but it's the difference between a tip that's advice and a tip that's a play you actually run.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 08 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-8" data-title="Deckborn Devlog 08" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 08.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 08: The Warlord Was Never Fighting Back ===</p>
-      <p>Date: August 10, 2026</p>
-      <p><strong>Warlord AI</strong></p>
-      <p>- His three-move cycle was never running. An empty weight list defaults to random odds instead of the sequential pattern.</p>
-      <p>- He'd been picking at random this whole time, making him the easiest fight in the dungeon.</p>
-      <p>- Fixed. Cleave is two hits (compounds with his own strength buff), guard turn now chips damage.</p>
-      <p><strong>Warlord entrance</strong></p>
-      <p>- Walking into the arena cuts the camera to him for four lines before the fight starts.</p>
-      <p>- Camera position is computed from his location, so it follows if I move him.</p>
-      <p><strong>Sealed doors</strong></p>
-      <p>- A stone slab drops across the doorway behind you on entry.</p>
-      <p>- First seal is a real point of no return, it cuts off the fountain and the way back.</p>
-      <p><strong>Lighting</strong></p>
-      <p>- Relit the dungeon to match the arena: warm ambient near-off, tight bright pools on the walls.</p>
-      <p>- This also fixed blown-out combat effects, a dark room with auto exposure was reading every bright effect as a white blob.</p>
-      <p><strong>Also</strong></p>
-      <p>- Sign posted at the fork. AoE cards now play their impact effect on every target hit, not just one.</p>
-      <p><strong>Reflection</strong></p>
-      <p>None of the difficulty tuning has been played, it's arithmetic against numbers pulled from the live project. If the boss overshoots, the second cleave hit is the first thing I'd turn back down.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > Devlog entry 09 ===== -->
-  <section class="xp-window" id="win-deckborn-devlog-9" data-title="Deckborn Devlog 09" data-width="560" data-height="460">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-notepad.svg" alt="">
-        Devlog 09.txt - Notepad
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body notepad-body">
-      <p>=== Deckborn Devlog 09: The Return Transition Bug ===</p>
-      <p>Date: August 12, 2026</p>
-      <p><strong>Return transition</strong></p>
-      <p>- Coming back from a fight, the hero used to pop back in half a second late, fully solid, in a single frame.</p>
-      <p>- Cause: the transition system blocks input, and hiding the player was a side effect of that block.</p>
-      <p>- Fix: turned off the input block. You can move during the wipe now.</p>
-      <p><strong>New transitions</strong></p>
-      <p>- Diamond wipe into a fight, iris wipe back out, both retimed onto an ease curve.</p>
-      <p>- Loading screen covers the roughly 600ms mid-load gap where no UI exists.</p>
-      <p><strong>Pause menu</strong></p>
-      <p>- Escape or P, works in exploration and combat.</p>
-      <p>- Fixed: pausing didn't pause the interface, so the valley clock and potions ran straight through it.</p>
-      <p><strong>Reflection</strong></p>
-      <p>I chased this bug through three wrong guesses before finding the real one. All of it is proven by logs and footage, none of it by a person actually watching the wipe happen.</p>
-    </div>
-  </section>
-
-  <!-- ===== Deckborn > GDD &amp; Docs ===== -->
-  <section class="xp-window" id="win-deckborn-gdd" data-title="Deckborn GDD &amp; Docs" data-width="720" data-height="620">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-gdd.svg" alt="">
-        Deckborn_GDD.pdf - Preview
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body pdf-viewer">
-      <div class="pdf-toolbar">
-        <p class="pdf-summary">The full game design document: core loop, Valley and Dungeon structure, combat rules, all 22 cards, 12 enemies, economy, UI, and production scope.</p>
-        <div class="pdf-actions">
-          <a class="xp-button-link" href="Deckborn_GDD.pdf" target="_blank" rel="noopener">Open in new tab</a>
-          <a class="xp-button-link primary" href="Deckborn_GDD.pdf" download>Download PDF &darr;</a>
-        </div>
-      </div>
-      <div class="pdf-frame desktop-only">
-        <iframe data-src="Deckborn_GDD.pdf#view=FitH" title="Deckborn Game Design Document"></iframe>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       WRONG BIRD — folder + its child windows (mirror of Deckborn)
-       ============================================================ -->
-
-  <!-- ===== Wrong Bird folder ===== -->
-  <section class="xp-window" id="win-wrongbird" data-title="Wrong Bird" data-width="500" data-height="380">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-folder-wrongbird.svg" alt="">
-        Wrong Bird
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body folder-body">
-      <div class="explorer-bar"><span class="explorer-label">Address</span> Projects \ Wrong Bird</div>
-      <div class="folder-view">
-        <button class="folder-item" data-window="win-wrongbird-game">
-          <img src="img/icon-wrongbird.svg" alt=""><span>Wrong Bird</span>
-        </button>
-        <button class="folder-item" data-window="win-wrongbird-gdd">
-          <img src="img/icon-gdd.svg" alt=""><span>GDD &amp; Docs</span>
-        </button>
-        <button class="folder-item" data-window="win-wrongbird-shots">
-          <img src="img/icon-screenshots.svg" alt=""><span>Screenshots</span>
-        </button>
-        <a class="folder-item" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">
-          <img src="img/icon-itch.svg" alt=""><span>itch.io page</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Wrong Bird > Download (build) ===== -->
-  <section class="xp-window" id="win-wrongbird-game" data-title="Wrong Bird" data-width="600" data-height="460">
+  <!-- ===== Wrong Bird site ===== -->
+  <section class="xp-window browser-window site-wrongbird" id="win-wrongbird" data-title="Wrong Bird" data-width="860" data-height="640">
     <div class="title-bar">
       <div class="title-bar-text">
         <img class="title-bar-icon" src="img/icon-wrongbird.svg" alt="">
-        Wrong Bird Training Loop.exe
+        Wrong Bird &mdash; clayxp Explorer
       </div>
       <div class="title-bar-controls">
         <button aria-label="Minimize" data-action="minimize"></button>
@@ -614,69 +509,71 @@
         <button aria-label="Close" data-action="close"></button>
       </div>
     </div>
-    <div class="window-body">
-      <div class="screenshot-strip">
-        <img src="img/wrongbird-cover.jpeg" alt="Wrong Bird cover art" loading="lazy">
-        <img src="img/wrongbird-1.png" alt="Wrong Bird screenshot 1" loading="lazy">
-        <img src="img/wrongbird-2.png" alt="Wrong Bird screenshot 2" loading="lazy">
-        <img src="img/wrongbird-3.png" alt="Wrong Bird screenshot 3" loading="lazy">
-      </div>
-      <p class="pitch">&ldquo;Penguins can't fly&rdquo; &mdash; some idiot. Wrong Bird is a pet raising simulator with roguelite mechanics in which you train penguins to fly. Built to learn UI/UX and RNG-driven systems; the training-loop prototype was completed in May 2026, with a distance-launching loop and full vertical slice targeted for Fall 2026.</p>
-      <div class="download-note">
-        <p><strong>Windows &middot; 501 MB &middot; direct download on itch.io</strong></p>
-      </div>
-      <div class="link-row">
-        <a class="xp-button-link primary" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">Download on itch.io &rarr;</a>
-      </div>
-    </div>
-  </section>
+    <div class="window-body site-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> http://clayxp/projects/wrong-bird</div>
+      <div class="site-page">
+        <header class="site-hero">
+          <p class="site-kicker">A Clay Buiocchi project</p>
+          <h2 class="site-title">Wrong Bird</h2>
+          <p class="site-tagline">&ldquo;Penguins can't fly&rdquo; &mdash; some idiot.</p>
+          <ul class="site-facts">
+            <li><strong>Genre</strong> Pet raising sim &middot; roguelite</li>
+            <li><strong>Engine</strong> Unreal Engine 5</li>
+            <li><strong>Status</strong> Training-loop prototype done &middot; vertical slice Fall 2026</li>
+          </ul>
+        </header>
 
-  <!-- ===== Wrong Bird > GDD &amp; Docs ===== -->
-  <section class="xp-window" id="win-wrongbird-gdd" data-title="Wrong Bird GDD &amp; Docs" data-width="720" data-height="620">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-gdd.svg" alt="">
-        Wrong_Bird_GDD.pdf - Preview
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body pdf-viewer">
-      <div class="pdf-toolbar">
-        <p class="pdf-summary">The full game design document: core and training/launch loops, stats, abilities, biomes, evolution, breeding and rarity, raising and mood, interface, audio, build order, and production scope.</p>
-        <div class="pdf-actions">
-          <a class="xp-button-link" href="Wrong_Bird_GDD.pdf" target="_blank" rel="noopener">Open in new tab</a>
-          <a class="xp-button-link primary" href="Wrong_Bird_GDD.pdf" download>Download PDF &darr;</a>
-        </div>
-      </div>
-      <div class="pdf-frame desktop-only">
-        <iframe data-src="Wrong_Bird_GDD.pdf#view=FitH" title="Wrong Bird Game Design Document"></iframe>
-      </div>
-    </div>
-  </section>
+        <nav class="site-nav" aria-label="Wrong Bird sections">
+          <a href="#wrongbird-about" data-scroll-to="wrongbird-about">About</a>
+          <a href="#wrongbird-shots" data-scroll-to="wrongbird-shots">Screenshots</a>
+          <a href="#wrongbird-gdd" data-scroll-to="wrongbird-gdd">GDD</a>
+          <a href="#wrongbird-links" data-scroll-to="wrongbird-links">Links</a>
+        </nav>
 
-  <!-- ===== Wrong Bird > Screenshots ===== -->
-  <section class="xp-window" id="win-wrongbird-shots" data-title="Wrong Bird Screenshots" data-width="600" data-height="360">
-    <div class="title-bar">
-      <div class="title-bar-text">
-        <img class="title-bar-icon" src="img/icon-screenshots.svg" alt="">
-        Wrong Bird Screenshots
-      </div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize" data-action="minimize"></button>
-        <button aria-label="Maximize" data-action="maximize"></button>
-        <button aria-label="Close" data-action="close"></button>
-      </div>
-    </div>
-    <div class="window-body">
-      <div class="screenshot-strip">
-        <img src="img/wrongbird-cover.jpeg" alt="Wrong Bird cover art" loading="lazy">
-        <img src="img/wrongbird-1.png" alt="Wrong Bird screenshot 1" loading="lazy">
-        <img src="img/wrongbird-2.png" alt="Wrong Bird screenshot 2" loading="lazy">
-        <img src="img/wrongbird-3.png" alt="Wrong Bird screenshot 3" loading="lazy">
+        <section class="site-section" id="wrongbird-about">
+          <h3 class="site-section-title"><img src="img/icon-wrongbird.svg" alt="">About the game</h3>
+          <p class="pitch">Wrong Bird is a pet raising simulator with roguelite mechanics in which you train penguins to fly. Built to learn UI/UX and RNG-driven systems; the training-loop prototype was completed in May 2026, with a distance-launching loop and full vertical slice targeted for Fall 2026.</p>
+          <div class="download-note">
+            <p><strong>Windows &middot; 501 MB &middot; direct download on itch.io</strong></p>
+          </div>
+          <div class="link-row">
+            <a class="xp-button-link primary" href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">Download on itch.io &rarr;</a>
+          </div>
+        </section>
+
+        <section class="site-section" id="wrongbird-shots">
+          <h3 class="site-section-title"><img src="img/icon-screenshots.svg" alt="">Screenshots</h3>
+          <div class="site-gallery">
+            <a href="img/wrongbird-cover.jpeg" target="_blank" rel="noopener"><img src="img/wrongbird-cover.jpeg" alt="Wrong Bird cover art" loading="lazy"></a>
+            <a href="img/wrongbird-1.png" target="_blank" rel="noopener"><img src="img/wrongbird-1.png" alt="Wrong Bird screenshot 1" loading="lazy"></a>
+            <a href="img/wrongbird-2.png" target="_blank" rel="noopener"><img src="img/wrongbird-2.png" alt="Wrong Bird screenshot 2" loading="lazy"></a>
+            <a href="img/wrongbird-3.png" target="_blank" rel="noopener"><img src="img/wrongbird-3.png" alt="Wrong Bird screenshot 3" loading="lazy"></a>
+          </div>
+        </section>
+
+        <section class="site-section" id="wrongbird-gdd">
+          <h3 class="site-section-title"><img src="img/icon-gdd.svg" alt="">Game design document</h3>
+          <p>The full game design document: core and training/launch loops, stats, abilities, biomes, evolution, breeding and rarity, raising and mood, interface, audio, build order, and production scope.</p>
+          <div class="link-row">
+            <a class="xp-button-link" href="Wrong_Bird_GDD.pdf" target="_blank" rel="noopener">Open in new tab</a>
+            <a class="xp-button-link primary" href="Wrong_Bird_GDD.pdf" download>Download PDF &darr;</a>
+          </div>
+          <div class="site-pdf desktop-only">
+            <iframe data-src="Wrong_Bird_GDD.pdf#view=FitH" loading="lazy" title="Wrong Bird Game Design Document"></iframe>
+          </div>
+        </section>
+
+        <section class="site-section" id="wrongbird-links">
+          <h3 class="site-section-title"><img src="img/icon-itch.svg" alt="">Links</h3>
+          <ul class="site-links">
+            <li><a href="https://claybuiocchi.itch.io/wrong-bird-training-loop-prototype" target="_blank" rel="noopener">Wrong Bird on itch.io</a></li>
+            <li><a href="https://claybuiocchi.itch.io" target="_blank" rel="noopener">All of Clay's games on itch.io</a></li>
+            <li><a href="#" data-window="win-deckborn">Deckborn, Clay's other project</a></li>
+            <li><a href="#" data-window="win-contact">Get in touch</a></li>
+          </ul>
+        </section>
+
+        <footer class="site-footer">&copy; 2026 Clay Buiocchi &middot; best viewed in clayxp Explorer at 800&times;600</footer>
       </div>
     </div>
   </section>
