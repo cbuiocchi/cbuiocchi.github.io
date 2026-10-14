@@ -54,24 +54,24 @@
 
   // Closing a window only hides it in CSS — the iframe underneath (and any
   // audio it's playing) keeps running unless we actually unload it. We stash
-  // the real src on close and restore it on the next open/re-open.
+  // the real src on close and restore it on the next open/re-open. A project
+  // site holds more than one (game + GDD), so handle every iframe in it.
   function restoreIframe(win) {
-    var iframe = win.querySelector('iframe');
-    if (!iframe || !iframe.dataset.src) return;
-    // On mobile the embed is swapped for a screenshot strip (desktop-only
-    // wrapper), so don't spend bandwidth loading a game nobody can see.
+    // On mobile the embeds sit in desktop-only wrappers, so don't spend
+    // bandwidth loading a game or PDF nobody can see.
     if (isMobile()) return;
-    if (iframe.src !== iframe.dataset.src) {
-      iframe.src = iframe.dataset.src;
-    }
+    win.querySelectorAll('iframe').forEach(function (iframe) {
+      if (iframe.dataset.src && iframe.src !== iframe.dataset.src) {
+        iframe.src = iframe.dataset.src;
+      }
+    });
   }
 
   function unloadIframe(win) {
-    var iframe = win.querySelector('iframe');
-    if (iframe) {
+    win.querySelectorAll('iframe').forEach(function (iframe) {
       if (!iframe.dataset.src) iframe.dataset.src = iframe.src;
       iframe.src = 'about:blank';
-    }
+    });
   }
 
   function openWindow(id) {
@@ -87,6 +87,10 @@
         // otherwise fall back to the 620x480 default.
         var w = parseInt(win.dataset.width, 10) || 620;
         var h = parseInt(win.dataset.height, 10) || 480;
+        // The project sites ask for a big window; don't let one spill past
+        // the screen edge or under the taskbar (40px) on smaller displays.
+        w = Math.min(w, desktop.clientWidth - 80);
+        h = Math.min(h, desktop.clientHeight - 40 - 60);
         win.style.width = w + 'px';
         win.style.height = h + 'px';
         if (id === 'win-welcome') {
@@ -261,6 +265,29 @@
       // jump to the top of the page.
       e.preventDefault();
       openWindow(trigger.dataset.window);
+    });
+  });
+
+  // ---- project-site jump links ----
+  // The nav in a project site scrolls the page *inside* its window. A plain
+  // #anchor jump would also try to scroll the (overflow:hidden) desktop and
+  // knock the whole layout out of place, so do the scroll by hand. On mobile
+  // the window isn't its own scroller, so fall back to scrolling the page.
+  document.querySelectorAll('[data-scroll-to]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(link.dataset.scrollTo);
+      var page = link.closest('.site-page');
+      if (!target || !page) return;
+      var behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      if (page.scrollHeight > page.clientHeight) {
+        var nav = page.querySelector('.site-nav');
+        var top = target.getBoundingClientRect().top - page.getBoundingClientRect().top +
+          page.scrollTop - (nav ? nav.offsetHeight : 0) - 8;
+        page.scrollTo({ top: top, behavior: behavior });
+      } else {
+        target.scrollIntoView({ behavior: behavior, block: 'start' });
+      }
     });
   });
 

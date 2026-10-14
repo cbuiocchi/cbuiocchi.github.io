@@ -1,6 +1,6 @@
 /* ============================================================
    style.css — desktop layout, wallpaper, taskbar, start menu,
-   boot screen, and content-specific styling (screenshots, embed).
+   boot screen, project sites, and content-specific styling (embed).
    ============================================================ */
 
 @font-face {
@@ -311,27 +311,20 @@ html, body {
 }
 .resume-bullets li { margin-bottom: 3px; }
 
-.screenshot-strip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-}
-.screenshot-strip img {
-  height: 160px;
-  border: 1px solid #999;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
 .download-note { margin-bottom: 12px; }
 .link-row { display: flex; gap: 10px; }
 
-/* ============ FOLDER (EXPLORER) WINDOWS ============ */
-/* Folder windows drop the default body padding so the address bar can span
-   edge-to-edge; the icon grid gets its own padding. */
-.folder-body { padding: 0; }
+/* ============ PROJECT SITES (browser-style windows) ============ */
+/* A project is one window holding a whole mini website: address bar pinned
+   at the top, then a single scrolling page (.site-page). Each project sets
+   its own palette through the --site-* variables below, so the shared rules
+   never need to know which game they're dressing. */
+.site-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
 
 .explorer-bar {
   display: flex;
@@ -345,45 +338,251 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 .explorer-label { color: #6a6a86; }
 
-.folder-view {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 6px;
-  padding: 12px;
-  align-content: start;
+.site-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--site-bg);
+  color: var(--site-ink);
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
-.folder-item {
+.site-hero {
+  padding: 34px 28px 28px;
+  background: var(--site-hero-bg);
+  color: var(--site-hero-ink);
+}
+.site-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.site-title {
+  margin: 4px 0 6px;
+  font-family: 'Firlest', var(--xp-font);
+  font-size: clamp(40px, 7vw, 64px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--site-title-ink);
+}
+.site-tagline {
+  margin: 0 0 16px;
+  font-size: 15px;
+}
+.site-facts {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 4px;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  color: #1a1a2a;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.site-facts li {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  font-size: 12px;
+}
+.site-facts strong {
+  margin-right: 4px;
+  color: var(--site-title-ink);
+}
+
+/* jump-nav: sticks to the top of the page as you scroll */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 0 20px;
+  background: var(--site-nav-bg);
+  border-bottom: 3px solid var(--site-accent);
+}
+.site-nav a {
+  padding: 9px 14px;
+  color: var(--site-nav-ink);
+  font-size: 12.5px;
+  font-weight: bold;
   text-decoration: none;
-  font-family: var(--xp-font);
-  font-size: 11.5px;
-  text-align: center;
-  cursor: pointer;
 }
-.folder-item img {
-  width: 40px;
-  height: 40px;
-  pointer-events: none;
-}
-.folder-item span { line-height: 1.2; }
-.folder-item:hover,
-.folder-item:focus-visible {
-  background: rgba(51, 112, 210, 0.12);
-  border: 1px dotted rgba(51, 112, 210, 0.6);
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  background: var(--site-accent);
+  color: var(--site-accent-ink);
   outline: none;
 }
+
+.site-section {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 26px 24px 8px;
+}
+.site-section + .site-section { border-top: 1px solid var(--site-rule); }
+.site-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 19px;
+  color: var(--site-heading);
+}
+.site-section-title img { width: 28px; height: 28px; }
+.site-section p { margin: 0 0 12px; }
+.site-section a { color: var(--site-link); }
+.site-section .xp-button-link { color: #000; }
+.site-section .link-row { flex-wrap: wrap; margin-bottom: 16px; }
+.site-note {
+  padding: 8px 12px;
+  background: var(--site-panel);
+  border-left: 3px solid var(--site-accent);
+}
+
+.site-pdf {
+  height: 560px;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #666;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.25);
+}
+.site-pdf iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.site-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.site-gallery a { display: block; }
+.site-gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid #999;
+  border-radius: 2px;
+}
+.site-gallery a:hover img { filter: brightness(1.08); }
+
+.site-links { margin: 0 0 16px; padding-left: 20px; }
+.site-links li { margin-bottom: 6px; }
+
+.site-footer {
+  margin-top: 18px;
+  padding: 14px 20px;
+  background: var(--site-nav-bg);
+  color: var(--site-nav-ink);
+  font-size: 11px;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* ---- devlogs: an index of entries, then every entry in full ---- */
+.devlog-index {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  list-style: none;
+  background: var(--site-panel);
+  border: 1px solid var(--site-rule);
+  border-radius: 3px;
+}
+.devlog-index li { margin: 2px 0; }
+.devlog-index a { text-decoration: none; }
+.devlog-index a:hover { text-decoration: underline; }
+.devlog-index span {
+  display: inline-block;
+  min-width: 52px;
+  color: var(--site-muted);
+  font-size: 12px;
+}
+
+.devlog {
+  margin-bottom: 18px;
+  padding: 16px 18px 6px;
+  background: var(--site-panel);
+  border: 1px solid var(--site-rule);
+  border-top: 3px solid var(--site-accent);
+  border-radius: 3px;
+}
+.devlog-head { margin-bottom: 8px; }
+.devlog-head h3 {
+  margin: 2px 0;
+  font-size: 16px;
+  color: var(--site-heading);
+}
+.devlog-num,
+.devlog-head time {
+  font-size: 11.5px;
+  color: var(--site-muted);
+}
+.devlog-num {
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.devlog h4 {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--site-heading);
+}
+.devlog ul { margin: 0 0 8px; padding-left: 20px; }
+.devlog li { margin-bottom: 3px; }
+.devlog .devlog-reflection { font-style: italic; }
+
+/* ---- per-project palettes ---- */
+.site-deckborn {
+  /* same royal purple + gold as the pop-up ad */
+  --site-bg:          #fbf8f1;
+  --site-ink:         #2a2235;
+  --site-heading:     #4b1e94;
+  --site-link:        #4b1e94;
+  --site-muted:       #7a6a8c;
+  --site-panel:       #ffffff;
+  --site-rule:        #e6dcc4;
+  --site-accent:      #f5c542;
+  --site-accent-ink:  #23103f;
+  --site-hero-bg:     radial-gradient(circle at 85% 20%, #6a35c9 0%, transparent 55%), linear-gradient(160deg, #4b1e94 0%, #23103f 100%);
+  --site-hero-ink:    #ded0f7;
+  --site-title-ink:   #f5c542;
+  --site-nav-bg:      #23103f;
+  --site-nav-ink:     #ffe89b;
+}
+
+.site-wrongbird {
+  /* ice and open sky from the cover art, with the penguin's beak for accent */
+  --site-bg:          #f1f7fb;
+  --site-ink:         #1d2f3f;
+  --site-heading:     #1f3a52;
+  --site-link:        #1c5d8c;
+  --site-muted:       #5f7a8f;
+  --site-panel:       #ffffff;
+  --site-rule:        #cfe0ec;
+  --site-accent:      #f07a4a;
+  --site-accent-ink:  #ffffff;
+  --site-hero-bg:     linear-gradient(90deg, rgba(20, 44, 66, 0.82) 0%, rgba(20, 44, 66, 0.45) 55%, rgba(20, 44, 66, 0.1) 100%), url("../img/wrongbird-cover.jpeg") center 40% / cover;
+  --site-hero-ink:    #eaf4fb;
+  --site-title-ink:   #ffffff;
+  --site-nav-bg:      #1f3a52;
+  --site-nav-ink:     #eaf4fb;
+}
+.site-wrongbird .site-hero { padding-top: 44px; padding-bottom: 40px; }
 
 .mobile-only { display: none; }
 
@@ -702,40 +901,6 @@ button, .xp-button-link, a { touch-action: manipulation; }
   padding-top: 4px;
 }
 
-/* ============ PDF VIEWER (GDDs) ============ */
-.pdf-viewer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #ada2c4;
-  padding: 12px;
-}
-.pdf-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.pdf-summary { margin: 0; }
-.pdf-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.pdf-frame {
-  flex: 1;
-  min-height: 0;
-  background: #fff;
-  border: 1px solid #666;
-  box-shadow: 0 3px 14px rgba(0,0,0,0.3);
-}
-.pdf-frame iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
-
 /* ============ RESPONSIVE / MOBILE ============ */
 @media (max-width: 760px) {
   html, body { overflow: auto; height: auto; }
@@ -784,7 +949,15 @@ button, .xp-button-link, a { touch-action: manipulation; }
   .window-body { font-size: 14px; }
 
   .game-embed-wrap { aspect-ratio: 4 / 3; }
-  .screenshot-strip img { height: 140px; }
+
+  /* On a phone the window grows to fit, so the page scrolls with the
+     document instead of inside the window. */
+  .site-page { overflow: visible; }
+  .site-hero { padding: 24px 16px 20px; }
+  .site-nav { top: 0; padding: 0 8px; }
+  .site-nav a { padding: 12px 12px; font-size: 13.5px; }
+  .site-section { padding: 22px 16px 6px; }
+  .devlog { padding: 14px 14px 4px; }
 
   /* The ad reflows into the page like any other window on mobile; it just
      needs a bit more breathing room and a thumb-sized call to action. */
@@ -817,8 +990,6 @@ button, .xp-button-link, a { touch-action: manipulation; }
   }
 
   .resume-viewer { padding: 10px; }
-  .pdf-toolbar { flex-direction: column; align-items: stretch; }
-  .pdf-actions { flex-wrap: wrap; }
   .resume-doc { padding: 20px 18px; }
   .resume-entry-header, .resume-entry-sub { flex-direction: column; gap: 2px; }
 }
