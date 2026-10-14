@@ -496,7 +496,6 @@ html, body {
 }
 .site-footer p { margin: 0; }
 
-/* the little 88x31 buttons every mid-2000s site had in its footer */
 /* ---- devlogs: an index of entries, then every entry in full ---- */
 .devlog-index { margin: 0 0 20px; padding: 10px 14px; list-style: none; }
 .devlog-index li { margin: 2px 0; }
