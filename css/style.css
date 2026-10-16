@@ -270,19 +270,6 @@ html, body {
 .welcome-tour li { margin-bottom: 8px; }
 .welcome-tour a { color: #0a246a; }
 
-.welcome-skills {
-  margin-top: 12px;
-  padding: 8px 12px;
-  border: 1px solid #0a246a;
-  background: #fff;
-}
-.welcome-skills-title {
-  margin: 0 0 6px;
-  font-weight: bold;
-  color: #0a246a;
-}
-.welcome-skills p:last-child { margin-bottom: 0; }
-
 /* ============ RESUME (rendered as a document, not desktop chrome) ============ */
 .resume-viewer {
   background: #ada2c4;
