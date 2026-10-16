@@ -281,12 +281,7 @@ html, body {
   font-weight: bold;
   color: #0a246a;
 }
-.welcome-skills ul {
-  margin: 0;
-  padding-left: 20px;
-}
-.welcome-skills li { margin-bottom: 2px; }
-.welcome-skills li:last-child { margin-bottom: 0; }
+.welcome-skills p:last-child { margin-bottom: 0; }
 
 /* ============ RESUME (rendered as a document, not desktop chrome) ============ */
 .resume-viewer {
