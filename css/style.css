@@ -134,8 +134,11 @@ html, body {
   position: absolute;
   top: 16px;
   left: 16px;
+  bottom: 56px; /* clear of the taskbar */
   display: flex;
   flex-direction: column;
+  flex-wrap: wrap; /* short screens: start a second column instead of hiding icons under the taskbar */
+  align-content: flex-start;
   gap: 22px;
   z-index: 5;
 }
@@ -1518,8 +1521,16 @@ button, .xp-button-link, a { touch-action: manipulation; }
   padding-top: 4px;
 }
 
+/* While a window is being dragged, iframes must not eat the pointer events
+   (main.js adds .dragging to <body>). */
+body.dragging iframe { pointer-events: none; }
+body.dragging { user-select: none; }
+.title-bar { touch-action: none; }
+
 /* ============ RESPONSIVE / MOBILE ============ */
-@media (max-width: 760px) {
+/* Keep in sync with mobileQuery in js/main.js. Short landscape phones are
+   wider than 760px but too short for floating windows. */
+@media (max-width: 760px), (max-height: 500px) {
   html, body { overflow: auto; height: auto; }
   #desktop {
     overflow: visible;
@@ -1534,6 +1545,9 @@ button, .xp-button-link, a { touch-action: manipulation; }
 
   .desktop-icons {
     position: relative;
+    top: auto;
+    left: auto;
+    bottom: auto;
     z-index: 1;
     flex-direction: row;
     flex-wrap: wrap;
@@ -1549,14 +1563,12 @@ button, .xp-button-link, a { touch-action: manipulation; }
     z-index: 1;
     width: 100% !important;
     height: auto !important;
+    min-width: 0;
     margin: 0 0 16px;
     border-radius: 0;
     transform: none !important;
   }
-  .xp-window.open { display: flex; }
-  .xp-window:not(.open) { display: none; }
-
-  .title-bar { height: 40px; padding: 4px 6px; }
+  .title-bar { height: 40px; padding: 4px 6px; touch-action: auto; }
   .title-bar-controls button {
     width: 30px;
     height: 30px;

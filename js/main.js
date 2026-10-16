@@ -14,9 +14,15 @@
   var CASCADE_STEP = 28;
   var CASCADE_MAX = 6;
 
+  // Must match the RESPONSIVE / MOBILE media query in css/style.css. Short
+  // landscape phones are wider than 760px but have no room for floating
+  // windows, so they get the stacked layout too.
+  var mobileQuery = window.matchMedia('(max-width: 760px), (max-height: 500px)');
   function isMobile() {
-    return window.innerWidth <= 760;
+    return mobileQuery.matches;
   }
+
+  var TASKBAR_H = 40;
 
   // ---- boot screen ----
   // Wired up FIRST, on purpose. The boot screen covers the whole page, so if
@@ -61,7 +67,10 @@
       // On mobile the PDF embeds sit in desktop-only wrappers, so don't
       // spend bandwidth loading something nobody can see.
       if (isMobile() && iframe.closest('.desktop-only')) return;
-      if (iframe.dataset.src && iframe.src !== iframe.dataset.src) {
+      // Compare the raw attribute: iframe.src resolves to an absolute URL,
+      // so a relative data-src (the GDD PDFs) would never match and the PDF
+      // would reload, losing its scroll position, on every refocus.
+      if (iframe.dataset.src && iframe.getAttribute('src') !== iframe.dataset.src) {
         iframe.src = iframe.dataset.src;
       }
     });
@@ -82,31 +91,7 @@
       win.classList.add('open');
       win.classList.remove('minimized');
 
-      if (!isMobile() && !win.style.left && !win.style.top) {
-        // Per-window size can be preset via data-width/data-height;
-        // otherwise fall back to the 620x480 default.
-        var w = parseInt(win.dataset.width, 10) || 620;
-        var h = parseInt(win.dataset.height, 10) || 480;
-        // The project sites ask for a big window; don't let one spill past
-        // the screen edge or under the taskbar (40px) on smaller displays.
-        w = Math.min(w, desktop.clientWidth - 80);
-        h = Math.min(h, desktop.clientHeight - 40 - 60);
-        win.style.width = w + 'px';
-        win.style.height = h + 'px';
-        if (id === 'win-welcome') {
-          // The welcome window greets visitors, so sit it dead-center of the
-          // desktop rather than in the cascade stack.
-          win.style.left = Math.max(0, (desktop.clientWidth - w) / 2) + 'px';
-          // 40 = taskbar height; keep the window centered in the visible area.
-          win.style.top = Math.max(0, (desktop.clientHeight - 40 - h) / 2) + 'px';
-        } else {
-          // Position can also be preset via data-left/data-top; else cascade.
-          var step = cascadeOffset % CASCADE_MAX;
-          win.style.left = (win.dataset.left || (60 + step * CASCADE_STEP)) + 'px';
-          win.style.top = (win.dataset.top || (40 + step * CASCADE_STEP)) + 'px';
-          cascadeOffset++;
-        }
-      }
+      if (!isMobile() && !win.style.left && !win.style.top) placeWindow(win);
 
       addTaskbarItem(id);
     } else if (win.classList.contains('minimized')) {
@@ -122,6 +107,50 @@
         win.scrollIntoView({ block: 'start' });
       }, 100);
     }
+  }
+
+  // Give a window its desktop size and position. Called on first open, and
+  // again if a window opened in the stacked mobile layout ends up on the
+  // desktop layout (rotating a tablet, widening the browser).
+  function placeWindow(win) {
+    if (win.id === 'win-deckborn-ad') { placeAd(win); return; }
+    // Per-window size can be preset via data-width/data-height;
+    // otherwise fall back to the 620x480 default.
+    var w = parseInt(win.dataset.width, 10) || 620;
+    var h = parseInt(win.dataset.height, 10) || 480;
+    // The project sites ask for a big window; don't let one spill past
+    // the screen edge or under the taskbar on smaller displays.
+    w = Math.max(320, Math.min(w, desktop.clientWidth - 80));
+    h = Math.max(200, Math.min(h, desktop.clientHeight - TASKBAR_H - 60));
+    win.style.width = w + 'px';
+    win.style.height = h + 'px';
+    if (win.id === 'win-welcome') {
+      // The welcome window greets visitors, so sit it dead-center of the
+      // desktop rather than in the cascade stack.
+      win.style.left = Math.max(0, (desktop.clientWidth - w) / 2) + 'px';
+      win.style.top = Math.max(0, (desktop.clientHeight - TASKBAR_H - h) / 2) + 'px';
+    } else {
+      // Position can also be preset via data-left/data-top; else cascade.
+      var step = cascadeOffset % CASCADE_MAX;
+      var left = parseInt(win.dataset.left, 10) || (60 + step * CASCADE_STEP);
+      var top = parseInt(win.dataset.top, 10) || (40 + step * CASCADE_STEP);
+      // On a smaller screen the cascade would push a big window off the
+      // right edge or under the taskbar, so pull it back into view.
+      win.style.left = Math.max(0, Math.min(left, desktop.clientWidth - w)) + 'px';
+      win.style.top = Math.max(0, Math.min(top, desktop.clientHeight - TASKBAR_H - h)) + 'px';
+      cascadeOffset++;
+    }
+  }
+
+  // Keep at least a grabbable strip of the title bar on screen, so a window
+  // can never be dragged (or left by a browser resize) where it can't be
+  // dragged back from.
+  function clampPosition(win, left, top) {
+    var keep = 80;
+    var maxLeft = desktop.clientWidth - keep;
+    var maxTop = desktop.clientHeight - TASKBAR_H - 30;
+    win.style.left = Math.max(keep - win.offsetWidth, Math.min(left, maxLeft)) + 'px';
+    win.style.top = Math.max(0, Math.min(top, maxTop)) + 'px';
   }
 
   function closeWindow(id) {
@@ -158,7 +187,7 @@
       win.style.left = '10px';
       win.style.top = '10px';
       win.style.width = (desktop.clientWidth - 20) + 'px';
-      win.style.height = (desktop.clientHeight - 66) + 'px';
+      win.style.height = (desktop.clientHeight - TASKBAR_H - 26) + 'px';
       win.dataset.maximized = 'true';
     }
     focusWindow(id);
@@ -197,36 +226,43 @@
   }
 
   // ---- dragging ----
+  // Pointer events, so it works with a mouse, a pen, or a finger on a
+  // tablet. While dragging, iframes (trailers, PDFs) stop taking pointer
+  // events (.dragging in style.css); otherwise crossing one mid-drag would
+  // swallow the moves and the release, leaving the window stuck to the cursor.
   function makeDraggable(win) {
     var titleBar = win.querySelector('.title-bar');
     var dragging = false;
     var startX, startY, origLeft, origTop;
 
-    titleBar.addEventListener('mousedown', function (e) {
+    titleBar.addEventListener('pointerdown', function (e) {
       if (e.target.closest('.title-bar-controls')) return;
-      if (isMobile()) return;
+      if (isMobile() || e.button !== 0) return;
+      if (win.dataset.maximized === 'true') return;
       dragging = true;
       startX = e.clientX;
       startY = e.clientY;
       origLeft = win.offsetLeft;
       origTop = win.offsetTop;
       focusWindow(win.id);
+      document.body.classList.add('dragging');
+      if (titleBar.setPointerCapture) titleBar.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
 
-    document.addEventListener('mousemove', function (e) {
+    titleBar.addEventListener('pointermove', function (e) {
       if (!dragging) return;
-      var dx = e.clientX - startX;
-      var dy = e.clientY - startY;
-      var newLeft = Math.max(0, origLeft + dx);
-      var newTop = Math.max(0, origTop + dy);
-      win.style.left = newLeft + 'px';
-      win.style.top = newTop + 'px';
+      clampPosition(win, origLeft + e.clientX - startX, origTop + e.clientY - startY);
     });
 
-    document.addEventListener('mouseup', function () {
+    function endDrag() {
+      if (!dragging) return;
       dragging = false;
-    });
+      document.body.classList.remove('dragging');
+    }
+    titleBar.addEventListener('pointerup', endDrag);
+    titleBar.addEventListener('pointercancel', endDrag);
+    titleBar.addEventListener('lostpointercapture', endDrag);
   }
 
   // ---- wire up all windows ----
@@ -304,6 +340,9 @@
   function closeStartMenu() {
     startMenu.classList.remove('open');
   }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeStartMenu();
+  });
 
   // ---- clock ----
   function tickClock() {
@@ -330,17 +369,41 @@
     var ad = getWindow(adId);
     if (!ad || ad.classList.contains('open')) return;
 
-    if (!isMobile()) {
-      var w = parseInt(ad.dataset.width, 10) || 400;
-      var h = parseInt(ad.dataset.height, 10) || 450;
-      ad.style.width = w + 'px';
-      ad.style.height = h + 'px';
-      ad.style.left = Math.max(12, desktop.clientWidth - w - 40) + 'px';
-      // 40 = taskbar height, matching the centering used for the welcome window.
-      ad.style.top = Math.max(12, (desktop.clientHeight - 40 - h) / 2) + 'px';
-    }
+    if (!isMobile()) placeAd(ad);
 
     ad.classList.add('open');
     focusWindow(adId);
   }
+
+  function placeAd(ad) {
+    var w = parseInt(ad.dataset.width, 10) || 400;
+    var h = parseInt(ad.dataset.height, 10) || 450;
+    h = Math.max(200, Math.min(h, desktop.clientHeight - TASKBAR_H - 24));
+    ad.style.width = w + 'px';
+    ad.style.height = h + 'px';
+    ad.style.left = Math.max(12, desktop.clientWidth - w - 40) + 'px';
+    ad.style.top = Math.max(12, (desktop.clientHeight - TASKBAR_H - h) / 2) + 'px';
+  }
+
+  // ---- viewport changes ----
+  // Rotating a tablet or resizing the browser can strand windows off screen,
+  // or flip between the stacked (mobile) and floating (desktop) layouts.
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (isMobile()) return;
+      document.querySelectorAll('.xp-window.open').forEach(function (win) {
+        if (!win.style.left && !win.style.top) {
+          placeWindow(win);
+        } else if (win.dataset.maximized === 'true') {
+          win.style.width = (desktop.clientWidth - 20) + 'px';
+          win.style.height = (desktop.clientHeight - TASKBAR_H - 26) + 'px';
+        } else {
+          clampPosition(win, win.offsetLeft, win.offsetTop);
+        }
+        restoreIframe(win);
+      });
+    }, 150);
+  });
 })();
