@@ -14,6 +14,7 @@ js/main.js      The window manager. One IIFE, no framework. Handles: opening/clo
                 windows, dragging by the title bar, z-order/focus, the taskbar buttons, the start
                 menu, the clock, and the boot-screen intro.
 img/            Desktop icons (SVG, hand-drawn to match XP style) + downloaded itch.io screenshots.
+prototypes/     Small projects and prototypes, one self-contained folder each (see its README).
 ```
 
 ## How a window works
