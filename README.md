@@ -64,6 +64,18 @@ Both GDDs are real PDFs at the repo root: `Deckborn_GDD.pdf` and `Wrong_Bird_GDD
 
 No JS changes needed. `main.js` discovers windows and triggers by their `data-window` attribute automatically.
 
+## The Prototypes folder
+
+The **Prototypes** desktop icon opens `#win-prototypes`, an Explorer-style folder window with a thumbnail tile (`.folder-item`) per prototype. Each tile opens that prototype's own window (e.g. `#win-air-ride`), which embeds the project's page from `prototypes/<name>/index.html` in an `<iframe class="prototype-frame" data-src="…">`, so closing the window unloads it and stops any video.
+
+To add one:
+
+1. Add the project folder under `prototypes/` (see `prototypes/README.md`).
+2. Copy the `#win-air-ride` `<section>` in `index.html`, give it a new id, and point its iframe's `data-src` at the new folder.
+3. Add a `<button class="folder-item" data-window="win-…">` tile to `#win-prototypes`, with a thumbnail image and name.
+
+Styling lives under `PROTOTYPES FOLDER` in `css/style.css`.
+
 ## The Deckborn pop-up ad
 
 `#win-deckborn-ad` is a fake XP-era popup ad for Deckborn, in the game's royal-purple-and-gold palette. It's a normal `.xp-window`, so it drags, focuses, and reflows on mobile like every other window — but it only has a **close** button (no minimize/maximize) and it deliberately stays out of the taskbar, so closing it is final.
