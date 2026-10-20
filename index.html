@@ -45,6 +45,10 @@
       <img src="img/icon-wrongbird.svg?v=2" alt="">
       <span>Wrong Bird</span>
     </button>
+    <button class="desktop-icon" data-window="win-prototypes">
+      <img src="img/icon-folder.svg" alt="">
+      <span>Prototypes</span>
+    </button>
     <button class="desktop-icon" data-window="win-about">
       <img src="img/icon-about.svg" alt="">
       <span>About Me</span>
@@ -126,6 +130,7 @@
           <p>Hi, I'm <strong>Clay Buiocchi</strong> (they/them). Welcome to my desktop. I am a <strong>game designer</strong> who is proficient with <strong>Unreal Engine 5</strong>, including <strong>Blueprints</strong> and <strong>Unreal Motion Graphics (UMG)</strong>.</p>
           <ul class="welcome-tour">
             <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are my two games currently in production. Each one opens a mini site with everything on one page: trailer, devlogs, design doc, and screenshots.</li>
+            <li><a href="#" data-window="win-prototypes"><strong>Prototypes</strong></a> holds smaller experiments and case studies.</li>
             <li><a href="#" data-window="win-about"><strong>About Me</strong></a> covers who I am and what I care about.</li>
             <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> has my full skills, projects, and experience.</li>
             <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> is where to find me and how to reach out.</li>
@@ -1032,6 +1037,51 @@
     </div>
   </section>
 
+  <!-- ===== Prototypes folder =====
+       An Explorer-style folder of small projects. Each item opens its own
+       window below, which embeds that project's self-contained page from
+       prototypes/<name>/ in an iframe (so closing the window stops any video). -->
+  <section class="xp-window folder-window" id="win-prototypes" data-title="Prototypes" data-width="560" data-height="360">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-folder.svg" alt="">
+        Prototypes
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body site-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> C:\Documents and Settings\Clay\Desktop\Prototypes</div>
+      <div class="folder-items">
+        <button class="folder-item" data-window="win-air-ride">
+          <img src="prototypes/air-ride/poster.jpg" alt="">
+          <span>Air Ride</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="xp-window prototype-window" id="win-air-ride" data-title="Air Ride" data-width="760" data-height="600">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-folder.svg" alt="">
+        Air Ride &mdash; Prototypes
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body site-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> C:\Documents and Settings\Clay\Desktop\Prototypes\Air Ride</div>
+      <iframe class="prototype-frame" data-src="prototypes/air-ride/index.html" title="Air Ride prototype"></iframe>
+    </div>
+  </section>
+
   <!-- ===== Contact window ===== -->
   <section class="xp-window" id="win-contact" data-title="Contact">
     <div class="title-bar">
@@ -1073,6 +1123,7 @@
         <li><button data-window="win-welcome"><img src="img/icon-welcome.svg" alt="">Welcome</button></li>
         <li><button data-window="win-deckborn"><img src="img/icon-deckborn.svg?v=2" alt="">Deckborn</button></li>
         <li><button data-window="win-wrongbird"><img src="img/icon-wrongbird.svg?v=2" alt="">Wrong Bird</button></li>
+        <li><button data-window="win-prototypes"><img src="img/icon-folder.svg" alt="">Prototypes</button></li>
         <li><button data-window="win-about"><img src="img/icon-about.svg" alt="">About Me</button></li>
         <li><button data-window="win-resume"><img src="img/icon-resume.svg" alt="">Resume</button></li>
         <li><button data-window="win-contact"><img src="img/icon-contact.svg" alt="">Contact</button></li>
