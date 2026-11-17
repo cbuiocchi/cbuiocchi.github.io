@@ -430,6 +430,15 @@ html, body {
   box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
   background: #000;
 }
+/* A subfolder tile (e.g. Playground) shows its folder icon, not a screenshot. */
+.folder-item-folder img {
+  object-fit: contain;
+  padding: 10px 24px;
+  box-sizing: border-box;
+  background: #fff;
+  border-color: transparent;
+  box-shadow: none;
+}
 .folder-item:hover,
 .folder-item:focus-visible {
   background: #e2ebfb;
@@ -1635,6 +1644,8 @@ body.dragging { user-select: none; }
 
   /* The window has no fixed height to fill here, so give the embed one. */
   .prototype-frame { flex: none; height: 80vh; }
+  /* Playground toys capture touch for play, so keep them short enough to scroll past. */
+  .playground-window .prototype-frame { height: 60vh; }
 
   /* The ad reflows into the page like any other window on mobile; it just
      needs a bit more breathing room and a thumb-sized call to action. */
