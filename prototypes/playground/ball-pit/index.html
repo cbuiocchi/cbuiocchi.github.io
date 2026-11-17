@@ -13,6 +13,8 @@
     font-family: "Trebuchet MS", Tahoma, sans-serif;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-touch-callout: none; /* no long-press menu while diving */
+    -webkit-tap-highlight-color: transparent;
   }
   canvas {
     display: block;
@@ -38,6 +40,15 @@
   }
   .hint small { display: block; font-weight: normal; font-size: 12px; opacity: 0.8; margin-top: 2px; }
   .hint.gone { opacity: 0; }
+  .hint .touch { display: none; }
+  @media (pointer: coarse) {
+    .hint .mouse { display: none; }
+    .hint .touch { display: block; }
+  }
+  /* Narrow frames: drop the hint below the buttons so they don't overlap. */
+  @media (max-width: 480px) {
+    .hint { top: 58px; padding: 0 12px; }
+  }
 
   .toolbar {
     position: absolute;
@@ -54,6 +65,12 @@
     border-radius: 999px;
     cursor: pointer;
     box-shadow: 0 2px 0 rgba(0,0,0,0.18);
+    touch-action: manipulation; /* no double-tap zoom when tapping fast */
+  }
+  /* Thumb-sized buttons on touch screens. */
+  @media (pointer: coarse) {
+    .toolbar { gap: 8px; }
+    .toolbar button { font-size: 14px; min-height: 40px; padding: 8px 15px; }
   }
   .toolbar button:active { transform: translateY(1px); box-shadow: none; }
   .toolbar button:focus-visible { outline: 2px dashed #7a5b3a; outline-offset: 2px; }
@@ -62,8 +79,8 @@
 </style>
 </head>
 <body>
-<canvas id="pit" aria-label="A ball pit. Move your pointer into it to push the balls around; hold the button down to dive in deeper."></canvas>
-<div class="hint" id="hint">Dive in!<small>move around &middot; hold the mouse button down to go deeper</small></div>
+<canvas id="pit" aria-label="A ball pit. Move your pointer or finger through it to push the balls around; hold down to dive in deeper."></canvas>
+<div class="hint" id="hint">Dive in!<small class="mouse">move around &middot; hold the mouse button down to go deeper</small><small class="touch">drag through the balls &middot; press and hold to go deeper</small></div>
 <div class="toolbar">
   <button id="more" type="button">+ Balls</button>
   <button id="shake" type="button">Shake!</button>
