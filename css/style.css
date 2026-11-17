@@ -430,6 +430,15 @@ html, body {
   box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
   background: #000;
 }
+/* A subfolder tile (e.g. Playground) shows its folder icon, not a screenshot. */
+.folder-item-folder img {
+  object-fit: contain;
+  padding: 10px 24px;
+  box-sizing: border-box;
+  background: #fff;
+  border-color: transparent;
+  box-shadow: none;
+}
 .folder-item:hover,
 .folder-item:focus-visible {
   background: #e2ebfb;

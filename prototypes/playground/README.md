@@ -1,11 +1,11 @@
 # Playground
 
-Little interactive web toys, each in its own folder:
+Little interactive web toys, each in its own folder. On the site, Playground is a subfolder of the Prototypes window.
 
 ```
-playground/
+prototypes/playground/
   my-toy/
-    index.html    Entry point. Served at https://cbuiocchi.github.io/playground/my-toy/
+    index.html    Entry point. Served at https://cbuiocchi.github.io/prototypes/playground/my-toy/
     thumb.jpg     232x174 thumbnail for the Playground folder window (shown at 116x87).
 ```
 
