@@ -84,8 +84,9 @@
 <div class="hud" aria-hidden="true">
   <div><span id="speed">0</span> km/h</div>
   <div><span id="height">0</span> m up</div>
+  <div><span id="gforce">1.0</span> G</div>
 </div>
-<div class="hint" id="hint">All aboard!<small>press Ride &middot; drag to look around</small></div>
+<div class="hint" id="hint">All aboard!<small>loops, rolls &amp; a corkscrew &middot; press Ride &middot; drag to look around</small></div>
 <div class="toolbar">
   <button id="ride" type="button">Ride!</button>
   <button id="view" type="button">View: Front seat</button>
@@ -113,6 +114,7 @@ const rideBtn = document.getElementById('ride');
 const viewBtn = document.getElementById('view');
 const speedEl = document.getElementById('speed');
 const heightEl = document.getElementById('height');
+const gEl = document.getElementById('gforce');
 
 const G = 9.81;
 const CHAIN_SPEED = 4.5;     // m/s up the lift hill
@@ -155,16 +157,60 @@ scene.add(ground);
 
 /* ---------- the track ---------- */
 
-// Starts in the station, runs up the lift hill, then the fun part.
+// A vertical loop shaped like a teardrop: a wide curve at the bottom
+// (gentler on riders at full speed) tightening to a small one at the
+// top. It is traced by turning through 360 degrees while the turning
+// radius changes, and drifts sideways (z) by `shift` so the exit runs
+// beside the entry instead of into it.
+function loopPoints(x0, y0, rBottom, rTop, z0, shift, steps) {
+  const pts = [];
+  let x = x0, y = y0;
+  const sub = 40;
+  for (let k = 0; k <= steps; k++) {
+    if (k) {
+      for (let n = 0; n < sub; n++) {
+        const a = ((k - 1) + (n + 0.5) / sub) / steps * Math.PI * 2;
+        const r = rTop + (rBottom - rTop) * Math.pow((1 + Math.cos(a)) / 2, 1.5);
+        const d = r * (Math.PI * 2 / steps / sub);
+        x -= Math.cos(a) * d;
+        y += Math.sin(a) * d;
+      }
+    }
+    pts.push([x, y, z0 + shift * k / steps]);
+  }
+  return pts;
+}
+
+const LOOP = loopPoints(-80, 2, 14, 5, 0, 5, 24);
+
+// Starts in the station, then: lift hill, big drop, vertical loop,
+// banked turnaround, zero-g roll, camelback hill, double corkscrew,
+// and a banked turn home.
 const CONTROL = [
-  [ 14, 2, 0], [  0, 2, 0], [-10, 3, 0], [-20, 10, 0], [-30, 19, 0],
-  [-38, 24, 0], [-45, 23, 0], [-52, 14, 1], [-58, 4, 3],
-  [-68, 5, 10], [-72, 11, 22], [-66, 13, 32], [-54, 8, 37],
-  [-42, 3.5, 38], [-31, 12, 38], [-20, 4, 38], [-8, 3, 38],
-  [  4, 8, 38], [ 14, 3, 37], [ 25, 6.5, 35], [ 36, 3.5, 31],
-  [ 46, 4.5, 22], [ 48, 4, 11], [ 42, 2.5, 3], [ 30, 2, 0]
+  [ 14, 2, 0], [  0, 2, 0], [-8, 3, 0], [-18, 12, 0], [-28, 24, 0],
+  [-36, 31, 0], [-42, 32, 0], [-48, 28.5, 0], [-55, 18, 0], [-61, 7, 0],
+  [-67, 2.6, 0], [-74, 2, 0],
+  ...LOOP,
+  [-102, 2, 5.5], [-110, 4, 11], [-114, 8, 21], [-109, 11, 31], [-97, 11.5, 36],
+  // zero-g roll (straight, so the roll is clean)
+  [-84, 11.5, 36], [-74, 11.5, 36], [-64, 11.3, 36],
+  // drop and camelback hill
+  [-56, 7, 36], [-49, 3.5, 36], [-42, 5.6, 36], [-34, 9.6, 36], [-26, 11, 36],
+  [-18, 9.6, 36], [-10, 5.6, 36], [-3, 3.5, 36],
+  // double corkscrew
+  [4, 3.5, 36], [16, 4, 36], [28, 4, 36], [40, 3.5, 36],
+  [ 49, 4.5, 31], [ 53, 6, 21], [ 50, 5, 11], [ 42, 3, 4], [ 30, 2, 0]
 ].map(p => new THREE.Vector3(p[0], p[1], p[2]));
 
+// Heartline rolls: the track twists around a line at rider height,
+// so riders spin in place instead of being swung around.
+const ROLLS = [
+  { from: [-84, 11.5, 36], to: [-64, 11.3, 36], turns: 1 },
+  { from: [4, 3.5, 36], to: [40, 3.5, 36], turns: -2 }
+];
+const HEARTLINE = 1.2;
+
+const LOOP_FIRST = new THREE.Vector3(...LOOP[0]), LOOP_LAST = new THREE.Vector3(...LOOP[LOOP.length - 1]);
 const curve = new THREE.CatmullRomCurve3(CONTROL, true, 'centripetal');
 const LENGTH = curve.getLength();
 const STEP = 0.1;
@@ -172,37 +218,125 @@ const N = Math.ceil(LENGTH / STEP);
 
 const pos = [], fwd = [], up = [], right = [];
 {
+  const worldUp = new THREE.Vector3(0, 1, 0);
   for (let i = 0; i < N; i++) {
     const t = i / N;
     pos.push(curve.getPointAt(t));
-    fwd.push(curve.getTangentAt(t).normalize());
   }
-  // Signed horizontal turn rate (radians per metre), smoothed, becomes bank.
+
+  // Soften valleys and crests by smoothing the height a little, except
+  // through the vertical loop, which is already shaped with care.
+  const nearestIdx = p => {
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < N; i++) { const d = pos[i].distanceToSquared(p); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  const loopA = nearestIdx(LOOP_FIRST), loopB = nearestIdx(LOOP_LAST);
+  const SW = 35;
+  for (let pass = 0; pass < 2; pass++) {
+    const ys = pos.map(p => p.y);
+    for (let i = 0; i < N; i++) {
+      if (i > loopA - SW && i < loopB + SW) continue;
+      let sum = 0;
+      for (let k = -SW; k <= SW; k++) sum += ys[(i + k + N) % N];
+      pos[i].y = sum / (2 * SW + 1);
+    }
+  }
+  for (let i = 0; i < N; i++) fwd.push(new THREE.Vector3().subVectors(pos[(i + 1) % N], pos[(i - 1 + N) % N]).normalize());
+
+  // 1. Rotation-minimising frames (double reflection). These follow the
+  //    track without twisting, so through the loop "up" points at the
+  //    loop's centre and riders end up upside down at the top.
+  const rmf = [new THREE.Vector3().copy(worldUp).addScaledVector(fwd[0], -fwd[0].y).normalize()];
+  const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), rL = new THREE.Vector3(), tL = new THREE.Vector3();
+  for (let i = 0; i < N - 1; i++) {
+    v1.subVectors(pos[i + 1], pos[i]);
+    const c1 = v1.dot(v1);
+    rL.copy(rmf[i]).addScaledVector(v1, -2 / c1 * v1.dot(rmf[i]));
+    tL.copy(fwd[i]).addScaledVector(v1, -2 / c1 * v1.dot(fwd[i]));
+    v2.subVectors(fwd[i + 1], tL);
+    const c2 = v2.dot(v2);
+    const r = rL.clone();
+    if (c2 > 1e-12) r.addScaledVector(v2, -2 / c2 * v2.dot(rL));
+    rmf.push(r.normalize());
+  }
+
+  // 2. Where the track is upright and not too steep, we know what "up"
+  //    should be: world up, leaned into the turn. Banking comes from how
+  //    fast the heading changes.
+  const ok = i => Math.abs(fwd[i].y) < 0.8 && rmf[i].y > 0;
   const turn = new Float32Array(N);
   for (let i = 0; i < N; i++) {
-    const a = fwd[(i - 5 + N) % N], b = fwd[(i + 5) % N];
-    const ha = Math.atan2(a.x, a.z), hb = Math.atan2(b.x, b.z);
-    let d = hb - ha;
+    const ia = (i - 5 + N) % N, ib = (i + 5) % N;
+    if (!ok(ia) || !ok(ib)) continue;
+    let d = Math.atan2(fwd[ib].x, fwd[ib].z) - Math.atan2(fwd[ia].x, fwd[ia].z);
     if (d > Math.PI) d -= 2 * Math.PI;
     if (d < -Math.PI) d += 2 * Math.PI;
     turn[i] = d / (10 * STEP);
   }
-  const bank = new Float32Array(N);
   const W = 60; // smoothing window, in samples
+  const phi = new Float32Array(N), known = new Uint8Array(N);
+  const tmp = new THREE.Vector3(), want = new THREE.Vector3();
   for (let i = 0; i < N; i++) {
+    if (!ok(i)) continue;
     let sum = 0;
     for (let k = -W; k <= W; k++) sum += turn[(i + k + N) % N];
-    bank[i] = THREE.MathUtils.clamp((sum / (2 * W + 1)) * 9, -0.85, 0.85);
+    const bank = THREE.MathUtils.clamp((sum / (2 * W + 1)) * 9, -0.85, 0.85);
+    want.copy(worldUp).addScaledVector(fwd[i], -fwd[i].y).normalize().applyAxisAngle(fwd[i], -bank);
+    // Signed angle from the RMF up to the wanted up, around forward.
+    phi[i] = Math.atan2(fwd[i].dot(tmp.crossVectors(rmf[i], want)), rmf[i].dot(want));
+    known[i] = 1;
   }
-  const worldUp = new THREE.Vector3(0, 1, 0);
+  // 3. Unwrap that correction angle and fill the gaps (the loop, the steep
+  //    drop) by blending between the known ends.
+  let prev = 0; // sample 0 is in the station, so it is known
+  for (let i = 1; i <= N; i++) {
+    const ii = i % N;
+    if (!known[ii]) continue;
+    let target = phi[ii];
+    while (target - phi[prev] > Math.PI) target -= 2 * Math.PI;
+    while (target - phi[prev] < -Math.PI) target += 2 * Math.PI;
+    if (ii !== 0) phi[ii] = target;
+    const gap = i - prev;
+    for (let k = 1; k < gap; k++) phi[(prev + k) % N] = phi[prev] + (target - phi[prev]) * k / gap;
+    prev = ii;
+  }
+
+  // 4. Scripted heartline rolls.
+  const nearest = p => {
+    const q = new THREE.Vector3(...p);
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < N; i++) { const d = pos[i].distanceToSquared(q); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  const roll = new Float32Array(N);
+  for (const r of ROLLS) {
+    const a = nearest(r.from), b = nearest(r.to);
+    for (let i = a; i <= b; i++) {
+      const t = (i - a) / (b - a);
+      roll[i] = r.turns * Math.PI * 2 * t * t * (3 - 2 * t);
+    }
+  }
+
+  const base = [];
   for (let i = 0; i < N; i++) {
-    const f = fwd[i];
-    const r = new THREE.Vector3().crossVectors(f, worldUp).normalize();
-    const u = new THREE.Vector3().crossVectors(r, f).normalize();
-    // Lean into the turn.
-    u.applyAxisAngle(f, -bank[i]);
-    r.crossVectors(f, u).normalize();
-    up.push(u); right.push(r);
+    const u = rmf[i].clone().applyAxisAngle(fwd[i], phi[i]);
+    base.push(u.clone());
+    if (roll[i]) {
+      u.applyAxisAngle(fwd[i], roll[i]);
+      // Keep the heartline fixed: move the track around it.
+      pos[i].addScaledVector(base[i], HEARTLINE).addScaledVector(u, -HEARTLINE);
+    }
+    up.push(u);
+  }
+  // Rolls moved the track, so re-derive forward there and tidy the frames.
+  for (let i = 0; i < N; i++) {
+    if (roll[i] || roll[(i + 1) % N] || roll[(i - 1 + N) % N]) {
+      fwd[i].subVectors(pos[(i + 1) % N], pos[(i - 1 + N) % N]).normalize();
+    }
+    const r = new THREE.Vector3().crossVectors(fwd[i], up[i]).normalize();
+    up[i].crossVectors(r, fwd[i]).normalize();
+    right.push(r);
   }
 }
 
@@ -226,7 +360,7 @@ function newFrame() {
 let crestS = 0;
 {
   let best = -Infinity;
-  for (let i = 0; i < N * 0.4; i++) if (pos[i].y > best) { best = pos[i].y; crestS = i * STEP; }
+  for (let i = 0; i < N * 0.25; i++) if (pos[i].y > best) { best = pos[i].y; crestS = i * STEP; }
 }
 const LIFT_START = 8;
 
@@ -293,7 +427,7 @@ const fr = newFrame();
   for (let s = 3; s < LENGTH; s += 5) {
     frameAt(s, fr);
     const top = tmpA.copy(fr.p).addScaledVector(fr.u, -0.5);
-    if (top.y > 1.2 && !inStation(s)) cols.push(top.clone());
+    if (top.y > 1.2 && fr.u.y > 0.6 && !inStation(s) && clearBelow(top)) cols.push(top.clone());
   }
   const columns = new THREE.InstancedMesh(colGeo, new THREE.MeshStandardMaterial({ color: '#e9e4d8', roughness: 0.7 }), cols.length);
   const m = new THREE.Matrix4();
@@ -304,6 +438,14 @@ const fr = newFrame();
   });
   columns.castShadow = true;
   scene.add(columns);
+}
+// No column if some other piece of track runs underneath this spot.
+function clearBelow(p) {
+  for (let i = 0; i < N; i += 4) {
+    const q = pos[i];
+    if (q.y < p.y - 1.5 && (q.x - p.x) ** 2 + (q.z - p.z) ** 2 < 4) return false;
+  }
+  return true;
 }
 function inStation(s) { return s < 2 || s > LENGTH - 14; }
 
@@ -472,7 +614,7 @@ viewBtn.addEventListener('click', () => {
 });
 
 let lookYaw = 0, lookPitch = 0, dragging = false, lastX = 0, lastY = 0;
-let orbit = 0.6;
+let orbit = -1.2;
 canvas.addEventListener('pointerdown', e => {
   dragging = true; lastX = e.clientX; lastY = e.clientY;
   canvas.classList.add('dragging');
@@ -501,9 +643,18 @@ function updateCamera(dt) {
     lookYaw *= Math.pow(0.25, dt);
     lookPitch *= Math.pow(0.25, dt);
   }
+  // Widen the view with speed so it feels faster.
+  const fov = view === 0 ? 70 + THREE.MathUtils.clamp((v - 10) * 0.9, 0, 18) : 65;
+  if (Math.abs(camera.fov - fov) > 0.05) {
+    camera.fov += (fov - camera.fov) * (1 - Math.pow(0.05, dt));
+    camera.updateProjectionMatrix();
+  }
   if (view === 0) {
     frameAt(s - 0.6, camFr);
     camera.position.copy(camFr.p).addScaledVector(camFr.u, 1.55);
+    // A little rumble once the train is really moving.
+    const sh = state === 'riding' ? Math.max(0, v - 8) * 0.0018 : 0;
+    camera.position.addScaledVector(camFr.r, (Math.random() - 0.5) * sh).addScaledVector(camFr.u, (Math.random() - 0.5) * sh);
     // Look along the track's frame, then add the drag offset.
     m3.makeBasis(camFr.r, camFr.u, camFr.f.clone().negate());
     q.setFromRotationMatrix(m3);
@@ -511,8 +662,11 @@ function updateCamera(dt) {
     qPitch.setFromAxisAngle(new THREE.Vector3(1, 0, 0), lookPitch);
     camera.quaternion.copy(q).multiply(qYaw).multiply(qPitch);
   } else if (view === 1) {
-    frameAt(s - CAR_GAP, camFr);
-    const behind = tmpA.copy(camFr.p).addScaledVector(camFr.f, -9).add(new THREE.Vector3(0, 5, 0));
+    // Ride along the track a little behind the train, so the camera
+    // follows it through the loop instead of cutting across.
+    frameAt(s - CAR_GAP * CARS - 7, camFr);
+    const behind = tmpA.copy(camFr.p).addScaledVector(camFr.u, 3.5);
+    camera.up.lerp(camFr.u, 1 - Math.pow(0.05, dt)).normalize();
     chasePos.lerp(behind, 1 - Math.pow(0.02, dt));
     camera.position.copy(chasePos);
     frameAt(s + 2, camFr);
@@ -521,10 +675,29 @@ function updateCamera(dt) {
     camera.rotateY(lookYaw);
     camera.rotateX(lookPitch);
   } else {
+    camera.up.set(0, 1, 0);
     if (!dragging) orbit += dt * 0.06;
-    camera.position.set(Math.cos(orbit) * 95 - 12, 48, Math.sin(orbit) * 95 + 18);
-    camera.lookAt(-12, 6, 18);
+    camera.position.set(Math.cos(orbit) * 115 - 30, 55, Math.sin(orbit) * 115 + 18);
+    camera.lookAt(-30, 8, 18);
   }
+}
+
+// G-force felt in the seat: the push of the track along "up",
+// counting both gravity and the curve the train is following.
+const gTmp = new THREE.Vector3();
+let gSmooth = 1;
+function gForce() {
+  if (state !== 'riding') return (gSmooth = 1);
+  const i = Math.floor((((s % LENGTH) + LENGTH) % LENGTH) / STEP) % N;
+  // Curvature of the rider's path (the heartline, above the track).
+  const k = 15, ia = (i - k + N) % N, ib = (i + k) % N;
+  gTmp.copy(pos[ia]).addScaledVector(up[ia], HEARTLINE)
+    .addScaledVector(pos[i], -2).addScaledVector(up[i], -2 * HEARTLINE)
+    .add(pos[ib]).addScaledVector(up[ib], HEARTLINE)
+    .divideScalar((k * STEP) ** 2);
+  const g = (v * v * gTmp.dot(up[i]) + G * up[i].y) / G;
+  gSmooth += (g - gSmooth) * 0.15;
+  return gSmooth;
 }
 
 /* ---------- sizing & loop ---------- */
@@ -550,6 +723,7 @@ function frame(now) {
   frameAt(s, fr);
   speedEl.textContent = Math.round(v * 3.6);
   heightEl.textContent = Math.round(fr.p.y);
+  gEl.textContent = gForce().toFixed(1);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
