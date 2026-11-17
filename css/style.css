@@ -1645,7 +1645,7 @@ body.dragging { user-select: none; }
   /* The window has no fixed height to fill here, so give the embed one. */
   .prototype-frame { flex: none; height: 80vh; }
   /* Playground toys capture touch for play, so keep them short enough to scroll past. */
-  .playground-window .prototype-frame { height: 60vh; }
+  .playground-window .prototype-frame { height: 60vh; height: 60svh; min-height: 240px; }
 
   /* The ad reflows into the page like any other window on mobile; it just
      needs a bit more breathing room and a thumb-sized call to action. */
