@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ball Pit</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #fdf3df;
+    font-family: "Trebuchet MS", Tahoma, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none; /* the pit, not the page, gets the finger */
+  }
+  canvas.diving { cursor: grabbing; }
+
+  .hint {
+    position: absolute;
+    top: 14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #7a5b3a;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    transition: opacity 0.6s;
+  }
+  .hint small { display: block; font-weight: normal; font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .hint.gone { opacity: 0; }
+
+  .toolbar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+  }
+  .toolbar button {
+    font: bold 12px "Trebuchet MS", Tahoma, sans-serif;
+    color: #fff;
+    padding: 5px 11px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.18);
+  }
+  .toolbar button:active { transform: translateY(1px); box-shadow: none; }
+  .toolbar button:focus-visible { outline: 2px dashed #7a5b3a; outline-offset: 2px; }
+  #shake { background: #e8483f; }
+  #more  { background: #2f86d6; }
+</style>
+</head>
+<body>
+<canvas id="pit" aria-label="A ball pit. Move your pointer into it to push the balls around; hold the button down to dive in deeper."></canvas>
+<div class="hint" id="hint">Dive in!<small>move around &middot; hold the mouse button down to go deeper</small></div>
+<div class="toolbar">
+  <button id="more" type="button">+ Balls</button>
+  <button id="shake" type="button">Shake!</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     Ball pit: Verlet physics on a canvas.
+     Each ball stores where it is now and where it was a moment ago,
+     and its velocity is the gap between the two. That's handy here:
+     to push a ball we just move it, and the move turns into velocity.
+     So a fast swipe throws balls and a slow one nudges them.
+
+     The pointer is a big invisible circle (the "diver"). Holding the
+     button down makes it bigger (you go deeper), and letting go gives
+     a small splash.
+     ------------------------------------------------------------------ */
+
+  var canvas = document.getElementById('pit');
+  var ctx = canvas.getContext('2d');
+  var hint = document.getElementById('hint');
+
+  // Classic ball-pit colours: [base, highlight, shadow]
+  var COLORS = [
+    ['#e8483f', '#ff9a8f', '#a3221c'], // red
+    ['#f6c21c', '#fff1a0', '#b98a00'], // yellow
+    ['#2f86d6', '#9ccdff', '#17508c'], // blue
+    ['#3bb54a', '#a6eaa0', '#1d7a2a'], // green
+    ['#f58a1f', '#ffc98f', '#b0560a'], // orange
+    ['#9b5ccf', '#d6b3f5', '#5e2f8a']  // purple
+  ];
+
+  var GRAVITY = 1500;     // px/s²
+  var SUBSTEPS = 4;
+  var ITERATIONS = 2;     // collision passes per substep
+  var DAMPING = 0.996;    // a little air resistance
+  var WALL_BOUNCE = 0.45;
+  var MAX_SPEED = 38;     // px per substep, keeps fast swipes from blowing up the pit
+
+  var W = 0, H = 0, DPR = 1;
+  var baseR = 14;
+  var balls = [];
+  var sprites = [];      // one pre-rendered glossy ball per colour, redrawn on resize
+
+  var diver = { x: -9999, y: -9999, px: -9999, py: -9999, r: 0, target: 0, active: false, down: false };
+
+  /* ---------- sizing ---------- */
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var oldW = W, oldH = H;
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    baseR = Math.max(9, Math.min(20, Math.min(W, H) / 26));
+    buildSprites();
+
+    if (!balls.length) {
+      fill(targetCount());
+    } else {
+      // Keep the balls where they are relative to the floor.
+      var dy = H - oldH;
+      for (var i = 0; i < balls.length; i++) {
+        var b = balls[i];
+        b.x = Math.min(b.x, W - b.r); b.px = Math.min(b.px, W - b.r);
+        b.y += dy; b.py += dy;
+      }
+      var want = targetCount();
+      if (balls.length < want * 0.8) fill(want - balls.length);
+      if (oldW && W * H < oldW * oldH * 0.6) balls.length = Math.min(balls.length, Math.ceil(want * 1.1));
+    }
+  }
+
+  // Roughly 55% of the window full of balls.
+  function targetCount() {
+    var area = W * H * 0.55;
+    var perBall = Math.PI * baseR * baseR / 0.78; // packing density
+    return Math.max(40, Math.min(700, Math.round(area / perBall)));
+  }
+
+  function fill(n, fromTop) {
+    for (var i = 0; i < n; i++) {
+      var r = baseR * (0.88 + Math.random() * 0.24);
+      var x = r + Math.random() * (W - 2 * r);
+      // Start new balls stacked below the floor and above the screen
+      // (y < 0) so they rain in when the page opens.
+      var y = fromTop ? -r - Math.random() * H * 0.6 : H - r - Math.random() * H * 1.1;
+      balls.push({ x: x, y: y, px: x + (Math.random() - 0.5) * 2, py: y, r: r, c: (Math.random() * COLORS.length) | 0 });
+    }
+  }
+
+  function buildSprites() {
+    sprites = COLORS.map(function (c) {
+      var s = Math.ceil(baseR * 1.15 * 2 * DPR) + 4;
+      var off = document.createElement('canvas');
+      off.width = off.height = s;
+      var g = off.getContext('2d');
+      var cx = s / 2, rr = s / 2 - 2;
+      var grad = g.createRadialGradient(cx - rr * 0.35, cx - rr * 0.4, rr * 0.1, cx, cx, rr);
+      grad.addColorStop(0, c[1]);
+      grad.addColorStop(0.45, c[0]);
+      grad.addColorStop(1, c[2]);
+      g.fillStyle = grad;
+      g.beginPath(); g.arc(cx, cx, rr, 0, Math.PI * 2); g.fill();
+      // shine
+      g.fillStyle = 'rgba(255,255,255,0.75)';
+      g.beginPath();
+      g.ellipse(cx - rr * 0.38, cx - rr * 0.42, rr * 0.28, rr * 0.17, -0.6, 0, Math.PI * 2);
+      g.fill();
+      off.scale = s / rr; // drawn size = ball radius * scale
+      return off;
+    });
+  }
+
+  /* ---------- physics ---------- */
+
+  var grid = new Map();
+  function cellKey(cx, cy) { return cx * 73856093 ^ cy * 19349663; }
+
+  function step(dt) {
+    var g = GRAVITY * dt * dt;
+    var i, b, vx, vy, sp;
+
+    // Ease the diver's size toward its target (bigger while held down).
+    diver.r += (diver.target - diver.r) * 0.18;
+
+    for (i = 0; i < balls.length; i++) {
+      b = balls[i];
+      vx = (b.x - b.px) * DAMPING;
+      vy = (b.y - b.py) * DAMPING;
+      sp = vx * vx + vy * vy;
+      if (sp > MAX_SPEED * MAX_SPEED) {
+        sp = MAX_SPEED / Math.sqrt(sp);
+        vx *= sp; vy *= sp;
+      }
+      b.px = b.x; b.py = b.y;
+      b.x += vx;
+      b.y += vy + g;
+    }
+
+    for (var it = 0; it < ITERATIONS; it++) {
+      collideBalls();
+      collideDiver();
+      collideWalls();
+    }
+  }
+
+  function collideBalls() {
+    var cell = baseR * 2.3;
+    grid.clear();
+    var i, j, b, o, k, list;
+    for (i = 0; i < balls.length; i++) {
+      b = balls[i];
+      k = cellKey(Math.floor(b.x / cell), Math.floor(b.y / cell));
+      list = grid.get(k);
+      if (list) list.push(i); else grid.set(k, [i]);
+    }
+    for (i = 0; i < balls.length; i++) {
+      b = balls[i];
+      var gx = Math.floor(b.x / cell), gy = Math.floor(b.y / cell);
+      for (var ox = -1; ox <= 1; ox++) {
+        for (var oy = -1; oy <= 1; oy++) {
+          list = grid.get(cellKey(gx + ox, gy + oy));
+          if (!list) continue;
+          for (var n = 0; n < list.length; n++) {
+            j = list[n];
+            if (j <= i) continue;
+            o = balls[j];
+            var dx = o.x - b.x, dy = o.y - b.y;
+            var min = b.r + o.r;
+            var d2 = dx * dx + dy * dy;
+            if (d2 >= min * min || d2 === 0) continue;
+            var d = Math.sqrt(d2);
+            var push = (min - d) / d * 0.5;
+            dx *= push; dy *= push;
+            b.x -= dx; b.y -= dy;
+            o.x += dx; o.y += dy;
+          }
+        }
+      }
+    }
+  }
+
+  function collideDiver() {
+    if (!diver.active || diver.r < 1) return;
+    for (var i = 0; i < balls.length; i++) {
+      var b = balls[i];
+      var dx = b.x - diver.x, dy = b.y - diver.y;
+      var min = diver.r + b.r;
+      var d2 = dx * dx + dy * dy;
+      if (d2 >= min * min) continue;
+      var d = Math.sqrt(d2) || 0.01;
+      // Shove the ball straight out of the diver. Verlet turns that
+      // shove into velocity on the next step.
+      var k = (min - d) / d;
+      b.x += dx * k;
+      b.y += dy * k;
+    }
+  }
+
+  function collideWalls() {
+    for (var i = 0; i < balls.length; i++) {
+      var b = balls[i], v;
+      if (b.x < b.r) { v = b.x - b.px; b.x = b.r; b.px = b.x + v * WALL_BOUNCE; }
+      else if (b.x > W - b.r) { v = b.x - b.px; b.x = W - b.r; b.px = b.x + v * WALL_BOUNCE; }
+      if (b.y > H - b.r) {
+        v = b.y - b.py;
+        b.y = H - b.r;
+        b.py = b.y + v * WALL_BOUNCE;
+        b.px = b.x - (b.x - b.px) * 0.9; // floor friction
+      }
+      // No ceiling: balls can fly up off-screen and fall back in.
+    }
+  }
+
+  /* ---------- drawing ---------- */
+
+  function draw() {
+    // Back wall: soft stripes, like a padded playroom.
+    ctx.fillStyle = '#fdf3df';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(246, 194, 28, 0.13)';
+    var stripe = 46;
+    for (var x = -H; x < W; x += stripe * 2) {
+      ctx.beginPath();
+      ctx.moveTo(x, H); ctx.lineTo(x + stripe, H);
+      ctx.lineTo(x + stripe + H, 0); ctx.lineTo(x + H, 0);
+      ctx.fill();
+    }
+
+    for (var i = 0; i < balls.length; i++) {
+      var b = balls[i];
+      if (b.y < -b.r) continue;
+      var s = sprites[b.c];
+      var size = b.r * s.scale;
+      ctx.drawImage(s, b.x - size / 2, b.y - size / 2, size, size);
+    }
+
+    // The padded rim along the bottom, in front of the balls.
+    var rim = Math.max(10, H * 0.035);
+    var grad = ctx.createLinearGradient(0, H - rim, 0, H);
+    grad.addColorStop(0, '#4fa8f0');
+    grad.addColorStop(1, '#1f5f9e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, H - rim, W, rim);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fillRect(0, H - rim, W, 2);
+  }
+
+  /* ---------- input ---------- */
+
+  function idleRadius() { return baseR * 3.2; }
+  function diveRadius() { return baseR * 6; }
+
+  function pointerPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  function dismissHint() {
+    if (!hint.classList.contains('gone')) hint.classList.add('gone');
+  }
+
+  canvas.addEventListener('pointermove', function (e) {
+    var p = pointerPos(e);
+    if (!diver.active) { diver.px = p.x; diver.py = p.y; diver.r = 0; }
+    diver.x = p.x; diver.y = p.y;
+    diver.active = true;
+    diver.target = diver.down ? diveRadius() : idleRadius();
+    dismissHint();
+  });
+
+  canvas.addEventListener('pointerdown', function (e) {
+    var p = pointerPos(e);
+    diver.x = p.x; diver.y = p.y;
+    diver.active = true;
+    diver.down = true;
+    diver.target = diveRadius();
+    canvas.classList.add('diving');
+    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+    dismissHint();
+  });
+
+  function release(e) {
+    if (diver.down) splash(diver.x, diver.y, diver.r * 1.6, 9);
+    diver.down = false;
+    canvas.classList.remove('diving');
+    // A finger lifting means the diver leaves the pit; a mouse stays.
+    if (e && e.pointerType !== 'mouse') leave();
+    else diver.target = idleRadius();
+  }
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+
+  function leave() {
+    diver.active = false;
+    diver.down = false;
+    diver.target = 0;
+    diver.r = 0;
+    canvas.classList.remove('diving');
+  }
+  canvas.addEventListener('pointerleave', function () { if (!diver.down) leave(); });
+
+  // Pop balls outward (and a bit up) from a point.
+  function splash(x, y, radius, strength) {
+    for (var i = 0; i < balls.length; i++) {
+      var b = balls[i];
+      var dx = b.x - x, dy = b.y - y;
+      var d = Math.sqrt(dx * dx + dy * dy) || 1;
+      if (d > radius) continue;
+      var f = (1 - d / radius) * strength;
+      b.px -= dx / d * f;
+      b.py -= (dy / d - 0.6) * f;
+    }
+  }
+
+  document.getElementById('shake').addEventListener('click', function () {
+    for (var i = 0; i < balls.length; i++) {
+      var b = balls[i];
+      b.px -= (Math.random() - 0.5) * 16;
+      b.py += 6 + Math.random() * 14; // upward kick
+    }
+    dismissHint();
+  });
+
+  document.getElementById('more').addEventListener('click', function () {
+    if (balls.length < 900) fill(Math.round(targetCount() * 0.2), true);
+    dismissHint();
+  });
+
+  /* ---------- loop ---------- */
+
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 1000, 1 / 30); // don't explode after a tab switch
+    last = now;
+    var sub = dt / SUBSTEPS;
+    for (var s = 0; s < SUBSTEPS; s++) step(sub);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

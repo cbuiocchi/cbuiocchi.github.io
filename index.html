@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IM+Fell+English:ital@0;1&family=Luckiest+Guy&family=Fredoka:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="css/xp.css">
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 
@@ -52,6 +52,10 @@
     <button class="desktop-icon" data-window="win-prototypes">
       <img src="img/icon-folder.svg" alt="">
       <span>Prototypes</span>
+    </button>
+    <button class="desktop-icon" data-window="win-playground">
+      <img src="img/icon-playground.svg" alt="">
+      <span>Playground</span>
     </button>
     <button class="desktop-icon" data-window="win-resume">
       <img src="img/icon-resume.svg" alt="">
@@ -132,6 +136,7 @@
             <li><a href="#" data-window="win-about"><strong>About Me</strong></a> covers who I am and what I care about.</li>
             <li><a href="#" data-window="win-deckborn"><strong>Deckborn</strong></a> and <a href="#" data-window="win-wrongbird"><strong>Wrong Bird</strong></a> are my two games currently in production. Each one opens a mini site with everything on one page: trailer, devlogs, design doc, and screenshots.</li>
             <li><a href="#" data-window="win-prototypes"><strong>Prototypes</strong></a> holds smaller experiments and case studies.</li>
+            <li><a href="#" data-window="win-playground"><strong>Playground</strong></a> is a box of little web toys to mess around with.</li>
             <li><a href="#" data-window="win-resume"><strong>Resume</strong></a> has my full skills, projects, and experience.</li>
             <li><a href="#" data-window="win-contact"><strong>Contact</strong></a> is where to find me and how to reach out.</li>
           </ul>
@@ -1082,6 +1087,52 @@
     </div>
   </section>
 
+  <!-- ===== Playground folder =====
+       Little interactive web toys. Same setup as Prototypes: a folder of
+       thumbnail tiles, and each tile opens its own window that embeds a
+       self-contained page from playground/<name>/ in an iframe (so closing
+       the window stops its animation loop). -->
+  <section class="xp-window folder-window" id="win-playground" data-title="Playground" data-width="560" data-height="360">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-playground.svg" alt="">
+        Playground
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body site-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> C:\Documents and Settings\Clay\Desktop\Playground</div>
+      <div class="folder-items">
+        <button class="folder-item" data-window="win-ball-pit">
+          <img src="playground/ball-pit/thumb.jpg" alt="">
+          <span>Ball Pit</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="xp-window prototype-window playground-window" id="win-ball-pit" data-title="Ball Pit" data-width="720" data-height="520">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <img class="title-bar-icon" src="img/icon-playground.svg" alt="">
+        Ball Pit &mdash; Playground
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" data-action="minimize"></button>
+        <button aria-label="Maximize" data-action="maximize"></button>
+        <button aria-label="Close" data-action="close"></button>
+      </div>
+    </div>
+    <div class="window-body site-body">
+      <div class="explorer-bar"><span class="explorer-label">Address</span> C:\Documents and Settings\Clay\Desktop\Playground\Ball Pit</div>
+      <iframe class="prototype-frame" data-src="playground/ball-pit/index.html" title="Ball pit toy"></iframe>
+    </div>
+  </section>
+
   <!-- ===== Contact window ===== -->
   <section class="xp-window" id="win-contact" data-title="Contact">
     <div class="title-bar">
@@ -1125,6 +1176,7 @@
         <li><button data-window="win-deckborn"><img src="img/icon-deckborn.svg?v=2" alt="">Deckborn</button></li>
         <li><button data-window="win-wrongbird"><img src="img/icon-wrongbird.svg?v=2" alt="">Wrong Bird</button></li>
         <li><button data-window="win-prototypes"><img src="img/icon-folder.svg" alt="">Prototypes</button></li>
+        <li><button data-window="win-playground"><img src="img/icon-playground.svg" alt="">Playground</button></li>
         <li><button data-window="win-resume"><img src="img/icon-resume.svg" alt="">Resume</button></li>
         <li><button data-window="win-contact"><img src="img/icon-contact.svg" alt="">Contact</button></li>
       </ul>

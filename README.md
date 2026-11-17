@@ -15,6 +15,7 @@ js/main.js      The window manager. One IIFE, no framework. Handles: opening/clo
                 menu, the clock, and the boot-screen intro.
 img/            Desktop icons (SVG, hand-drawn to match XP style) + downloaded itch.io screenshots.
 prototypes/     Small projects and prototypes, one self-contained folder each (see its README).
+playground/     Little interactive web toys (the ball pit, ...), one folder each (see its README).
 ```
 
 ## How a window works
@@ -75,6 +76,16 @@ To add one:
 3. Add a `<button class="folder-item" data-window="win-…">` tile to `#win-prototypes`, with a thumbnail image and name.
 
 Styling lives under `PROTOTYPES FOLDER` in `css/style.css`.
+
+## The Playground folder
+
+The **Playground** desktop icon opens `#win-playground`, a folder of web toys that works just like Prototypes: each `.folder-item` tile opens its toy's own window (e.g. `#win-ball-pit`), which embeds `playground/<name>/index.html` in an `<iframe class="prototype-frame" data-src="…">`. Closing the window unloads the iframe, so the toy's animation loop stops.
+
+To add one:
+
+1. Add the toy's folder under `playground/` with an `index.html` and a `thumb.jpg` (see `playground/README.md`).
+2. Copy the `#win-ball-pit` `<section>` in `index.html`, give it a new id, and point its iframe's `data-src` at the new folder. Keep the `playground-window` class: on mobile it makes the frame shorter (60vh), because toys capture touch and visitors still need room to scroll past.
+3. Add a `<button class="folder-item" data-window="win-…">` tile to `#win-playground`.
 
 ## The Deckborn pop-up ad
 
