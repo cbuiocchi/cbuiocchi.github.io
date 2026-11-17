@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skee Ball</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #1d1240;
+    font-family: "Trebuchet MS", Tahoma, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none; /* the lane, not the page, gets the swipe */
+  }
+  canvas.holding { cursor: grabbing; }
+
+  .hud {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    pointer-events: none;
+    color: #fff;
+  }
+  .panel {
+    background: rgba(10, 4, 30, 0.72);
+    border: 2px solid #ffcf3f;
+    border-radius: 10px;
+    padding: 4px 10px;
+    text-align: center;
+    min-width: 58px;
+  }
+  .panel b { display: block; font-size: 20px; line-height: 1.1; color: #ffe27a; font-variant-numeric: tabular-nums; }
+  .panel span { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; }
+  .balls { display: flex; gap: 3px; justify-content: center; margin-top: 3px; height: 10px; }
+  .balls i { width: 9px; height: 9px; border-radius: 50%; background: #ff7a3d; box-shadow: inset -2px -2px 0 rgba(0,0,0,0.25); }
+  .balls i.used { background: rgba(255,255,255,0.18); box-shadow: none; }
+
+  .hint {
+    position: absolute;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    pointer-events: none;
+    transition: opacity 0.6s;
+    padding: 0 12px;
+  }
+  .hint small { display: block; font-weight: normal; font-size: 12px; margin-top: 2px; opacity: 0.9; }
+  .hint.gone { opacity: 0; }
+  .hint .touch { display: none; }
+  @media (pointer: coarse) {
+    .hint .mouse { display: none; }
+    .hint .touch { display: block; }
+  }
+
+  .over {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 4, 30, 0.6);
+  }
+  .over.show { display: flex; }
+  .card {
+    background: #2a1a5e;
+    border: 3px solid #ffcf3f;
+    border-radius: 16px;
+    padding: 18px 26px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    max-width: calc(100% - 48px);
+  }
+  .card h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; color: #ffcf3f; }
+  .card .big { font-size: 44px; font-weight: bold; line-height: 1.1; color: #fff; }
+  .card p { margin: 4px 0 14px; font-size: 13px; opacity: 0.9; }
+  .card button {
+    font: bold 15px "Trebuchet MS", Tahoma, sans-serif;
+    color: #fff;
+    background: #e8483f;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    padding: 9px 22px;
+    min-height: 44px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+    touch-action: manipulation;
+  }
+  .card button:active { transform: translateY(2px); box-shadow: none; }
+  .card button:focus-visible { outline: 2px dashed #fff; outline-offset: 3px; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<canvas id="game" tabindex="0" aria-label="Skee ball lane. Swipe or flick the ball up the lane to roll it into the rings. Keyboard: arrow keys to aim, hold space to charge and let go to roll."></canvas>
+
+<div class="hud">
+  <div class="panel"><b id="score">0</b><span>Score</span></div>
+  <div class="panel"><b id="ballsLeft">9</b><div class="balls" id="ballDots"></div></div>
+  <div class="panel"><b id="best">0</b><span>Best</span></div>
+</div>
+
+<div class="hint" id="hint">Flick the ball up the lane!<small class="mouse">drag the ball up and let go &middot; or &larr; &rarr; to aim, hold space to roll</small><small class="touch">swipe up from the ball &middot; a softer roll lands higher than you think</small></div>
+
+<div class="over" id="over">
+  <div class="card">
+    <h2>Game over</h2>
+    <div class="big" id="final">0</div>
+    <p id="finalNote">points</p>
+    <button id="again" type="button">Play again</button>
+  </div>
+</div>
+
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     Skee ball, drawn on a 2D canvas with a small perspective camera.
+
+     The world is in metres. x runs across the lane, y is up, z runs
+     away from the player. The ball rolls up the lane (y = 0), climbs
+     the ramp, leaves it as a projectile, and either lands on the
+     tilted target board or bounces off the back wall first. Where it
+     touches the board decides the score.
+
+     The board is described in its own 2D coordinates (u across, v up
+     the slope from its bottom edge), so the rings are plain circles.
+     ------------------------------------------------------------------ */
+
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+
+  // ---- layout (metres) ----
+  var LANE_W = 0.35;          // half width
+  var BALL_R = 0.045;
+  var START_Z = 0.16;         // where the ball sits before a roll
+  var RAMP_Z0 = 2.25, RAMP_Z1 = 2.45, RAMP_H = 0.16;
+  var RAMP_ANGLE = Math.atan(RAMP_H / (RAMP_Z1 - RAMP_Z0));
+  var BOARD_Z = 2.55;         // bottom edge of the target board
+  var BOARD_TILT = 28 * Math.PI / 180;
+  var BOARD_L = 0.72;         // length up the slope
+  var BACK_Z = BOARD_Z + BOARD_L * Math.cos(BOARD_TILT);
+  var BACK_TOP = BOARD_L * Math.sin(BOARD_TILT) + 0.42;
+  var RING_V = 0.45;          // centre of the rings, up the slope
+  var RINGS = [               // [radius, points] inner to outer
+    [0.055, 50], [0.11, 40], [0.165, 30], [0.22, 20], [0.28, 10]
+  ];
+  var CORNER = { u: 0.27, v: 0.64, r: 0.045, pts: 100 };
+
+  var GRAVITY = 9.8;
+  var LANE_DRAG = 0.25;       // m/s² rolling resistance
+  var BALLS_PER_GAME = 9;
+
+  // ---- camera ----
+  var CAM = { y: 2.3, z: -3.4, pitch: 22 * Math.PI / 180 }; // far back + narrow view, so the board isn't tiny
+  var cosP = Math.cos(CAM.pitch), sinP = Math.sin(CAM.pitch);
+  var W = 0, H = 0, DPR = 1, S = 1, OX = 0, OY = 0;
+
+  function rawProject(x, y, z) {
+    var dy = y - CAM.y, dz = z - CAM.z;
+    var yc = dy * cosP + dz * sinP;
+    var zc = dz * cosP - dy * sinP;
+    return { x: x / zc, y: -yc / zc, d: zc };
+  }
+  function P(x, y, z) {
+    var p = rawProject(x, y, z);
+    return { x: OX + p.x * S, y: OY + p.y * S, k: S / p.d }; // k: px per metre at that depth
+  }
+  function boardPoint(u, v) {
+    return P(u, v * Math.sin(BOARD_TILT), BOARD_Z + v * Math.cos(BOARD_TILT));
+  }
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+
+    // Fit the whole machine (lane corners up to the top of the back wall).
+    var pts = [
+      rawProject(-LANE_W - 0.06, 0, 0), rawProject(LANE_W + 0.06, 0, 0),
+      rawProject(-LANE_W, BACK_TOP, BACK_Z), rawProject(LANE_W, BACK_TOP, BACK_Z)
+    ];
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    pts.forEach(function (p) {
+      minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    });
+    var topPad = 64, botPad = 10; // room for the HUD
+    S = Math.min((W - 16) / (maxX - minX), (H - topPad - botPad) / (maxY - minY));
+    OX = W / 2 - (minX + maxX) / 2 * S;
+    OY = topPad + (H - topPad - botPad - (maxY - minY) * S) / 2 - minY * S;
+    buildStatic();
+  }
+
+  /* ---------- game state ---------- */
+
+  var score = 0, ballsLeft = BALLS_PER_GAME;
+  var best = 0;
+  try { best = +localStorage.getItem('skeeball-best') || 0; } catch (e) {}
+
+  // phase: ready | lane | ramp | air | settle | sink | done
+  var ball = { x: 0, y: 0, z: START_Z, vx: 0, vy: 0, vz: 0, phase: 'ready', t: 0, spin: 0 };
+  var settle = null;      // { u0, v0, u1, v1, pts }
+  var popups = [];
+  var flash = 0;          // board light flash on a big score
+  var gameOver = false;
+
+  var elScore = document.getElementById('score');
+  var elBalls = document.getElementById('ballsLeft');
+  var elDots = document.getElementById('ballDots');
+  var elBest = document.getElementById('best');
+  var elHint = document.getElementById('hint');
+  var elOver = document.getElementById('over');
+  var elLive = document.getElementById('live');
+
+  function updateHud() {
+    elScore.textContent = score;
+    elBest.textContent = best;
+    elBalls.textContent = ballsLeft;
+    var html = '';
+    for (var i = 0; i < BALLS_PER_GAME; i++) html += '<i' + (i >= ballsLeft ? ' class="used"' : '') + '></i>';
+    elDots.innerHTML = html;
+  }
+
+  function resetBall() {
+    ball.x = clamp(ball.aimX || 0, -LANE_W + BALL_R, LANE_W - BALL_R);
+    ball.y = 0; ball.z = START_Z;
+    ball.vx = ball.vy = ball.vz = 0;
+    ball.phase = ballsLeft > 0 ? 'ready' : 'done';
+    ball.t = 0;
+    ball.hitBack = false;
+    if (ball.phase === 'done') endGame();
+  }
+
+  function newGame() {
+    score = 0; ballsLeft = BALLS_PER_GAME; gameOver = false;
+    popups.length = 0;
+    elOver.classList.remove('show');
+    ball.aimX = 0;
+    resetBall();
+    updateHud();
+    canvas.focus({ preventScroll: true });
+  }
+
+  function endGame() {
+    if (gameOver) return;
+    gameOver = true;
+    var isBest = score > best;
+    if (isBest) {
+      best = score;
+      try { localStorage.setItem('skeeball-best', best); } catch (e) {}
+    }
+    updateHud();
+    document.getElementById('final').textContent = score;
+    var tickets = Math.floor(score / 30);
+    document.getElementById('finalNote').textContent =
+      (isBest && score > 0 ? 'New best! ' : '') + 'points · ' + tickets + ' ticket' + (tickets === 1 ? '' : 's');
+    setTimeout(function () { elOver.classList.add('show'); document.getElementById('again').focus({ preventScroll: true }); }, 600);
+  }
+
+  document.getElementById('again').addEventListener('click', newGame);
+
+  function roll(speed, vx) {
+    if (ball.phase !== 'ready' || gameOver) return;
+    ball.vz = clamp(speed, 0, 7.5);
+    ball.vx = clamp(vx, -1.2, 1.2);
+    ball.phase = 'lane';
+    ballsLeft--;
+    updateHud();
+    elHint.classList.add('gone');
+  }
+
+  /* ---------- physics ---------- */
+
+  function step(dt) {
+    var b = ball;
+    b.t += dt;
+    if (b.phase === 'lane' || b.phase === 'ramp' || b.phase === 'air') {
+      b.spin += Math.hypot(b.vx, b.vz, b.vy) * dt / BALL_R;
+      b.x += b.vx * dt;
+      // side rails
+      if (b.x < -LANE_W + BALL_R) { b.x = -LANE_W + BALL_R; b.vx = Math.abs(b.vx) * 0.55; }
+      if (b.x > LANE_W - BALL_R) { b.x = LANE_W - BALL_R; b.vx = -Math.abs(b.vx) * 0.55; }
+    }
+
+    if (b.phase === 'lane') {
+      b.vz -= (b.vz > 0 ? 1 : -1) * LANE_DRAG * dt;
+      b.z += b.vz * dt;
+      b.y = 0;
+      if (b.vz > 0 && b.z >= RAMP_Z0) b.phase = 'ramp';
+      if (b.vz <= 0 && b.z <= START_Z + 0.3) { softRoll(); }
+    } else if (b.phase === 'ramp') {
+      // Speed along the ramp, losing some to gravity on the way up.
+      var sp = b.vz / Math.cos(RAMP_ANGLE);
+      sp -= GRAVITY * Math.sin(RAMP_ANGLE) * dt;
+      b.vz = sp * Math.cos(RAMP_ANGLE);
+      b.z += b.vz * dt;
+      if (b.z < RAMP_Z0) { b.phase = 'lane'; b.y = 0; return; } // rolled back down
+      b.y = (b.z - RAMP_Z0) * Math.tan(RAMP_ANGLE);
+      if (b.z >= RAMP_Z1) {
+        b.phase = 'air';
+        b.vy = sp * Math.sin(RAMP_ANGLE);
+        b.vz = sp * Math.cos(RAMP_ANGLE);
+        b.y = RAMP_H;
+      }
+    } else if (b.phase === 'air') {
+      b.vy -= GRAVITY * dt;
+      b.z += b.vz * dt;
+      b.y += b.vy * dt;
+      if (b.z > BACK_Z - BALL_R) {
+        // Off the back wall: a dead, slightly random bounce.
+        b.z = BACK_Z - BALL_R;
+        b.vz = -Math.abs(b.vz) * (0.08 + Math.random() * 0.22);
+        b.vx = b.vx * 0.5 + (Math.random() - 0.5) * 0.6;
+        b.hitBack = true;
+      }
+      if (b.z < RAMP_Z1 && b.vz < 0) b.vz = 0.2; // the cage stops it bouncing back down the lane
+      if (b.z >= BOARD_Z) {
+        var by = (b.z - BOARD_Z) * Math.tan(BOARD_TILT);
+        if (b.y - BALL_R <= by) land();
+      } else if (b.y < -0.03) {
+        score0(b.hitBack ? 'Too hard!' : '0');
+      }
+    } else if (b.phase === 'settle') {
+      settle.t += dt / 0.28;
+      var e = Math.min(1, settle.t), s = 1 - Math.pow(1 - e, 3);
+      var u = settle.u0 + (settle.u1 - settle.u0) * s;
+      var v = settle.v0 + (settle.v1 - settle.v0) * s;
+      b.x = u; b.z = BOARD_Z + v * Math.cos(BOARD_TILT);
+      b.y = v * Math.sin(BOARD_TILT) + BALL_R + Math.sin(e * Math.PI) * 0.025;
+      if (e >= 1) { b.phase = 'sink'; b.t = 0; award(settle.pts, settle.u1, settle.v1); }
+    } else if (b.phase === 'sink') {
+      if (b.t > 0.75) resetBall();
+    }
+  }
+
+  function softRoll() {
+    // Didn't make it up the ramp: it rolls back to you and the ball is gone.
+    ball.phase = 'sink';
+    ball.t = 0.2;
+    popup('Too soft!', P(ball.x, 0.1, ball.z + 0.3), '#ffffff');
+    elLive.textContent = 'Too soft. No points.';
+  }
+
+  function score0(label) {
+    ball.phase = 'sink'; ball.t = 0;
+    popup(label, P(ball.x, 0.05, BOARD_Z), '#cfc6ff');
+    elLive.textContent = 'Gutter. No points.';
+  }
+
+  function land() {
+    var b = ball;
+    var u = b.x;
+    var v = (b.z - BOARD_Z) / Math.cos(BOARD_TILT);
+    // A little bounce on impact: some of the momentum carries on up
+    // the slope, plus a touch of rattle.
+    var along = b.vz * Math.cos(BOARD_TILT) + b.vy * Math.sin(BOARD_TILT);
+    var u1 = u + b.vx * 0.05 + (Math.random() - 0.5) * 0.03;
+    var v1 = v + along * 0.025 + (Math.random() - 0.5) * 0.03;
+    u1 = clamp(u1, -LANE_W + BALL_R, LANE_W - BALL_R);
+    v1 = clamp(v1, 0, BOARD_L - BALL_R);
+    var pts = pointsAt(u1, v1);
+    settle = { u0: u, v0: v, u1: u1, v1: v1, pts: pts, t: 0 };
+    b.phase = 'settle';
+  }
+
+  function pointsAt(u, v) {
+    var cu = Math.abs(u) - CORNER.u, cv = v - CORNER.v;
+    if (cu * cu + cv * cv < Math.pow(CORNER.r + 0.01, 2)) return CORNER.pts;
+    var d = Math.hypot(u, v - RING_V);
+    for (var i = 0; i < RINGS.length; i++) if (d < RINGS[i][0]) return RINGS[i][1];
+    return 0;
+  }
+
+  function award(pts, u, v) {
+    score += pts;
+    updateHud();
+    var p = boardPoint(u, v);
+    var col = pts >= 100 ? '#ff5edb' : pts >= 50 ? '#ffe27a' : pts > 0 ? '#ffffff' : '#cfc6ff';
+    popup(pts ? '+' + pts : '0', p, col, pts >= 50);
+    if (pts >= 40) flash = 1;
+    elLive.textContent = pts + ' points. Score ' + score + '.';
+  }
+
+  function popup(text, p, color, big) {
+    popups.push({ text: text, x: p.x, y: p.y, color: color, big: !!big, t: 0 });
+  }
+
+  /* ---------- drawing ---------- */
+
+  var bg = null; // cached background (cabinet + lane + board), rebuilt on resize
+
+  function poly(c, pts) {
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
+    c.closePath();
+  }
+
+  function boardCircle(c, u0, v0, r, n) {
+    n = n || 48;
+    c.beginPath();
+    for (var i = 0; i <= n; i++) {
+      var a = i / n * Math.PI * 2;
+      var p = boardPoint(u0 + Math.cos(a) * r, v0 + Math.sin(a) * r);
+      if (i === 0) c.moveTo(p.x, p.y); else c.lineTo(p.x, p.y);
+    }
+    c.closePath();
+  }
+
+  function buildStatic() {
+    bg = document.createElement('canvas');
+    bg.width = canvas.width; bg.height = canvas.height;
+    var c = bg.getContext('2d');
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    // Arcade room
+    var g = c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#2b1660');
+    g.addColorStop(1, '#120a2c');
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+    // carpet confetti
+    var seed = 7;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    var cols = ['#ff5edb', '#3fd0ff', '#ffe27a', '#7dff8a'];
+    for (var i = 0; i < W * H / 900; i++) {
+      c.fillStyle = cols[i % 4];
+      c.globalAlpha = 0.18;
+      var x = rnd() * W, y = rnd() * H, s = 2 + rnd() * 3;
+      c.fillRect(x, y, s, s * 0.6);
+    }
+    c.globalAlpha = 1;
+
+    var L0 = P(-LANE_W, 0, 0), R0 = P(LANE_W, 0, 0);
+    var Lr = P(-LANE_W, 0, RAMP_Z0), Rr = P(LANE_W, 0, RAMP_Z0);
+
+    // Cabinet sides (outside the lane)
+    var rail = 0.06;
+    c.fillStyle = '#e8483f';
+    poly(c, [P(-LANE_W - rail, 0, 0), L0, P(-LANE_W, 0.1, BACK_Z), P(-LANE_W - rail, 0.1, BACK_Z)]); c.fill();
+    poly(c, [P(LANE_W + rail, 0, 0), R0, P(LANE_W, 0.1, BACK_Z), P(LANE_W + rail, 0.1, BACK_Z)]); c.fill();
+
+    // Lane (wood planks)
+    var lg = c.createLinearGradient(0, L0.y, 0, Lr.y);
+    lg.addColorStop(0, '#e0a868');
+    lg.addColorStop(1, '#a8723e');
+    c.fillStyle = lg;
+    poly(c, [L0, R0, Rr, Lr]); c.fill();
+    c.strokeStyle = 'rgba(90, 50, 20, 0.35)';
+    c.lineWidth = 1;
+    for (var k = 1; k < 7; k++) {
+      var xx = -LANE_W + k * (LANE_W * 2 / 7);
+      var a = P(xx, 0, 0), b = P(xx, 0, RAMP_Z0);
+      c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
+    }
+    // foul line + arrows
+    c.strokeStyle = 'rgba(255,255,255,0.7)';
+    c.lineWidth = Math.max(1.5, P(0, 0, 0.35).k * 0.012);
+    var f1 = P(-LANE_W, 0, 0.35), f2 = P(LANE_W, 0, 0.35);
+    c.beginPath(); c.moveTo(f1.x, f1.y); c.lineTo(f2.x, f2.y); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,0.35)';
+    [-0.18, 0, 0.18].forEach(function (ax) {
+      poly(c, [P(ax, 0, 1.2), P(ax - 0.035, 0, 1.05), P(ax + 0.035, 0, 1.05)]); c.fill();
+    });
+
+    // Ramp
+    var rl0 = Lr, rr0 = Rr, rl1 = P(-LANE_W, RAMP_H, RAMP_Z1), rr1 = P(LANE_W, RAMP_H, RAMP_Z1);
+    var rg = c.createLinearGradient(0, rl0.y, 0, rl1.y);
+    rg.addColorStop(0, '#9a6232');
+    rg.addColorStop(1, '#d99a58');
+    c.fillStyle = rg;
+    poly(c, [rl0, rr0, rr1, rl1]); c.fill();
+    c.strokeStyle = '#ffe27a';
+    c.lineWidth = Math.max(1.5, rl1.k * 0.012);
+    c.beginPath(); c.moveTo(rl1.x, rl1.y); c.lineTo(rr1.x, rr1.y); c.stroke();
+
+    // Gap between ramp and board (the 0 gutter)
+    c.fillStyle = '#140a24';
+    poly(c, [rl1, rr1, P(LANE_W, 0, BOARD_Z), P(-LANE_W, 0, BOARD_Z)]); c.fill();
+
+    // Target board
+    var b00 = boardPoint(-LANE_W, 0), b10 = boardPoint(LANE_W, 0);
+    var b11 = boardPoint(LANE_W, BOARD_L), b01 = boardPoint(-LANE_W, BOARD_L);
+    c.save();
+    poly(c, [b00, b10, b11, b01]);
+    c.fillStyle = '#2a175a';
+    c.fill();
+    c.clip();
+    var ringCols = ['#e8483f', '#2f86d6', '#3bb54a', '#f58a1f', '#9b5ccf'];
+    for (var r = RINGS.length - 1; r >= 0; r--) {
+      var rad = RINGS[r][0];
+      // raised lip
+      boardCircle(c, 0, RING_V, rad);
+      c.fillStyle = '#f6efe0';
+      c.fill();
+      boardCircle(c, 0, RING_V, rad - 0.012);
+      c.fillStyle = ringCols[r];
+      c.fill();
+      // the cup's dark inner shadow at the far side
+      boardCircle(c, 0, RING_V + 0.006, rad - 0.022);
+      c.fillStyle = 'rgba(0,0,0,0.22)';
+      c.fill();
+      boardCircle(c, 0, RING_V, rad - 0.022);
+      c.fillStyle = ringCols[r];
+      c.fill();
+    }
+    boardCircle(c, 0, RING_V, 0.03);
+    c.fillStyle = '#0c0618';
+    c.fill();
+    // Corner 100 holes
+    [-1, 1].forEach(function (sx) {
+      boardCircle(c, sx * CORNER.u, CORNER.v, CORNER.r + 0.01);
+      c.fillStyle = '#f6efe0'; c.fill();
+      boardCircle(c, sx * CORNER.u, CORNER.v, CORNER.r);
+      c.fillStyle = '#ff5edb'; c.fill();
+      boardCircle(c, sx * CORNER.u, CORNER.v, CORNER.r * 0.55);
+      c.fillStyle = '#0c0618'; c.fill();
+    });
+    c.restore();
+
+    // Ring labels
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    for (r = 0; r < RINGS.length; r++) {
+      var inner = r ? RINGS[r - 1][0] : 0.03;
+      var mid = (RINGS[r][0] + inner) / 2;
+      // Numbers go across the rings, alternating sides, where the bands
+      // aren't squashed by the board's tilt.
+      var side = r % 2 ? 1 : -1;
+      var lp = boardPoint(side * mid, RING_V);
+      var band = (RINGS[r][0] - inner) * lp.k;
+      var size = Math.min(lp.k * 0.05, band * 0.95);
+      if (size >= 6) labelText(c, String(RINGS[r][1]), lp.x, lp.y, size);
+    }
+    [-1, 1].forEach(function (sx) {
+      var lp = boardPoint(sx * CORNER.u, CORNER.v - CORNER.r - 0.03);
+      labelText(c, '100', lp.x, lp.y, Math.max(8, lp.k * 0.034));
+    });
+
+    // Back wall + marquee
+    var w0 = P(-LANE_W - rail, BOARD_L * Math.sin(BOARD_TILT), BACK_Z);
+    var w1 = P(LANE_W + rail, BOARD_L * Math.sin(BOARD_TILT), BACK_Z);
+    var w2 = P(LANE_W + rail, BACK_TOP, BACK_Z), w3 = P(-LANE_W - rail, BACK_TOP, BACK_Z);
+    var wg = c.createLinearGradient(0, w3.y, 0, w0.y);
+    wg.addColorStop(0, '#ff5edb');
+    wg.addColorStop(1, '#8a2bd1');
+    c.fillStyle = wg;
+    poly(c, [w0, w1, w2, w3]); c.fill();
+    var mh = w0.y - w3.y;
+    c.fillStyle = '#fff';
+    var mw = w1.x - w0.x;
+    c.font = 'bold ' + Math.round(Math.min(mh * 0.34, mw * 0.11)) + 'px "Trebuchet MS", Tahoma, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('ROLL & SCORE', (w0.x + w1.x) / 2, w3.y + mh * 0.5);
+  }
+
+  function labelText(c, s, x, y, size) {
+    c.font = 'bold ' + Math.round(size) + 'px "Trebuchet MS", Tahoma, sans-serif';
+    c.lineWidth = Math.max(2, size * 0.22);
+    c.strokeStyle = 'rgba(0,0,0,0.55)';
+    c.strokeText(s, x, y);
+    c.fillStyle = '#fff';
+    c.fillText(s, x, y);
+  }
+
+  function drawBall() {
+    var b = ball;
+    if (b.phase === 'done') return;
+    var alpha = 1, scale = 1;
+    if (b.phase === 'sink') {
+      var e = Math.min(1, b.t / 0.3);
+      alpha = 1 - e; scale = 1 - e * 0.6;
+      if (alpha <= 0) return;
+    }
+    // shadow on lane / board
+    var groundY = 0;
+    if (b.z >= BOARD_Z) groundY = (b.z - BOARD_Z) * Math.tan(BOARD_TILT);
+    else if (b.z >= RAMP_Z0 && b.z <= RAMP_Z1) groundY = (b.z - RAMP_Z0) * Math.tan(RAMP_ANGLE);
+    else if (b.z > RAMP_Z1) groundY = -0.05;
+    var sp = P(b.x, groundY, b.z);
+    var lift = Math.max(0, b.y - groundY);
+    ctx.globalAlpha = alpha * Math.max(0.1, 0.35 - lift);
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(sp.x, sp.y, BALL_R * sp.k * 1.1, BALL_R * sp.k * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    var p = P(b.x, b.y + BALL_R, b.z);
+    var r = BALL_R * p.k * scale;
+    ctx.globalAlpha = alpha;
+    var g = ctx.createRadialGradient(p.x - r * 0.35, p.y - r * 0.4, r * 0.1, p.x, p.y, r);
+    g.addColorStop(0, '#ffd2a8');
+    g.addColorStop(0.5, '#ff7a3d');
+    g.addColorStop(1, '#a8360b');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+    // a stripe that turns as it rolls
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth = Math.max(1, r * 0.18);
+    var off = Math.cos(b.spin) * r * 0.75;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + off * 0.3, r * 0.82, Math.abs(Math.sin(b.spin)) * r * 0.5 + 0.5, 0, 0, Math.PI);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  function drawAim() {
+    if (ball.phase !== 'ready' || gameOver) return;
+    // A soft guide down the lane from the ball, brighter while charging.
+    var a = P(ball.x, 0, START_Z + 0.12), b = P(ball.x + aimDrift() * 1.8, 0, 1.6);
+    var grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+    var on = drag || keyCharge ? 0.5 : 0.22;
+    grad.addColorStop(0, 'rgba(255,255,255,' + on + ')');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = Math.max(2, a.k * 0.02);
+    ctx.setLineDash([a.k * 0.04, a.k * 0.04]);
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.setLineDash([]);
+
+    if (keyCharge) {
+      // Power meter beside the lane
+      var m0 = P(LANE_W + 0.1, 0, 0.2), m1 = P(LANE_W + 0.1, 0, 1.0);
+      var x = Math.min(W - 14, m0.x + 6);
+      var h = Math.max(60, m0.y - m1.y);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(x, m0.y - h, 10, h);
+      ctx.fillStyle = keyPower > 0.8 ? '#e8483f' : '#ffe27a';
+      ctx.fillRect(x, m0.y - h * keyPower, 10, h * keyPower);
+    }
+  }
+  function aimDrift() { return drag ? clamp((drag.lastX - drag.x0) / Math.max(1, S) * 0.6, -0.4, 0.4) : 0; }
+
+  function drawPopups(dt) {
+    for (var i = popups.length - 1; i >= 0; i--) {
+      var p = popups[i];
+      p.t += dt;
+      if (p.t > 1.2) { popups.splice(i, 1); continue; }
+      var e = p.t / 1.2;
+      var size = (p.big ? 30 : 22) * (1 + (p.t < 0.15 ? (0.15 - p.t) * 3 : 0));
+      ctx.globalAlpha = 1 - e * e;
+      ctx.font = 'bold ' + Math.round(size) + 'px "Trebuchet MS", Tahoma, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(20,8,40,0.85)';
+      var y = p.y - 20 - e * 40;
+      ctx.strokeText(p.text, p.x, y);
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.text, p.x, y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function draw(dt) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(bg, 0, 0);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    if (flash > 0) {
+      flash = Math.max(0, flash - dt * 1.5);
+      var b00 = boardPoint(-LANE_W, 0), b10 = boardPoint(LANE_W, 0);
+      var b11 = boardPoint(LANE_W, BOARD_L), b01 = boardPoint(-LANE_W, BOARD_L);
+      ctx.globalAlpha = 0.35 * flash * (0.6 + 0.4 * Math.sin(flash * 30));
+      ctx.fillStyle = '#fff';
+      poly(ctx, [b00, b10, b11, b01]); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    drawAim();
+    drawBall();
+    drawPopups(dt);
+  }
+
+  /* ---------- input ---------- */
+
+  var drag = null;      // { id, x0, y0, lastX, samples: [{x, y, t}] }
+
+  function laneXAtStart(clientX) {
+    var rect = canvas.getBoundingClientRect();
+    var p = P(0, 0, START_Z);
+    return (clientX - rect.left - p.x) / p.k;
+  }
+
+  canvas.addEventListener('pointerdown', function (e) {
+    if (ball.phase !== 'ready' || gameOver) return;
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lastX: e.clientX, samples: [] };
+    drag.samples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+    ball.aimX = clamp(laneXAtStart(e.clientX), -LANE_W + BALL_R, LANE_W - BALL_R);
+    ball.x = ball.aimX;
+    canvas.classList.add('holding');
+    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var now = performance.now();
+    drag.samples.push({ x: e.clientX, y: e.clientY, t: now });
+    while (drag.samples.length > 2 && now - drag.samples[0].t > 120) drag.samples.shift();
+    drag.lastX = e.clientX;
+    // Before the swipe really starts going up, slide the ball sideways.
+    if (drag.y0 - e.clientY < 25) {
+      ball.aimX = clamp(laneXAtStart(e.clientX), -LANE_W + BALL_R, LANE_W - BALL_R);
+      ball.x = ball.aimX;
+      drag.x0 = e.clientX;
+    }
+  });
+
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    canvas.classList.remove('holding');
+    var s = drag.samples, now = performance.now();
+    s.push({ x: e.clientX, y: e.clientY, t: now });
+    var first = s[0], last = s[s.length - 1];
+    var dt = Math.max(0.016, (last.t - first.t) / 1000);
+    var up = (first.y - last.y) / dt;      // px/s, positive = up the screen
+    var side = (last.x - first.x) / dt;
+    var total = drag.y0 - e.clientY;
+    drag = null;
+    if (up < 80 || total < 30) return;     // a tap or a downward drag: no roll
+    var flick = up / Math.max(H, 320);     // screen heights per second
+    var speed = 1.4 + flick * 0.45;
+    var vx = (side / up) * speed * 0.3;
+    roll(speed, vx);
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', function (e) { if (drag && e.pointerId === drag.id) { drag = null; canvas.classList.remove('holding'); } });
+
+  // Keyboard: arrows aim, hold space to charge a bouncing power meter.
+  var keyCharge = false, keyPower = 0, keyDir = 1, keys = {};
+  window.addEventListener('keydown', function (e) {
+    if (e.target && e.target.tagName === 'BUTTON') return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { keys[e.key] = true; e.preventDefault(); }
+    if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && ball.phase === 'ready' && !gameOver) {
+      keyCharge = true; keyPower = 0; keyDir = 1; e.preventDefault();
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    keys[e.key] = false;
+    if ((e.key === ' ' || e.key === 'Enter') && keyCharge) {
+      keyCharge = false;
+      roll(1.8 + keyPower * 2.6, 0);
+      e.preventDefault();
+    }
+  });
+
+  /* ---------- loop ---------- */
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 1000, 1 / 20);
+    last = now;
+    if (ball.phase === 'ready') {
+      var dir = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
+      if (dir) {
+        ball.aimX = clamp((ball.aimX || 0) + dir * dt * 0.5, -LANE_W + BALL_R, LANE_W - BALL_R);
+        ball.x = ball.aimX;
+      }
+    }
+    if (keyCharge) {
+      keyPower += keyDir * dt * 0.9;
+      if (keyPower >= 1) { keyPower = 1; keyDir = -1; }
+      if (keyPower <= 0) { keyPower = 0; keyDir = 1; }
+    }
+    var n = 8, sub = dt / n;
+    for (var i = 0; i < n; i++) step(sub);
+    draw(dt);
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  updateHud();
+  requestAnimationFrame(frame);
+
+  // Test hook: lets an automated check roll a ball at a given speed.
+  window.__skeeRoll = function (speed, vx) { roll(speed, vx || 0); };
+})();
+</script>
+</body>
+</html>
