@@ -15,7 +15,7 @@ js/main.js      The window manager. One IIFE, no framework. Handles: opening/clo
                 menu, the clock, and the boot-screen intro.
 img/            Desktop icons (SVG, hand-drawn to match XP style) + downloaded itch.io screenshots.
 prototypes/     Small projects and prototypes, one self-contained folder each (see its README).
-                prototypes/playground/ holds little interactive web toys (the ball pit, ...).
+                prototypes/playground/ holds little interactive web toys (ball pit, roller coaster, skee ball, coin pusher).
 ```
 
 ## How a window works
