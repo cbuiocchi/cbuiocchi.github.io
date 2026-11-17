@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roller Coaster</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #9fd3f2;
+    font-family: "Trebuchet MS", Tahoma, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+  }
+  canvas.dragging { cursor: grabbing; }
+
+  .hint {
+    position: absolute;
+    top: 14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+    pointer-events: none;
+    transition: opacity 0.6s;
+  }
+  .hint small { display: block; font-weight: normal; font-size: 12px; margin-top: 2px; }
+  .hint.gone { opacity: 0; }
+
+  .toolbar {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+  .toolbar button {
+    font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
+    color: #fff;
+    padding: 6px 14px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+  .toolbar button:active { transform: translateY(1px); box-shadow: none; }
+  .toolbar button:focus-visible { outline: 2px dashed #fff; outline-offset: 2px; }
+  .toolbar button:disabled { opacity: 0.55; cursor: default; }
+  #ride { background: #e8483f; }
+  #view { background: #2f86d6; }
+
+  .hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.5;
+    background: rgba(20, 40, 70, 0.45);
+    padding: 5px 9px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  .hud span { font-size: 15px; }
+</style>
+</head>
+<body>
+<canvas id="scene" aria-label="A small roller coaster. Press Ride to board the train; drag to look around."></canvas>
+<div class="hud" aria-hidden="true">
+  <div><span id="speed">0</span> km/h</div>
+  <div><span id="height">0</span> m up</div>
+  <div><span id="gforce">1.0</span> G</div>
+</div>
+<div class="hint" id="hint">All aboard!<small>loops, rolls &amp; a corkscrew &middot; press Ride &middot; drag to look around</small></div>
+<div class="toolbar">
+  <button id="ride" type="button">Ride!</button>
+  <button id="view" type="button">View: Front seat</button>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* ------------------------------------------------------------------
+   Roller coaster.
+   The track is a closed Catmull-Rom spline. It is sampled every few
+   centimetres by arc length, and each sample gets a frame (forward,
+   up, right) with banking worked out from how hard the track turns.
+   The train only stores "how far along the track" (s) and a speed;
+   gravity pulls on the slope (forward.y), a chain hauls it up the
+   lift hill, and brakes stop it back in the station.
+   ------------------------------------------------------------------ */
+
+const canvas = document.getElementById('scene');
+const hint = document.getElementById('hint');
+const rideBtn = document.getElementById('ride');
+const viewBtn = document.getElementById('view');
+const speedEl = document.getElementById('speed');
+const heightEl = document.getElementById('height');
+const gEl = document.getElementById('gforce');
+
+const G = 9.81;
+const CHAIN_SPEED = 4.5;     // m/s up the lift hill
+const FRICTION = 0.0016;     // drag ∝ v²
+const MIN_SPEED = 2.5;       // never stall on a hill
+const BRAKE_ZONE = 28;       // metres of brakes before the station
+const CAR_GAP = 2.7;         // metres between car centres
+const CARS = 3;
+
+/* ---------- renderer & scene ---------- */
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#9fd3f2');
+scene.fog = new THREE.Fog('#9fd3f2', 90, 260);
+
+const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 600);
+
+scene.add(new THREE.HemisphereLight('#dff2ff', '#5d8a3a', 0.9));
+const sun = new THREE.DirectionalLight('#fff3dc', 1.6);
+sun.position.set(-40, 80, 30);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -110, right: 110, top: 110, bottom: -110, near: 10, far: 220 });
+sun.shadow.camera.updateProjectionMatrix();
+scene.add(sun);
+
+// Ground
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(400, 64),
+  new THREE.MeshLambertMaterial({ color: '#79b552' })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* ---------- the track ---------- */
+
+// A vertical loop shaped like a teardrop: a wide curve at the bottom
+// (gentler on riders at full speed) tightening to a small one at the
+// top. It is traced by turning through 360 degrees while the turning
+// radius changes, and drifts sideways (z) by `shift` so the exit runs
+// beside the entry instead of into it.
+function loopPoints(x0, y0, rBottom, rTop, z0, shift, steps) {
+  const pts = [];
+  let x = x0, y = y0;
+  const sub = 40;
+  for (let k = 0; k <= steps; k++) {
+    if (k) {
+      for (let n = 0; n < sub; n++) {
+        const a = ((k - 1) + (n + 0.5) / sub) / steps * Math.PI * 2;
+        const r = rTop + (rBottom - rTop) * Math.pow((1 + Math.cos(a)) / 2, 1.5);
+        const d = r * (Math.PI * 2 / steps / sub);
+        x -= Math.cos(a) * d;
+        y += Math.sin(a) * d;
+      }
+    }
+    pts.push([x, y, z0 + shift * k / steps]);
+  }
+  return pts;
+}
+
+const LOOP = loopPoints(-80, 2, 14, 5, 0, 5, 24);
+
+// Starts in the station, then: lift hill, big drop, vertical loop,
+// banked turnaround, zero-g roll, camelback hill, double corkscrew,
+// and a banked turn home.
+const CONTROL = [
+  [ 14, 2, 0], [  0, 2, 0], [-8, 3, 0], [-18, 12, 0], [-28, 24, 0],
+  [-36, 31, 0], [-42, 32, 0], [-48, 28.5, 0], [-55, 18, 0], [-61, 7, 0],
+  [-67, 2.6, 0], [-74, 2, 0],
+  ...LOOP,
+  [-102, 2, 5.5], [-110, 4, 11], [-114, 8, 21], [-109, 11, 31], [-97, 11.5, 36],
+  // zero-g roll (straight, so the roll is clean)
+  [-84, 11.5, 36], [-74, 11.5, 36], [-64, 11.3, 36],
+  // drop and camelback hill
+  [-56, 7, 36], [-49, 3.5, 36], [-42, 5.6, 36], [-34, 9.6, 36], [-26, 11, 36],
+  [-18, 9.6, 36], [-10, 5.6, 36], [-3, 3.5, 36],
+  // double corkscrew
+  [4, 3.5, 36], [16, 4, 36], [28, 4, 36], [40, 3.5, 36],
+  [ 49, 4.5, 31], [ 53, 6, 21], [ 50, 5, 11], [ 42, 3, 4], [ 30, 2, 0]
+].map(p => new THREE.Vector3(p[0], p[1], p[2]));
+
+// Heartline rolls: the track twists around a line at rider height,
+// so riders spin in place instead of being swung around.
+const ROLLS = [
+  { from: [-84, 11.5, 36], to: [-64, 11.3, 36], turns: 1 },
+  { from: [4, 3.5, 36], to: [40, 3.5, 36], turns: -2 }
+];
+const HEARTLINE = 1.2;
+
+const LOOP_FIRST = new THREE.Vector3(...LOOP[0]), LOOP_LAST = new THREE.Vector3(...LOOP[LOOP.length - 1]);
+const curve = new THREE.CatmullRomCurve3(CONTROL, true, 'centripetal');
+const LENGTH = curve.getLength();
+const STEP = 0.1;
+const N = Math.ceil(LENGTH / STEP);
+
+const pos = [], fwd = [], up = [], right = [];
+{
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  for (let i = 0; i < N; i++) {
+    const t = i / N;
+    pos.push(curve.getPointAt(t));
+  }
+
+  // Soften valleys and crests by smoothing the height a little, except
+  // through the vertical loop, which is already shaped with care.
+  const nearestIdx = p => {
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < N; i++) { const d = pos[i].distanceToSquared(p); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  const loopA = nearestIdx(LOOP_FIRST), loopB = nearestIdx(LOOP_LAST);
+  const SW = 35;
+  for (let pass = 0; pass < 2; pass++) {
+    const ys = pos.map(p => p.y);
+    for (let i = 0; i < N; i++) {
+      if (i > loopA - SW && i < loopB + SW) continue;
+      let sum = 0;
+      for (let k = -SW; k <= SW; k++) sum += ys[(i + k + N) % N];
+      pos[i].y = sum / (2 * SW + 1);
+    }
+  }
+  for (let i = 0; i < N; i++) fwd.push(new THREE.Vector3().subVectors(pos[(i + 1) % N], pos[(i - 1 + N) % N]).normalize());
+
+  // 1. Rotation-minimising frames (double reflection). These follow the
+  //    track without twisting, so through the loop "up" points at the
+  //    loop's centre and riders end up upside down at the top.
+  const rmf = [new THREE.Vector3().copy(worldUp).addScaledVector(fwd[0], -fwd[0].y).normalize()];
+  const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), rL = new THREE.Vector3(), tL = new THREE.Vector3();
+  for (let i = 0; i < N - 1; i++) {
+    v1.subVectors(pos[i + 1], pos[i]);
+    const c1 = v1.dot(v1);
+    rL.copy(rmf[i]).addScaledVector(v1, -2 / c1 * v1.dot(rmf[i]));
+    tL.copy(fwd[i]).addScaledVector(v1, -2 / c1 * v1.dot(fwd[i]));
+    v2.subVectors(fwd[i + 1], tL);
+    const c2 = v2.dot(v2);
+    const r = rL.clone();
+    if (c2 > 1e-12) r.addScaledVector(v2, -2 / c2 * v2.dot(rL));
+    rmf.push(r.normalize());
+  }
+
+  // 2. Where the track is upright and not too steep, we know what "up"
+  //    should be: world up, leaned into the turn. Banking comes from how
+  //    fast the heading changes.
+  const ok = i => Math.abs(fwd[i].y) < 0.8 && rmf[i].y > 0;
+  const turn = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const ia = (i - 5 + N) % N, ib = (i + 5) % N;
+    if (!ok(ia) || !ok(ib)) continue;
+    let d = Math.atan2(fwd[ib].x, fwd[ib].z) - Math.atan2(fwd[ia].x, fwd[ia].z);
+    if (d > Math.PI) d -= 2 * Math.PI;
+    if (d < -Math.PI) d += 2 * Math.PI;
+    turn[i] = d / (10 * STEP);
+  }
+  const W = 60; // smoothing window, in samples
+  const phi = new Float32Array(N), known = new Uint8Array(N);
+  const tmp = new THREE.Vector3(), want = new THREE.Vector3();
+  for (let i = 0; i < N; i++) {
+    if (!ok(i)) continue;
+    let sum = 0;
+    for (let k = -W; k <= W; k++) sum += turn[(i + k + N) % N];
+    const bank = THREE.MathUtils.clamp((sum / (2 * W + 1)) * 9, -0.85, 0.85);
+    want.copy(worldUp).addScaledVector(fwd[i], -fwd[i].y).normalize().applyAxisAngle(fwd[i], -bank);
+    // Signed angle from the RMF up to the wanted up, around forward.
+    phi[i] = Math.atan2(fwd[i].dot(tmp.crossVectors(rmf[i], want)), rmf[i].dot(want));
+    known[i] = 1;
+  }
+  // 3. Unwrap that correction angle and fill the gaps (the loop, the steep
+  //    drop) by blending between the known ends.
+  let prev = 0; // sample 0 is in the station, so it is known
+  for (let i = 1; i <= N; i++) {
+    const ii = i % N;
+    if (!known[ii]) continue;
+    let target = phi[ii];
+    while (target - phi[prev] > Math.PI) target -= 2 * Math.PI;
+    while (target - phi[prev] < -Math.PI) target += 2 * Math.PI;
+    if (ii !== 0) phi[ii] = target;
+    const gap = i - prev;
+    for (let k = 1; k < gap; k++) phi[(prev + k) % N] = phi[prev] + (target - phi[prev]) * k / gap;
+    prev = ii;
+  }
+
+  // 4. Scripted heartline rolls.
+  const nearest = p => {
+    const q = new THREE.Vector3(...p);
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < N; i++) { const d = pos[i].distanceToSquared(q); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  const roll = new Float32Array(N);
+  for (const r of ROLLS) {
+    const a = nearest(r.from), b = nearest(r.to);
+    for (let i = a; i <= b; i++) {
+      const t = (i - a) / (b - a);
+      roll[i] = r.turns * Math.PI * 2 * t * t * (3 - 2 * t);
+    }
+  }
+
+  const base = [];
+  for (let i = 0; i < N; i++) {
+    const u = rmf[i].clone().applyAxisAngle(fwd[i], phi[i]);
+    base.push(u.clone());
+    if (roll[i]) {
+      u.applyAxisAngle(fwd[i], roll[i]);
+      // Keep the heartline fixed: move the track around it.
+      pos[i].addScaledVector(base[i], HEARTLINE).addScaledVector(u, -HEARTLINE);
+    }
+    up.push(u);
+  }
+  // Rolls moved the track, so re-derive forward there and tidy the frames.
+  for (let i = 0; i < N; i++) {
+    if (roll[i] || roll[(i + 1) % N] || roll[(i - 1 + N) % N]) {
+      fwd[i].subVectors(pos[(i + 1) % N], pos[(i - 1 + N) % N]).normalize();
+    }
+    const r = new THREE.Vector3().crossVectors(fwd[i], up[i]).normalize();
+    up[i].crossVectors(r, fwd[i]).normalize();
+    right.push(r);
+  }
+}
+
+// Interpolated frame at distance s along the track.
+const tmpA = new THREE.Vector3();
+function frameAt(s, out) {
+  s = ((s % LENGTH) + LENGTH) % LENGTH;
+  const f = s / STEP;
+  const i = Math.floor(f) % N, j = (i + 1) % N, k = f - Math.floor(f);
+  out.p.lerpVectors(pos[i], pos[j], k);
+  out.f.lerpVectors(fwd[i], fwd[j], k).normalize();
+  out.u.lerpVectors(up[i], up[j], k).normalize();
+  out.r.crossVectors(out.f, out.u).normalize();
+  return out;
+}
+function newFrame() {
+  return { p: new THREE.Vector3(), f: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+}
+
+// Find the lift hill: from the end of the station to the highest point.
+let crestS = 0;
+{
+  let best = -Infinity;
+  for (let i = 0; i < N * 0.25; i++) if (pos[i].y > best) { best = pos[i].y; crestS = i * STEP; }
+}
+const LIFT_START = 8;
+
+// Build a tube along the track, offset in the track's own frame.
+function railGeometry(offRight, offUp, radius, sides, every) {
+  const verts = [], idx = [];
+  const rings = Math.floor(N / every);
+  for (let n = 0; n <= rings; n++) {
+    const i = (n * every) % N;
+    const c = tmpA.copy(pos[i]).addScaledVector(right[i], offRight).addScaledVector(up[i], offUp);
+    for (let k = 0; k < sides; k++) {
+      const a = (k / sides) * Math.PI * 2;
+      const ca = Math.cos(a) * radius, sa = Math.sin(a) * radius;
+      verts.push(
+        c.x + right[i].x * ca + up[i].x * sa,
+        c.y + right[i].y * ca + up[i].y * sa,
+        c.z + right[i].z * ca + up[i].z * sa
+      );
+    }
+  }
+  for (let n = 0; n < rings; n++) {
+    for (let k = 0; k < sides; k++) {
+      const a = n * sides + k, b = n * sides + (k + 1) % sides;
+      const c = a + sides, d = b + sides;
+      idx.push(a, c, b, b, c, d);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+const railMat = new THREE.MeshStandardMaterial({ color: '#e8483f', metalness: 0.4, roughness: 0.45 });
+const spineMat = new THREE.MeshStandardMaterial({ color: '#f6c21c', metalness: 0.3, roughness: 0.5 });
+for (const g of [railGeometry(0.55, 0, 0.07, 8, 3), railGeometry(-0.55, 0, 0.07, 8, 3)]) {
+  const m = new THREE.Mesh(g, railMat); m.castShadow = true; scene.add(m);
+}
+{
+  const m = new THREE.Mesh(railGeometry(0, -0.35, 0.16, 10, 3), spineMat);
+  m.castShadow = true; scene.add(m);
+}
+
+// Cross ties and support columns, as instanced meshes.
+const basis = new THREE.Matrix4();
+const fr = newFrame();
+{
+  const tieGeo = new THREE.BoxGeometry(1.3, 0.08, 0.14);
+  const count = Math.floor(LENGTH / 0.9);
+  const ties = new THREE.InstancedMesh(tieGeo, new THREE.MeshStandardMaterial({ color: '#f6c21c', roughness: 0.6 }), count);
+  for (let n = 0; n < count; n++) {
+    frameAt(n * 0.9, fr);
+    basis.makeBasis(fr.r, fr.u, fr.f);
+    basis.setPosition(tmpA.copy(fr.p).addScaledVector(fr.u, -0.2));
+    ties.setMatrixAt(n, basis);
+  }
+  ties.castShadow = true;
+  scene.add(ties);
+
+  const colGeo = new THREE.CylinderGeometry(0.16, 0.22, 1, 8);
+  colGeo.translate(0, 0.5, 0);
+  const cols = [];
+  for (let s = 3; s < LENGTH; s += 5) {
+    frameAt(s, fr);
+    const top = tmpA.copy(fr.p).addScaledVector(fr.u, -0.5);
+    if (top.y > 1.2 && fr.u.y > 0.6 && !inStation(s) && clearBelow(top)) cols.push(top.clone());
+  }
+  const columns = new THREE.InstancedMesh(colGeo, new THREE.MeshStandardMaterial({ color: '#e9e4d8', roughness: 0.7 }), cols.length);
+  const m = new THREE.Matrix4();
+  cols.forEach((c, n) => {
+    m.makeScale(1, c.y, 1);
+    m.setPosition(c.x, 0, c.z);
+    columns.setMatrixAt(n, m);
+  });
+  columns.castShadow = true;
+  scene.add(columns);
+}
+// No column if some other piece of track runs underneath this spot.
+function clearBelow(p) {
+  for (let i = 0; i < N; i += 4) {
+    const q = pos[i];
+    if (q.y < p.y - 1.5 && (q.x - p.x) ** 2 + (q.z - p.z) ** 2 < 4) return false;
+  }
+  return true;
+}
+function inStation(s) { return s < 2 || s > LENGTH - 14; }
+
+/* ---------- station ---------- */
+{
+  frameAt(0, fr);
+  const st = new THREE.Group();
+  const wood = new THREE.MeshLambertMaterial({ color: '#c98c4f' });
+  const roofMat = new THREE.MeshLambertMaterial({ color: '#2f86d6' });
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(16, 1.4, 3), wood);
+  deck.position.set(fr.p.x - 6, 1, fr.p.z - 2.4);
+  deck.receiveShadow = deck.castShadow = true;
+  st.add(deck);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(18, 0.4, 7), roofMat);
+  roof.position.set(fr.p.x - 6, 6.2, fr.p.z - 0.8);
+  roof.castShadow = true;
+  st.add(roof);
+  for (const x of [-14, -6, 2]) for (const z of [-3.6, 2.4]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6, 0.3), wood);
+    post.position.set(fr.p.x + x, 3, fr.p.z + z);
+    post.castShadow = true;
+    st.add(post);
+  }
+  scene.add(st);
+}
+
+/* ---------- scenery ---------- */
+{
+  const near = (x, z) => {
+    for (let i = 0; i < N; i += 20) {
+      const dx = pos[i].x - x, dz = pos[i].z - z;
+      if (dx * dx + dz * dz < 36) return true;
+    }
+    return false;
+  };
+  const trunks = [], tops = [];
+  let tries = 0;
+  while (trunks.length < 140 && tries++ < 3000) {
+    const x = (Math.random() - 0.5) * 300, z = (Math.random() - 0.5) * 300;
+    if (near(x, z) || (x > -24 && x < 18 && z > -8 && z < 6)) continue;
+    const s = 0.7 + Math.random() * 0.9;
+    trunks.push([x, z, s]); tops.push([x, z, s]);
+  }
+  const trunkM = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25, 0.35, 2, 6).translate(0, 1, 0),
+    new THREE.MeshLambertMaterial({ color: '#7a5b3a' }), trunks.length);
+  const topM = new THREE.InstancedMesh(new THREE.ConeGeometry(1.8, 4.5, 7).translate(0, 4, 0),
+    new THREE.MeshLambertMaterial({ color: '#2f7a3a' }), tops.length);
+  const m = new THREE.Matrix4();
+  trunks.forEach(([x, z, s], n) => {
+    m.makeScale(s, s, s); m.setPosition(x, 0, z);
+    trunkM.setMatrixAt(n, m); topM.setMatrixAt(n, m);
+  });
+  trunkM.castShadow = topM.castShadow = true;
+  scene.add(trunkM, topM);
+
+  // A few puffy clouds
+  const cloudMat = new THREE.MeshLambertMaterial({ color: '#ffffff' });
+  for (let c = 0; c < 9; c++) {
+    const g = new THREE.Group();
+    for (let k = 0; k < 4; k++) {
+      const b = new THREE.Mesh(new THREE.SphereGeometry(4 + Math.random() * 3, 10, 8), cloudMat);
+      b.position.set(k * 5 - 7, Math.random() * 2, Math.random() * 3);
+      g.add(b);
+    }
+    const a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 80;
+    g.position.set(Math.cos(a) * r, 45 + Math.random() * 25, Math.sin(a) * r);
+    scene.add(g);
+  }
+}
+
+/* ---------- the train ---------- */
+
+const COLORS = ['#e8483f', '#2f86d6', '#3bb54a'];
+const cars = [];
+for (let c = 0; c < CARS; c++) {
+  const car = new THREE.Group();
+  const paint = new THREE.MeshStandardMaterial({ color: COLORS[c], metalness: 0.2, roughness: 0.4 });
+  const dark = new THREE.MeshStandardMaterial({ color: '#333', roughness: 0.8 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.6, 2.3), paint);
+  body.position.y = 0.45;
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.7, 0.25), dark);
+  seat.position.set(0, 0.9, -0.7);
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: '#f6c21c' }));
+  bar.position.set(0, 1.05, 0.55);
+  car.add(body, seat, bar);
+  if (c === 0) {
+    const nose = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.45, 0.5), paint);
+    nose.position.set(0, 0.6, 1.3);
+    nose.rotation.x = -0.35;
+    car.add(nose);
+  }
+  for (const x of [-0.55, 0.55]) for (const z of [-0.8, 0.8]) {
+    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.12, 10), dark);
+    w.rotation.z = Math.PI / 2;
+    w.position.set(x, 0.12, z);
+    car.add(w);
+  }
+  car.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  car.matrixAutoUpdate = false;
+  scene.add(car);
+  cars.push(car);
+}
+
+/* ---------- ride state ---------- */
+
+let s = 0;          // where the front car is along the track (m)
+let v = 0;          // speed (m/s)
+let state = 'waiting'; // waiting | riding | done
+
+
+function dispatch() {
+  if (state === 'riding') return;
+  state = 'riding';
+  s = 0.01; v = 1;
+  rideBtn.disabled = true;
+  rideBtn.textContent = 'Riding...';
+  hint.classList.add('gone');
+}
+rideBtn.addEventListener('click', dispatch);
+
+function updateTrain(dt) {
+  if (state !== 'riding') return;
+  frameAt(s, fr);
+  // Gravity along the slope, plus air drag.
+  v += (-G * fr.f.y - FRICTION * v * v) * dt;
+
+  if (s < LIFT_START) {
+    v = Math.min(Math.max(v, 1), 3); // rolling out of the station
+  } else if (s < crestS - 2) {
+    v = Math.max(v, CHAIN_SPEED);    // the chain lift: click, click, click
+  } else if (s > LENGTH - BRAKE_ZONE) {
+    const left = LENGTH - s;
+    v = Math.min(v, Math.max(0.6, Math.sqrt(2 * 2.2 * left)));
+  } else {
+    v = Math.max(v, MIN_SPEED);
+  }
+
+  s += v * dt;
+  if (s >= LENGTH) {
+    s = 0; v = 0;
+    state = 'done';
+    rideBtn.disabled = false;
+    rideBtn.textContent = 'Ride again!';
+  }
+}
+
+const carM = new THREE.Matrix4();
+function placeCars() {
+  for (let c = 0; c < CARS; c++) {
+    frameAt(s - c * CAR_GAP, fr);
+    carM.makeBasis(fr.r, fr.u, fr.f);
+    carM.setPosition(tmpA.copy(fr.p).addScaledVector(fr.u, 0.1));
+    cars[c].matrix.copy(carM);
+    cars[c].matrixWorldNeedsUpdate = true;
+  }
+}
+
+/* ---------- camera ---------- */
+
+const VIEWS = ['Front seat', 'Chase', 'Watch'];
+let view = 0;
+viewBtn.addEventListener('click', () => {
+  view = (view + 1) % VIEWS.length;
+  viewBtn.textContent = 'View: ' + VIEWS[view];
+  lookYaw = lookPitch = 0;
+});
+
+let lookYaw = 0, lookPitch = 0, dragging = false, lastX = 0, lastY = 0;
+let orbit = -1.2;
+canvas.addEventListener('pointerdown', e => {
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  canvas.classList.add('dragging');
+  if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  if (view === 2) { orbit -= dx * 0.005; return; }
+  lookYaw = THREE.MathUtils.clamp(lookYaw - dx * 0.005, -2.6, 2.6);
+  lookPitch = THREE.MathUtils.clamp(lookPitch - dy * 0.004, -1.1, 1.1);
+});
+function endDrag() { dragging = false; canvas.classList.remove('dragging'); }
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+
+const camFr = newFrame();
+const chasePos = new THREE.Vector3(30, 12, -16);
+const look = new THREE.Vector3();
+const q = new THREE.Quaternion(), qYaw = new THREE.Quaternion(), qPitch = new THREE.Quaternion();
+const m3 = new THREE.Matrix4();
+
+function updateCamera(dt) {
+  if (!dragging) { // ease the look back to straight ahead
+    lookYaw *= Math.pow(0.25, dt);
+    lookPitch *= Math.pow(0.25, dt);
+  }
+  // Widen the view with speed so it feels faster.
+  const fov = view === 0 ? 70 + THREE.MathUtils.clamp((v - 10) * 0.9, 0, 18) : 65;
+  if (Math.abs(camera.fov - fov) > 0.05) {
+    camera.fov += (fov - camera.fov) * (1 - Math.pow(0.05, dt));
+    camera.updateProjectionMatrix();
+  }
+  if (view === 0) {
+    frameAt(s - 0.6, camFr);
+    camera.position.copy(camFr.p).addScaledVector(camFr.u, 1.55);
+    // A little rumble once the train is really moving.
+    const sh = state === 'riding' ? Math.max(0, v - 8) * 0.0018 : 0;
+    camera.position.addScaledVector(camFr.r, (Math.random() - 0.5) * sh).addScaledVector(camFr.u, (Math.random() - 0.5) * sh);
+    // Look along the track's frame, then add the drag offset.
+    m3.makeBasis(camFr.r, camFr.u, camFr.f.clone().negate());
+    q.setFromRotationMatrix(m3);
+    qYaw.setFromAxisAngle(new THREE.Vector3(0, 1, 0), lookYaw);
+    qPitch.setFromAxisAngle(new THREE.Vector3(1, 0, 0), lookPitch);
+    camera.quaternion.copy(q).multiply(qYaw).multiply(qPitch);
+  } else if (view === 1) {
+    // Ride along the track a little behind the train, so the camera
+    // follows it through the loop instead of cutting across.
+    frameAt(s - CAR_GAP * CARS - 7, camFr);
+    const behind = tmpA.copy(camFr.p).addScaledVector(camFr.u, 3.5);
+    camera.up.lerp(camFr.u, 1 - Math.pow(0.05, dt)).normalize();
+    chasePos.lerp(behind, 1 - Math.pow(0.02, dt));
+    camera.position.copy(chasePos);
+    frameAt(s + 2, camFr);
+    look.copy(camFr.p);
+    camera.lookAt(look);
+    camera.rotateY(lookYaw);
+    camera.rotateX(lookPitch);
+  } else {
+    camera.up.set(0, 1, 0);
+    if (!dragging) orbit += dt * 0.06;
+    camera.position.set(Math.cos(orbit) * 115 - 30, 55, Math.sin(orbit) * 115 + 18);
+    camera.lookAt(-30, 8, 18);
+  }
+}
+
+// G-force felt in the seat: the push of the track along "up",
+// counting both gravity and the curve the train is following.
+const gTmp = new THREE.Vector3();
+let gSmooth = 1;
+function gForce() {
+  if (state !== 'riding') return (gSmooth = 1);
+  const i = Math.floor((((s % LENGTH) + LENGTH) % LENGTH) / STEP) % N;
+  // Curvature of the rider's path (the heartline, above the track).
+  const k = 15, ia = (i - k + N) % N, ib = (i + k) % N;
+  gTmp.copy(pos[ia]).addScaledVector(up[ia], HEARTLINE)
+    .addScaledVector(pos[i], -2).addScaledVector(up[i], -2 * HEARTLINE)
+    .add(pos[ib]).addScaledVector(up[ib], HEARTLINE)
+    .divideScalar((k * STEP) ** 2);
+  const g = (v * v * gTmp.dot(up[i]) + G * up[i].y) / G;
+  gSmooth += (g - gSmooth) * 0.15;
+  return gSmooth;
+}
+
+/* ---------- sizing & loop ---------- */
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / Math.max(h, 1);
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 1 / 20);
+  last = now;
+  // Small fixed steps keep the physics steady at any frame rate.
+  const sub = 4;
+  for (let i = 0; i < sub; i++) updateTrain(dt / sub);
+  placeCars();
+  updateCamera(dt);
+  frameAt(s, fr);
+  speedEl.textContent = Math.round(v * 3.6);
+  heightEl.textContent = Math.round(fr.p.y);
+  gEl.textContent = gForce().toFixed(1);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
