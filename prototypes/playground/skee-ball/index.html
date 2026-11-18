@@ -16,14 +16,24 @@
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
-  canvas {
-    display: block;
+  #game {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
+    display: block;
     cursor: grab;
     touch-action: none; /* the lane, not the page, gets the swipe */
+    outline: none;
   }
-  canvas.holding { cursor: grabbing; }
+  #game.holding { cursor: grabbing; }
+  #fx {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
 
   .hud {
     position: absolute;
@@ -47,23 +57,46 @@
   }
   .panel b { display: block; font-size: 20px; line-height: 1.1; color: #ffe27a; font-variant-numeric: tabular-nums; }
   .panel span { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; }
+  .panel b.bump { animation: bump 0.35s ease-out; }
+  @keyframes bump { 0% { transform: scale(1.45); color: #fff; } 100% { transform: scale(1); } }
   .balls { display: flex; gap: 3px; justify-content: center; margin-top: 3px; height: 10px; }
   .balls i { width: 9px; height: 9px; border-radius: 50%; background: #ff7a3d; box-shadow: inset -2px -2px 0 rgba(0,0,0,0.25); }
   .balls i.used { background: rgba(255,255,255,0.18); box-shadow: none; }
 
+  .mute {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 207, 63, 0.8);
+    background: rgba(10, 4, 30, 0.72);
+    color: #ffe27a;
+    cursor: pointer;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    touch-action: manipulation;
+  }
+  .mute svg { width: 20px; height: 20px; }
+  .mute .off { display: none; }
+  .mute[aria-pressed="true"] .on { display: none; }
+  .mute[aria-pressed="true"] .off { display: block; }
+  .mute:focus-visible { outline: 2px dashed #fff; outline-offset: 2px; }
+
   .hint {
     position: absolute;
-    bottom: 14px;
-    left: 0;
-    right: 0;
+    bottom: 10px;
+    left: 54px;
+    right: 54px;
     text-align: center;
     color: #fff;
     font-size: 15px;
     font-weight: bold;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     pointer-events: none;
     transition: opacity 0.6s;
-    padding: 0 12px;
   }
   .hint small { display: block; font-weight: normal; font-size: 12px; margin-top: 2px; opacity: 0.9; }
   .hint.gone { opacity: 0; }
@@ -81,21 +114,56 @@
     justify-content: center;
     background: rgba(10, 4, 30, 0.6);
   }
-  .over.show { display: flex; }
+  .over.show { display: flex; animation: fade 0.3s ease-out; }
+  @keyframes fade { from { opacity: 0; } }
   .card {
     background: #2a1a5e;
     border: 3px solid #ffcf3f;
     border-radius: 16px;
-    padding: 18px 26px;
+    padding: 18px 22px;
     text-align: center;
     color: #fff;
     box-shadow: 0 8px 30px rgba(0,0,0,0.5);
     max-width: calc(100% - 48px);
+    box-sizing: border-box;
   }
   .card h2 { margin: 0 0 4px; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; color: #ffcf3f; }
-  .card .big { font-size: 44px; font-weight: bold; line-height: 1.1; color: #fff; }
-  .card p { margin: 4px 0 14px; font-size: 13px; opacity: 0.9; }
+  .card .big { font-size: 44px; font-weight: bold; line-height: 1.1; color: #fff; font-variant-numeric: tabular-nums; }
+  .card p { margin: 4px 0 10px; font-size: 13px; opacity: 0.9; }
+  .card .rolls { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 0 0 10px; }
+  .card .rolls i {
+    font-style: normal;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 26px;
+    padding: 2px 0;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    font-variant-numeric: tabular-nums;
+  }
+  .card .rolls i.hi { background: #ffcf3f; color: #2a1a5e; }
+  .card .rolls i.zero { opacity: 0.5; }
+  .tickets {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 4px 12px 4px 8px;
+    background: #ff5e8a;
+    color: #fff;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 4px;
+    position: relative;
+    -webkit-mask: radial-gradient(circle 5px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 5px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+            mask: radial-gradient(circle 5px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 5px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+    font-variant-numeric: tabular-nums;
+  }
   .card button {
+    display: block;
+    margin: 0 auto;
     font: bold 15px "Trebuchet MS", Tahoma, sans-serif;
     color: #fff;
     background: #e8483f;
@@ -110,11 +178,24 @@
   .card button:active { transform: translateY(2px); box-shadow: none; }
   .card button:focus-visible { outline: 2px dashed #fff; outline-offset: 3px; }
 
+  .fail {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+    font-size: 15px;
+  }
+
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>
 <body>
 <canvas id="game" tabindex="0" aria-label="Skee ball lane. Swipe or flick the ball up the lane to roll it into the rings. Keyboard: arrow keys to aim, hold space to charge and let go to roll."></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <div class="hud">
   <div class="panel"><b id="score">0</b><span>Score</span></div>
@@ -122,690 +203,1196 @@
   <div class="panel"><b id="best">0</b><span>Best</span></div>
 </div>
 
+<button class="mute" id="mute" type="button" aria-pressed="false" aria-label="Mute sound">
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>
+</button>
+
 <div class="hint" id="hint">Flick the ball up the lane!<small class="mouse">drag the ball up and let go &middot; or &larr; &rarr; to aim, hold space to roll</small><small class="touch">swipe up from the ball &middot; a softer roll lands higher than you think</small></div>
 
 <div class="over" id="over">
-  <div class="card">
-    <h2>Game over</h2>
+  <div class="card" role="dialog" aria-labelledby="overTitle">
+    <h2 id="overTitle">Game over</h2>
     <div class="big" id="final">0</div>
     <p id="finalNote">points</p>
+    <div class="rolls" id="rolls"></div>
+    <div class="tickets"><span aria-hidden="true">&#127903;</span><span id="tickets">0 tickets</span></div>
     <button id="again" type="button">Play again</button>
   </div>
 </div>
 
+<div class="fail" id="fail">This toy needs WebGL, which isn't available in this browser.</div>
+
 <div class="sr" aria-live="polite" id="live"></div>
 
-<script>
-(function () {
-  'use strict';
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-  /* ------------------------------------------------------------------
-     Skee ball, drawn on a 2D canvas with a small perspective camera.
+/* ------------------------------------------------------------------
+   Skee ball, rendered with Three.js.
 
-     The world is in metres. x runs across the lane, y is up, z runs
-     away from the player. The ball rolls up the lane (y = 0), climbs
-     the ramp, leaves it as a projectile, and either lands on the
-     tilted target board or bounces off the back wall first. Where it
-     touches the board decides the score.
+   The simulation works in metres. x runs across the lane, y is up and
+   z runs away from the player (Three.js points z the other way, so
+   V() flips it). The ball rolls up the lane (y = 0), climbs the ramp,
+   leaves it as a projectile, and either lands on the tilted target
+   board or bounces off the back wall first. Where it touches the
+   board decides the score.
 
-     The board is described in its own 2D coordinates (u across, v up
-     the slope from its bottom edge), so the rings are plain circles.
-     ------------------------------------------------------------------ */
+   The board has its own 2D coordinates (u across, v up the slope from
+   its bottom edge), so the rings are plain circles in a group that is
+   tilted into place.
+   ------------------------------------------------------------------ */
 
-  var canvas = document.getElementById('game');
-  var ctx = canvas.getContext('2d');
+const canvas = document.getElementById('game');
+const fx = document.getElementById('fx');
+const fctx = fx.getContext('2d');
 
-  // ---- layout (metres) ----
-  var LANE_W = 0.35;          // half width
-  var BALL_R = 0.045;
-  var START_Z = 0.16;         // where the ball sits before a roll
-  var RAMP_Z0 = 2.25, RAMP_Z1 = 2.45, RAMP_H = 0.16;
-  var RAMP_ANGLE = Math.atan(RAMP_H / (RAMP_Z1 - RAMP_Z0));
-  var BOARD_Z = 2.55;         // bottom edge of the target board
-  var BOARD_TILT = 28 * Math.PI / 180;
-  var BOARD_L = 0.72;         // length up the slope
-  var BACK_Z = BOARD_Z + BOARD_L * Math.cos(BOARD_TILT);
-  var BACK_TOP = BOARD_L * Math.sin(BOARD_TILT) + 0.42;
-  var RING_V = 0.45;          // centre of the rings, up the slope
-  var RINGS = [               // [radius, points] inner to outer
-    [0.055, 50], [0.11, 40], [0.165, 30], [0.22, 20], [0.28, 10]
-  ];
-  var CORNER = { u: 0.27, v: 0.64, r: 0.045, pts: 100 };
+// ---- layout (metres) ----
+const LANE_W = 0.35;          // half width
+const BALL_R = 0.045;
+const START_Z = 0.16;         // where the ball sits before a roll
+const RAMP_Z0 = 2.25, RAMP_Z1 = 2.45, RAMP_H = 0.16;
+const RAMP_ANGLE = Math.atan(RAMP_H / (RAMP_Z1 - RAMP_Z0));
+const BOARD_Z = 2.55;         // bottom edge of the target board
+const BOARD_TILT = 28 * Math.PI / 180;
+const BOARD_L = 0.72;         // length up the slope
+const BACK_Z = BOARD_Z + BOARD_L * Math.cos(BOARD_TILT);
+const BOARD_TOP = BOARD_L * Math.sin(BOARD_TILT);
+const BACK_TOP = BOARD_TOP + 0.42;
+const RING_V = 0.45;          // centre of the rings, up the slope
+const RINGS = [               // [radius, points] inner to outer
+  [0.055, 50], [0.11, 40], [0.165, 30], [0.22, 20], [0.28, 10]
+];
+const RING_COLS = ['#e8483f', '#2f86d6', '#3bb54a', '#f58a1f', '#9b5ccf'];
+const CORNER = { u: 0.27, v: 0.64, r: 0.045, pts: 100 };
+const RAIL = 0.06;
+const FLOOR_Y = -0.8;
+const TRAY_Z = -0.1;          // ball-return trough in front of the lane
 
-  var GRAVITY = 9.8;
-  var LANE_DRAG = 0.25;       // m/s² rolling resistance
-  var BALLS_PER_GAME = 9;
+const GRAVITY = 9.8;
+const LANE_DRAG = 0.25;       // m/s² rolling resistance
+const BALLS_PER_GAME = 9;
 
-  // ---- camera ----
-  var CAM = { y: 2.3, z: -3.4, pitch: 22 * Math.PI / 180 }; // far back + narrow view, so the board isn't tiny
-  var cosP = Math.cos(CAM.pitch), sinP = Math.sin(CAM.pitch);
-  var W = 0, H = 0, DPR = 1, S = 1, OX = 0, OY = 0;
+const V = (x, y, z) => new THREE.Vector3(x, y, -z);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
 
-  function rawProject(x, y, z) {
-    var dy = y - CAM.y, dz = z - CAM.z;
-    var yc = dy * cosP + dz * sinP;
-    var zc = dz * cosP - dy * sinP;
-    return { x: x / zc, y: -yc / zc, d: zc };
+/* ---------- renderer ---------- */
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e) {
+  document.getElementById('fail').style.display = 'flex';
+  throw e;
+}
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#1d1240');
+scene.fog = new THREE.Fog('#1d1240', 6, 14);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envMap = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture; // reflections for the shiny bits only
+
+const camera = new THREE.PerspectiveCamera(24, 1, 0.05, 60);
+
+scene.add(new THREE.HemisphereLight('#c9b8ff', '#2a1440', 0.9));
+const key = new THREE.DirectionalLight('#fff3e0', 1.5);
+key.position.set(1.2, 3.2, 0.4);
+key.target.position.copy(V(0, 0, 1.6));
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -0.9; key.shadow.camera.right = 0.9;
+key.shadow.camera.top = 1.9; key.shadow.camera.bottom = -1.9;
+key.shadow.camera.near = 0.5; key.shadow.camera.far = 6;
+key.shadow.bias = -0.0008;
+key.shadow.normalBias = 0.01;
+scene.add(key, key.target);
+const boardLight = new THREE.PointLight('#ff9ef0', 0.9, 1.25, 2);
+boardLight.position.copy(V(0, BACK_TOP - 0.05, BOARD_Z + 0.2));
+scene.add(boardLight);
+
+/* ---------- textures ---------- */
+
+function canvasTex(w, h, draw, srgb = true) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+
+let seed = 7;
+function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+
+const laneTex = canvasTex(256, 1024, (c, w, h) => {
+  const planks = 7;
+  for (let i = 0; i < planks; i++) {
+    const x0 = i * w / planks, pw = w / planks;
+    const base = 168 + rnd() * 30;
+    c.fillStyle = `rgb(${base + 50}, ${base - 10}, ${base - 70})`;
+    c.fillRect(x0, 0, pw, h);
+    // grain
+    for (let g = 0; g < 26; g++) {
+      c.strokeStyle = `rgba(110, 60, 20, ${0.05 + rnd() * 0.08})`;
+      c.lineWidth = 0.6 + rnd() * 1.4;
+      const gx = x0 + rnd() * pw;
+      c.beginPath();
+      c.moveTo(gx, 0);
+      for (let y = 0; y <= h; y += 64) c.lineTo(gx + Math.sin(y * 0.01 + g) * 3, y);
+      c.stroke();
+    }
+    c.fillStyle = 'rgba(70, 35, 10, 0.55)';
+    c.fillRect(x0, 0, 1.5, h);
   }
-  function P(x, y, z) {
-    var p = rawProject(x, y, z);
-    return { x: OX + p.x * S, y: OY + p.y * S, k: S / p.d }; // k: px per metre at that depth
-  }
-  function boardPoint(u, v) {
-    return P(u, v * Math.sin(BOARD_TILT), BOARD_Z + v * Math.cos(BOARD_TILT));
-  }
-
-  function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.clientWidth;
-    H = canvas.clientHeight;
-    canvas.width = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-
-    // Fit the whole machine (lane corners up to the top of the back wall).
-    var pts = [
-      rawProject(-LANE_W - 0.06, 0, 0), rawProject(LANE_W + 0.06, 0, 0),
-      rawProject(-LANE_W, BACK_TOP, BACK_Z), rawProject(LANE_W, BACK_TOP, BACK_Z)
-    ];
-    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    pts.forEach(function (p) {
-      minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
-      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+  // foul line + arrows (texture top = far end of the lane)
+  c.fillStyle = 'rgba(255,255,255,0.85)';
+  const fy = h * (1 - 0.35 / RAMP_Z0);
+  c.fillRect(0, fy - 2, w, 4);
+  c.fillStyle = 'rgba(255,255,255,0.45)';
+  [-0.18, 0, 0.18].forEach(ax => {
+    const x = (ax / LANE_W * 0.5 + 0.5) * w;
+    const y0 = h * (1 - 1.2 / RAMP_Z0), y1 = h * (1 - 1.05 / RAMP_Z0);
+    c.beginPath(); c.moveTo(x, y0); c.lineTo(x - 13, y1); c.lineTo(x + 13, y1); c.closePath(); c.fill();
+  });
+  // dots
+  [0.6, 0.8].forEach(z => {
+    [-0.24, -0.12, 0, 0.12, 0.24].forEach(ax => {
+      c.beginPath();
+      c.arc((ax / LANE_W * 0.5 + 0.5) * w, h * (1 - z / RAMP_Z0), 3, 0, Math.PI * 2);
+      c.fill();
     });
-    var topPad = 64, botPad = 10; // room for the HUD
-    S = Math.min((W - 16) / (maxX - minX), (H - topPad - botPad) / (maxY - minY));
-    OX = W / 2 - (minX + maxX) / 2 * S;
-    OY = topPad + (H - topPad - botPad - (maxY - minY) * S) / 2 - minY * S;
-    buildStatic();
-  }
+  });
+});
 
-  /* ---------- game state ---------- */
-
-  var score = 0, ballsLeft = BALLS_PER_GAME;
-  var best = 0;
-  try { best = +localStorage.getItem('skeeball-best') || 0; } catch (e) {}
-
-  // phase: ready | lane | ramp | air | settle | sink | done
-  var ball = { x: 0, y: 0, z: START_Z, vx: 0, vy: 0, vz: 0, phase: 'ready', t: 0, spin: 0 };
-  var settle = null;      // { u0, v0, u1, v1, pts }
-  var popups = [];
-  var flash = 0;          // board light flash on a big score
-  var gameOver = false;
-
-  var elScore = document.getElementById('score');
-  var elBalls = document.getElementById('ballsLeft');
-  var elDots = document.getElementById('ballDots');
-  var elBest = document.getElementById('best');
-  var elHint = document.getElementById('hint');
-  var elOver = document.getElementById('over');
-  var elLive = document.getElementById('live');
-
-  function updateHud() {
-    elScore.textContent = score;
-    elBest.textContent = best;
-    elBalls.textContent = ballsLeft;
-    var html = '';
-    for (var i = 0; i < BALLS_PER_GAME; i++) html += '<i' + (i >= ballsLeft ? ' class="used"' : '') + '></i>';
-    elDots.innerHTML = html;
-  }
-
-  function resetBall() {
-    ball.x = clamp(ball.aimX || 0, -LANE_W + BALL_R, LANE_W - BALL_R);
-    ball.y = 0; ball.z = START_Z;
-    ball.vx = ball.vy = ball.vz = 0;
-    ball.phase = ballsLeft > 0 ? 'ready' : 'done';
-    ball.t = 0;
-    ball.hitBack = false;
-    if (ball.phase === 'done') endGame();
-  }
-
-  function newGame() {
-    score = 0; ballsLeft = BALLS_PER_GAME; gameOver = false;
-    popups.length = 0;
-    elOver.classList.remove('show');
-    ball.aimX = 0;
-    resetBall();
-    updateHud();
-    canvas.focus({ preventScroll: true });
-  }
-
-  function endGame() {
-    if (gameOver) return;
-    gameOver = true;
-    var isBest = score > best;
-    if (isBest) {
-      best = score;
-      try { localStorage.setItem('skeeball-best', best); } catch (e) {}
-    }
-    updateHud();
-    document.getElementById('final').textContent = score;
-    var tickets = Math.floor(score / 30);
-    document.getElementById('finalNote').textContent =
-      (isBest && score > 0 ? 'New best! ' : '') + 'points · ' + tickets + ' ticket' + (tickets === 1 ? '' : 's');
-    setTimeout(function () { elOver.classList.add('show'); document.getElementById('again').focus({ preventScroll: true }); }, 600);
-  }
-
-  document.getElementById('again').addEventListener('click', newGame);
-
-  function roll(speed, vx) {
-    if (ball.phase !== 'ready' || gameOver) return;
-    ball.vz = clamp(speed, 0, 7.5);
-    ball.vx = clamp(vx, -1.2, 1.2);
-    ball.phase = 'lane';
-    ballsLeft--;
-    updateHud();
-    elHint.classList.add('gone');
-  }
-
-  /* ---------- physics ---------- */
-
-  function step(dt) {
-    var b = ball;
-    b.t += dt;
-    if (b.phase === 'lane' || b.phase === 'ramp' || b.phase === 'air') {
-      b.spin += Math.hypot(b.vx, b.vz, b.vy) * dt / BALL_R;
-      b.x += b.vx * dt;
-      // side rails
-      if (b.x < -LANE_W + BALL_R) { b.x = -LANE_W + BALL_R; b.vx = Math.abs(b.vx) * 0.55; }
-      if (b.x > LANE_W - BALL_R) { b.x = LANE_W - BALL_R; b.vx = -Math.abs(b.vx) * 0.55; }
-    }
-
-    if (b.phase === 'lane') {
-      b.vz -= (b.vz > 0 ? 1 : -1) * LANE_DRAG * dt;
-      b.z += b.vz * dt;
-      b.y = 0;
-      if (b.vz > 0 && b.z >= RAMP_Z0) b.phase = 'ramp';
-      if (b.vz <= 0 && b.z <= START_Z + 0.3) { softRoll(); }
-    } else if (b.phase === 'ramp') {
-      // Speed along the ramp, losing some to gravity on the way up.
-      var sp = b.vz / Math.cos(RAMP_ANGLE);
-      sp -= GRAVITY * Math.sin(RAMP_ANGLE) * dt;
-      b.vz = sp * Math.cos(RAMP_ANGLE);
-      b.z += b.vz * dt;
-      if (b.z < RAMP_Z0) { b.phase = 'lane'; b.y = 0; return; } // rolled back down
-      b.y = (b.z - RAMP_Z0) * Math.tan(RAMP_ANGLE);
-      if (b.z >= RAMP_Z1) {
-        b.phase = 'air';
-        b.vy = sp * Math.sin(RAMP_ANGLE);
-        b.vz = sp * Math.cos(RAMP_ANGLE);
-        b.y = RAMP_H;
-      }
-    } else if (b.phase === 'air') {
-      b.vy -= GRAVITY * dt;
-      b.z += b.vz * dt;
-      b.y += b.vy * dt;
-      if (b.z > BACK_Z - BALL_R) {
-        // Off the back wall: a dead, slightly random bounce.
-        b.z = BACK_Z - BALL_R;
-        b.vz = -Math.abs(b.vz) * (0.08 + Math.random() * 0.22);
-        b.vx = b.vx * 0.5 + (Math.random() - 0.5) * 0.6;
-        b.hitBack = true;
-      }
-      if (b.z < RAMP_Z1 && b.vz < 0) b.vz = 0.2; // the cage stops it bouncing back down the lane
-      if (b.z >= BOARD_Z) {
-        var by = (b.z - BOARD_Z) * Math.tan(BOARD_TILT);
-        if (b.y - BALL_R <= by) land();
-      } else if (b.y < -0.03) {
-        score0(b.hitBack ? 'Too hard!' : '0');
-      }
-    } else if (b.phase === 'settle') {
-      settle.t += dt / 0.28;
-      var e = Math.min(1, settle.t), s = 1 - Math.pow(1 - e, 3);
-      var u = settle.u0 + (settle.u1 - settle.u0) * s;
-      var v = settle.v0 + (settle.v1 - settle.v0) * s;
-      b.x = u; b.z = BOARD_Z + v * Math.cos(BOARD_TILT);
-      b.y = v * Math.sin(BOARD_TILT) + BALL_R + Math.sin(e * Math.PI) * 0.025;
-      if (e >= 1) { b.phase = 'sink'; b.t = 0; award(settle.pts, settle.u1, settle.v1); }
-    } else if (b.phase === 'sink') {
-      if (b.t > 0.75) resetBall();
-    }
-  }
-
-  function softRoll() {
-    // Didn't make it up the ramp: it rolls back to you and the ball is gone.
-    ball.phase = 'sink';
-    ball.t = 0.2;
-    popup('Too soft!', P(ball.x, 0.1, ball.z + 0.3), '#ffffff');
-    elLive.textContent = 'Too soft. No points.';
-  }
-
-  function score0(label) {
-    ball.phase = 'sink'; ball.t = 0;
-    popup(label, P(ball.x, 0.05, BOARD_Z), '#cfc6ff');
-    elLive.textContent = 'Gutter. No points.';
-  }
-
-  function land() {
-    var b = ball;
-    var u = b.x;
-    var v = (b.z - BOARD_Z) / Math.cos(BOARD_TILT);
-    // A little bounce on impact: some of the momentum carries on up
-    // the slope, plus a touch of rattle.
-    var along = b.vz * Math.cos(BOARD_TILT) + b.vy * Math.sin(BOARD_TILT);
-    var u1 = u + b.vx * 0.05 + (Math.random() - 0.5) * 0.03;
-    var v1 = v + along * 0.025 + (Math.random() - 0.5) * 0.03;
-    u1 = clamp(u1, -LANE_W + BALL_R, LANE_W - BALL_R);
-    v1 = clamp(v1, 0, BOARD_L - BALL_R);
-    var pts = pointsAt(u1, v1);
-    settle = { u0: u, v0: v, u1: u1, v1: v1, pts: pts, t: 0 };
-    b.phase = 'settle';
-  }
-
-  function pointsAt(u, v) {
-    var cu = Math.abs(u) - CORNER.u, cv = v - CORNER.v;
-    if (cu * cu + cv * cv < Math.pow(CORNER.r + 0.01, 2)) return CORNER.pts;
-    var d = Math.hypot(u, v - RING_V);
-    for (var i = 0; i < RINGS.length; i++) if (d < RINGS[i][0]) return RINGS[i][1];
-    return 0;
-  }
-
-  function award(pts, u, v) {
-    score += pts;
-    updateHud();
-    var p = boardPoint(u, v);
-    var col = pts >= 100 ? '#ff5edb' : pts >= 50 ? '#ffe27a' : pts > 0 ? '#ffffff' : '#cfc6ff';
-    popup(pts ? '+' + pts : '0', p, col, pts >= 50);
-    if (pts >= 40) flash = 1;
-    elLive.textContent = pts + ' points. Score ' + score + '.';
-  }
-
-  function popup(text, p, color, big) {
-    popups.push({ text: text, x: p.x, y: p.y, color: color, big: !!big, t: 0 });
-  }
-
-  /* ---------- drawing ---------- */
-
-  var bg = null; // cached background (cabinet + lane + board), rebuilt on resize
-
-  function poly(c, pts) {
-    c.beginPath();
-    c.moveTo(pts[0].x, pts[0].y);
-    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
-    c.closePath();
-  }
-
-  function boardCircle(c, u0, v0, r, n) {
-    n = n || 48;
-    c.beginPath();
-    for (var i = 0; i <= n; i++) {
-      var a = i / n * Math.PI * 2;
-      var p = boardPoint(u0 + Math.cos(a) * r, v0 + Math.sin(a) * r);
-      if (i === 0) c.moveTo(p.x, p.y); else c.lineTo(p.x, p.y);
-    }
-    c.closePath();
-  }
-
-  function buildStatic() {
-    bg = document.createElement('canvas');
-    bg.width = canvas.width; bg.height = canvas.height;
-    var c = bg.getContext('2d');
-    c.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    // Arcade room
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#2b1660');
-    g.addColorStop(1, '#120a2c');
+function boardTexture() {
+  const S = 1024, scale = S / (2 * LANE_W);  // px per metre (square texture, board is ~square)
+  const h = Math.round(BOARD_L * scale);
+  return canvasTex(S, h, (c, w) => {
+    const px = u => (u + LANE_W) * scale;
+    const py = v => h - v * scale;
+    const g = c.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#3a2178');
+    g.addColorStop(1, '#22114d');
     c.fillStyle = g;
-    c.fillRect(0, 0, W, H);
-    // carpet confetti
-    var seed = 7;
-    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
-    var cols = ['#ff5edb', '#3fd0ff', '#ffe27a', '#7dff8a'];
-    for (var i = 0; i < W * H / 900; i++) {
-      c.fillStyle = cols[i % 4];
-      c.globalAlpha = 0.18;
-      var x = rnd() * W, y = rnd() * H, s = 2 + rnd() * 3;
-      c.fillRect(x, y, s, s * 0.6);
+    c.fillRect(0, 0, w, h);
+    // sparkle stars
+    for (let i = 0; i < 70; i++) {
+      c.fillStyle = `rgba(255,255,255,${0.1 + rnd() * 0.25})`;
+      c.beginPath(); c.arc(rnd() * w, rnd() * h, 1 + rnd() * 2, 0, Math.PI * 2); c.fill();
     }
-    c.globalAlpha = 1;
-
-    var L0 = P(-LANE_W, 0, 0), R0 = P(LANE_W, 0, 0);
-    var Lr = P(-LANE_W, 0, RAMP_Z0), Rr = P(LANE_W, 0, RAMP_Z0);
-
-    // Cabinet sides (outside the lane)
-    var rail = 0.06;
-    c.fillStyle = '#e8483f';
-    poly(c, [P(-LANE_W - rail, 0, 0), L0, P(-LANE_W, 0.1, BACK_Z), P(-LANE_W - rail, 0.1, BACK_Z)]); c.fill();
-    poly(c, [P(LANE_W + rail, 0, 0), R0, P(LANE_W, 0.1, BACK_Z), P(LANE_W + rail, 0.1, BACK_Z)]); c.fill();
-
-    // Lane (wood planks)
-    var lg = c.createLinearGradient(0, L0.y, 0, Lr.y);
-    lg.addColorStop(0, '#e0a868');
-    lg.addColorStop(1, '#a8723e');
-    c.fillStyle = lg;
-    poly(c, [L0, R0, Rr, Lr]); c.fill();
-    c.strokeStyle = 'rgba(90, 50, 20, 0.35)';
-    c.lineWidth = 1;
-    for (var k = 1; k < 7; k++) {
-      var xx = -LANE_W + k * (LANE_W * 2 / 7);
-      var a = P(xx, 0, 0), b = P(xx, 0, RAMP_Z0);
-      c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
+    for (let r = RINGS.length - 1; r >= 0; r--) {
+      const rad = RINGS[r][0] * scale;
+      const rg = c.createRadialGradient(px(0), py(RING_V), rad * 0.3, px(0), py(RING_V), rad);
+      rg.addColorStop(0, shade(RING_COLS[r], -0.25));
+      rg.addColorStop(0.85, RING_COLS[r]);
+      rg.addColorStop(1, shade(RING_COLS[r], 0.15));
+      c.fillStyle = rg;
+      c.beginPath(); c.arc(px(0), py(RING_V), rad, 0, Math.PI * 2); c.fill();
     }
-    // foul line + arrows
-    c.strokeStyle = 'rgba(255,255,255,0.7)';
-    c.lineWidth = Math.max(1.5, P(0, 0, 0.35).k * 0.012);
-    var f1 = P(-LANE_W, 0, 0.35), f2 = P(LANE_W, 0, 0.35);
-    c.beginPath(); c.moveTo(f1.x, f1.y); c.lineTo(f2.x, f2.y); c.stroke();
-    c.fillStyle = 'rgba(255,255,255,0.35)';
-    [-0.18, 0, 0.18].forEach(function (ax) {
-      poly(c, [P(ax, 0, 1.2), P(ax - 0.035, 0, 1.05), P(ax + 0.035, 0, 1.05)]); c.fill();
-    });
-
-    // Ramp
-    var rl0 = Lr, rr0 = Rr, rl1 = P(-LANE_W, RAMP_H, RAMP_Z1), rr1 = P(LANE_W, RAMP_H, RAMP_Z1);
-    var rg = c.createLinearGradient(0, rl0.y, 0, rl1.y);
-    rg.addColorStop(0, '#9a6232');
-    rg.addColorStop(1, '#d99a58');
-    c.fillStyle = rg;
-    poly(c, [rl0, rr0, rr1, rl1]); c.fill();
-    c.strokeStyle = '#ffe27a';
-    c.lineWidth = Math.max(1.5, rl1.k * 0.012);
-    c.beginPath(); c.moveTo(rl1.x, rl1.y); c.lineTo(rr1.x, rr1.y); c.stroke();
-
-    // Gap between ramp and board (the 0 gutter)
-    c.fillStyle = '#140a24';
-    poly(c, [rl1, rr1, P(LANE_W, 0, BOARD_Z), P(-LANE_W, 0, BOARD_Z)]); c.fill();
-
-    // Target board
-    var b00 = boardPoint(-LANE_W, 0), b10 = boardPoint(LANE_W, 0);
-    var b11 = boardPoint(LANE_W, BOARD_L), b01 = boardPoint(-LANE_W, BOARD_L);
-    c.save();
-    poly(c, [b00, b10, b11, b01]);
-    c.fillStyle = '#2a175a';
-    c.fill();
-    c.clip();
-    var ringCols = ['#e8483f', '#2f86d6', '#3bb54a', '#f58a1f', '#9b5ccf'];
-    for (var r = RINGS.length - 1; r >= 0; r--) {
-      var rad = RINGS[r][0];
-      // raised lip
-      boardCircle(c, 0, RING_V, rad);
-      c.fillStyle = '#f6efe0';
-      c.fill();
-      boardCircle(c, 0, RING_V, rad - 0.012);
-      c.fillStyle = ringCols[r];
-      c.fill();
-      // the cup's dark inner shadow at the far side
-      boardCircle(c, 0, RING_V + 0.006, rad - 0.022);
-      c.fillStyle = 'rgba(0,0,0,0.22)';
-      c.fill();
-      boardCircle(c, 0, RING_V, rad - 0.022);
-      c.fillStyle = ringCols[r];
-      c.fill();
-    }
-    boardCircle(c, 0, RING_V, 0.03);
+    // centre cup
     c.fillStyle = '#0c0618';
-    c.fill();
-    // Corner 100 holes
-    [-1, 1].forEach(function (sx) {
-      boardCircle(c, sx * CORNER.u, CORNER.v, CORNER.r + 0.01);
-      c.fillStyle = '#f6efe0'; c.fill();
-      boardCircle(c, sx * CORNER.u, CORNER.v, CORNER.r);
-      c.fillStyle = '#ff5edb'; c.fill();
-      boardCircle(c, sx * CORNER.u, CORNER.v, CORNER.r * 0.55);
-      c.fillStyle = '#0c0618'; c.fill();
+    c.beginPath(); c.arc(px(0), py(RING_V), 0.03 * scale, 0, Math.PI * 2); c.fill();
+    // numbers across the rings, alternating sides
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (let r = 0; r < RINGS.length; r++) {
+      const inner = r ? RINGS[r - 1][0] : 0.03;
+      const mid = (RINGS[r][0] + inner) / 2;
+      const side = r % 2 ? 1 : -1;
+      const size = Math.min(0.048, (RINGS[r][0] - inner) * 0.92) * scale;
+      label(c, String(RINGS[r][1]), px(side * mid), py(RING_V), size);
+    }
+    [-1, 1].forEach(sx => {
+      c.fillStyle = '#ff5edb';
+      c.beginPath(); c.arc(px(sx * CORNER.u), py(CORNER.v), CORNER.r * scale, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#0c0618';
+      c.beginPath(); c.arc(px(sx * CORNER.u), py(CORNER.v), CORNER.r * 0.6 * scale, 0, Math.PI * 2); c.fill();
+      label(c, '100', px(sx * CORNER.u), py(CORNER.v - CORNER.r - 0.028), 0.034 * scale);
     });
-    c.restore();
+  });
+}
+function label(c, s, x, y, size) {
+  c.font = `bold ${Math.round(size)}px "Trebuchet MS", Tahoma, sans-serif`;
+  c.lineWidth = Math.max(3, size * 0.2);
+  c.strokeStyle = 'rgba(0,0,0,0.6)';
+  c.strokeText(s, x, y);
+  c.fillStyle = '#fff';
+  c.fillText(s, x, y);
+}
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = ch => clamp(Math.round(ch + (amt > 0 ? (255 - ch) * amt : ch * amt)), 0, 255);
+  return `rgb(${f(n >> 16)}, ${f((n >> 8) & 255)}, ${f(n & 255)})`;
+}
 
-    // Ring labels
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    for (r = 0; r < RINGS.length; r++) {
-      var inner = r ? RINGS[r - 1][0] : 0.03;
-      var mid = (RINGS[r][0] + inner) / 2;
-      // Numbers go across the rings, alternating sides, where the bands
-      // aren't squashed by the board's tilt.
-      var side = r % 2 ? 1 : -1;
-      var lp = boardPoint(side * mid, RING_V);
-      var band = (RINGS[r][0] - inner) * lp.k;
-      var size = Math.min(lp.k * 0.05, band * 0.95);
-      if (size >= 6) labelText(c, String(RINGS[r][1]), lp.x, lp.y, size);
-    }
-    [-1, 1].forEach(function (sx) {
-      var lp = boardPoint(sx * CORNER.u, CORNER.v - CORNER.r - 0.03);
-      labelText(c, '100', lp.x, lp.y, Math.max(8, lp.k * 0.034));
+const marqueeTex = canvasTex(1024, 360, (c, w, h) => {
+  const g = c.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#ff5edb');
+  g.addColorStop(1, '#7a1fc4');
+  c.fillStyle = g;
+  c.fillRect(0, 0, w, h);
+  // sunburst
+  c.save();
+  c.translate(w / 2, h * 1.1);
+  for (let i = 0; i < 24; i++) {
+    c.rotate(Math.PI / 12);
+    c.fillStyle = i % 2 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+    c.beginPath(); c.moveTo(0, 0); c.lineTo(-90, -h * 1.6); c.lineTo(90, -h * 1.6); c.closePath(); c.fill();
+  }
+  c.restore();
+  c.font = 'italic bold 128px "Trebuchet MS", Tahoma, sans-serif';
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.lineJoin = 'round';
+  c.lineWidth = 18;
+  c.strokeStyle = '#3a0a6a';
+  c.strokeText('ROLL & SCORE', w / 2, h * 0.5);
+  const tg = c.createLinearGradient(0, h * 0.3, 0, h * 0.7);
+  tg.addColorStop(0, '#fff8c4');
+  tg.addColorStop(1, '#ffcf3f');
+  c.fillStyle = tg;
+  c.fillText('ROLL & SCORE', w / 2, h * 0.5);
+});
+
+const ballTex = canvasTex(256, 128, (c, w, h) => {
+  const g = c.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#ff9a5a');
+  g.addColorStop(0.5, '#e8582a');
+  g.addColorStop(1, '#ff9a5a');
+  c.fillStyle = g;
+  c.fillRect(0, 0, w, h);
+  c.fillStyle = '#fff3d6';
+  c.fillRect(0, h * 0.44, w, h * 0.12);
+  c.fillStyle = 'rgba(120, 30, 0, 0.35)';
+  c.fillRect(0, h * 0.2, w, h * 0.03);
+  c.fillRect(0, h * 0.77, w, h * 0.03);
+});
+
+const carpetTex = canvasTex(512, 512, (c, w, h) => {
+  c.fillStyle = '#20113f';
+  c.fillRect(0, 0, w, h);
+  const cols = ['#ff5edb', '#3fd0ff', '#ffe27a', '#7dff8a'];
+  for (let i = 0; i < 520; i++) {
+    c.fillStyle = cols[i % 4];
+    c.globalAlpha = 0.35;
+    const x = rnd() * w, y = rnd() * h;
+    if (i % 3) { c.fillRect(x, y, 5, 3); }
+    else { c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 2); c.lineWidth = 2; c.strokeStyle = cols[(i + 1) % 4]; c.stroke(); }
+  }
+  c.globalAlpha = 1;
+});
+carpetTex.wrapS = carpetTex.wrapT = THREE.RepeatWrapping;
+carpetTex.repeat.set(10, 10);
+
+/* ---------- the machine ---------- */
+
+const M = {
+  wood: new THREE.MeshStandardMaterial({ map: laneTex, roughness: 0.35, metalness: 0, envMap, envMapIntensity: 0.25 }),
+  rampWood: new THREE.MeshStandardMaterial({ color: '#a8692f', roughness: 0.45 }),
+  cabinet: new THREE.MeshStandardMaterial({ color: '#c8243a', roughness: 0.3, metalness: 0.1, envMap, envMapIntensity: 0.35 }),
+  cabinetDark: new THREE.MeshStandardMaterial({ color: '#4a0c28', roughness: 0.6 }),
+  chrome: new THREE.MeshStandardMaterial({ color: '#e6e9f0', roughness: 0.2, metalness: 1, envMap, envMapIntensity: 1 }),
+  pit: new THREE.MeshStandardMaterial({ color: '#0c0618', roughness: 0.9 }),
+  rubber: new THREE.MeshStandardMaterial({ color: '#1b1428', roughness: 0.8 }),
+  plexi: new THREE.MeshStandardMaterial({ color: '#cfe8ff', roughness: 0.05, metalness: 0, envMap, envMapIntensity: 0.6, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide }),
+  bulbOn: new THREE.MeshStandardMaterial({ color: '#fff2a8', emissive: '#ffd84a', emissiveIntensity: 2.2 }),
+  bulbOff: new THREE.MeshStandardMaterial({ color: '#8a6f4a', emissive: '#3a2000', emissiveIntensity: 0.4, roughness: 0.4 }),
+  carpet: new THREE.MeshStandardMaterial({ map: carpetTex, roughness: 1 })
+};
+
+function box(w, h, d, mat, x, y, z, opts = {}) {
+  const geo = opts.round ? new RoundedBoxGeometry(w, h, d, 2, opts.round) : new THREE.BoxGeometry(w, h, d);
+  const m = new THREE.Mesh(geo, mat);
+  m.position.copy(V(x, y, z));
+  m.castShadow = opts.cast !== false;
+  m.receiveShadow = true;
+  scene.add(m);
+  return m;
+}
+
+// Room floor
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), M.carpet);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = FLOOR_Y;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// Lane
+const OUT = LANE_W + RAIL;  // outer half-width of the cabinet
+{
+  const lane = new THREE.Mesh(new THREE.PlaneGeometry(LANE_W * 2, RAMP_Z0), M.wood);
+  lane.rotation.x = -Math.PI / 2;
+  lane.position.copy(V(0, 0, RAMP_Z0 / 2));
+  lane.receiveShadow = true;
+  scene.add(lane);
+}
+// Body under the lane, and the ball-return trough at the front
+box(OUT * 2, -FLOOR_Y - 0.002, RAMP_Z1 + 0.25, M.cabinet, 0, FLOOR_Y / 2 - 0.001, (RAMP_Z1 - 0.25) / 2 + 0.0, { round: 0.02 });
+box(OUT * 2 + 0.01, 0.05, 0.02, M.chrome, 0, -0.01, -0.25, { round: 0.008 });           // front lip
+box(LANE_W * 2 + 0.06, 0.012, 0.2, M.rubber, 0, -0.06, TRAY_Z, { cast: false });           // trough floor
+box(OUT * 2, 0.4, 0.02, M.cabinetDark, 0, -0.25, -0.252, { cast: false });                 // front stripe
+// Side rails along the lane and up past the board
+[-1, 1].forEach(sx => {
+  box(RAIL, 0.1, BACK_Z + 0.25, M.cabinet, sx * (LANE_W + RAIL / 2), 0.05, (BACK_Z - 0.25) / 2, { round: 0.012 });
+  box(RAIL * 0.55, 0.012, BACK_Z + 0.25, M.chrome, sx * (LANE_W + RAIL / 2), 0.104, (BACK_Z - 0.25) / 2, { round: 0.005 });
+});
+// Ramp: a wedge from the lane up to the lip
+{
+  const len = Math.hypot(RAMP_Z1 - RAMP_Z0, RAMP_H);
+  const ramp = new THREE.Mesh(new THREE.BoxGeometry(LANE_W * 2, 0.02, len), M.rampWood);
+  ramp.position.copy(V(0, RAMP_H / 2 - 0.01, (RAMP_Z0 + RAMP_Z1) / 2));
+  ramp.rotation.x = RAMP_ANGLE;
+  ramp.receiveShadow = true; ramp.castShadow = true;
+  scene.add(ramp);
+  const fill = new THREE.Shape();
+  fill.moveTo(0, 0); fill.lineTo(RAMP_Z1 - RAMP_Z0, 0); fill.lineTo(RAMP_Z1 - RAMP_Z0, RAMP_H); fill.closePath();
+  const fillGeo = new THREE.ExtrudeGeometry(fill, { depth: LANE_W * 2, bevelEnabled: false });
+  const f = new THREE.Mesh(fillGeo, M.cabinetDark);
+  f.rotation.y = Math.PI / 2;
+  f.position.copy(V(-LANE_W, 0, RAMP_Z0));
+  scene.add(f);
+  // lip bar
+  const lip = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, LANE_W * 2, 16), M.chrome);
+  lip.rotation.z = Math.PI / 2;
+  lip.position.copy(V(0, RAMP_H, RAMP_Z1));
+  scene.add(lip);
+}
+// The pit between the ramp and the board (a ball that falls short scores 0)
+box(LANE_W * 2, 0.02, BOARD_Z - RAMP_Z1 + 0.05, M.pit, 0, -0.06, (RAMP_Z1 + BOARD_Z) / 2, { cast: false });
+// Solid cabinet under the board
+{
+  const s = new THREE.Shape();
+  s.moveTo(0, 0); s.lineTo(BACK_Z - BOARD_Z, 0); s.lineTo(BACK_Z - BOARD_Z, BOARD_TOP); s.closePath();
+  const g = new THREE.ExtrudeGeometry(s, { depth: LANE_W * 2, bevelEnabled: false });
+  const m = new THREE.Mesh(g, M.cabinetDark);
+  m.rotation.y = Math.PI / 2;
+  m.position.copy(V(-LANE_W, -0.002, BOARD_Z));
+  scene.add(m);
+  box(LANE_W * 2, 0.5, BACK_Z - RAMP_Z1, M.cabinetDark, 0, -0.25, (BACK_Z + RAMP_Z1) / 2, { cast: false });
+}
+
+// Target board
+const board = new THREE.Group();
+board.position.copy(V(0, 0, BOARD_Z));
+board.rotation.x = BOARD_TILT - Math.PI / 2;
+scene.add(board);
+{
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(LANE_W * 2, BOARD_L),
+    new THREE.MeshStandardMaterial({ map: boardTexture(), roughness: 0.42, metalness: 0.05 }));
+  face.position.set(0, BOARD_L / 2, 0);
+  face.receiveShadow = true;
+  board.add(face);
+}
+// Raised ring lips (each lights up when its ring scores)
+const ringLips = RINGS.map(([r]) => {
+  const mat = new THREE.MeshStandardMaterial({ color: '#f6efe0', roughness: 0.3, metalness: 0.15, emissive: '#ffffff', emissiveIntensity: 0 });
+  const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.0085, 10, 96), mat);
+  m.position.set(0, RING_V, 0.003);
+  m.castShadow = true; m.receiveShadow = true;
+  board.add(m);
+  return m;
+});
+{
+  const cup = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.007, 10, 48), M.chrome);
+  cup.position.set(0, RING_V, 0.003);
+  board.add(cup);
+}
+const cornerLips = [-1, 1].map(sx => {
+  const mat = new THREE.MeshStandardMaterial({ color: '#ffd0f4', roughness: 0.3, emissive: '#ff5edb', emissiveIntensity: 0.25 });
+  const m = new THREE.Mesh(new THREE.TorusGeometry(CORNER.r + 0.004, 0.009, 10, 48), mat);
+  m.position.set(sx * CORNER.u, CORNER.v, 0.004);
+  m.castShadow = true;
+  board.add(m);
+  return m;
+});
+
+// Back wall + marquee
+const backH = BACK_TOP + 0.16 - BOARD_TOP;
+box(OUT * 2, backH, 0.06, M.cabinet, 0, BOARD_TOP + backH / 2 - 0.02, BACK_Z + 0.03, { round: 0.015 });
+{
+  const mq = new THREE.Mesh(new THREE.PlaneGeometry(OUT * 2 - 0.06, backH - 0.12),
+    new THREE.MeshStandardMaterial({ map: marqueeTex, emissiveMap: marqueeTex, emissive: '#ffffff', emissiveIntensity: 0.55, roughness: 0.5 }));
+  mq.position.copy(V(0, BOARD_TOP + backH / 2 + 0.01, BACK_Z - 0.001));
+  scene.add(mq);
+}
+// Plexi cage around the target end, with a wire net on top
+[-1, 1].forEach(sx => {
+  const s = new THREE.Shape();
+  const z0 = RAMP_Z0 - 0.05, len = BACK_Z - z0;
+  s.moveTo(0, 0.1); s.lineTo(len, 0.1); s.lineTo(len, BACK_TOP); s.lineTo(0, 0.38); s.closePath();
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(s), M.plexi);
+  m.rotation.y = -Math.PI / 2;
+  m.position.copy(V(sx * (OUT - 0.005), 0, z0));
+  m.renderOrder = 2;
+  scene.add(m);
+  // frame
+  const edge = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, Math.hypot(len, BACK_TOP - 0.38), 8), M.chrome);
+  const mid = V(sx * (OUT - 0.005), (0.38 + BACK_TOP) / 2, z0 + len / 2);
+  edge.position.copy(mid);
+  edge.rotation.x = Math.PI / 2 + Math.atan2(BACK_TOP - 0.38, len);
+  scene.add(edge);
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.28, 8), M.chrome);
+  post.position.copy(V(sx * (OUT - 0.005), 0.24, z0));
+  scene.add(post);
+});
+{
+  const z0 = RAMP_Z0 - 0.05, len = BACK_Z - z0, pts = [];
+  const yAt = t => 0.38 + (BACK_TOP - 0.38) * t;
+  for (let i = 0; i <= 12; i++) {
+    const t = i / 12;
+    pts.push(V(-OUT, yAt(t), z0 + len * t), V(OUT, yAt(t), z0 + len * t));
+  }
+  for (let i = 0; i <= 10; i++) {
+    const x = -OUT + i * OUT * 2 / 10;
+    pts.push(V(x, yAt(0), z0), V(x, yAt(1), BACK_Z));
+  }
+  const net = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({ color: '#d6d0ff', transparent: true, opacity: 0.22 }));
+  net.renderOrder = 3;
+  scene.add(net);
+}
+
+// Chase lights: along both rails, and around the marquee
+const bulbs = [];
+{
+  const geo = new THREE.SphereGeometry(0.011, 12, 8);
+  const add = (p, order) => {
+    const m = new THREE.Mesh(geo, M.bulbOff);
+    m.position.copy(p);
+    scene.add(m);
+    bulbs.push({ m, order });
+  };
+  for (let i = 0; i < 14; i++) {
+    const z = -0.15 + i * (RAMP_Z1 + 0.1) / 13;
+    add(V(-OUT - 0.002, 0.06, z), i);
+    add(V(OUT + 0.002, 0.06, z), i);
+  }
+  const y0 = BOARD_TOP + 0.04, y1 = BACK_TOP + 0.1, z = BACK_Z - 0.01;
+  for (let i = 0; i < 11; i++) {
+    const x = -OUT + 0.025 + i * (OUT * 2 - 0.05) / 10;
+    add(V(x, y1, z), 20 + i);
+    add(V(x, y0, z), 40 - i);
+  }
+}
+
+// The ball in play, and the spares waiting in the return trough
+const ballGeo = new THREE.SphereGeometry(BALL_R, 32, 20);
+const ballMat = new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.25, metalness: 0, envMap, envMapIntensity: 0.6 });
+const ballMesh = new THREE.Mesh(ballGeo, ballMat);
+ballMesh.castShadow = true;
+scene.add(ballMesh);
+const spares = [];
+for (let i = 0; i < BALLS_PER_GAME; i++) {
+  const m = new THREE.Mesh(ballGeo, ballMat);
+  m.castShadow = true;
+  m.rotation.set(rnd() * 6, rnd() * 6, rnd() * 6);
+  scene.add(m);
+  spares.push(m);
+}
+function trayPos(i) {   // i-th ball from the right of the trough
+  return V(LANE_W - 0.04 - i * (BALL_R * 2 + 0.002), -0.06 + BALL_R + 0.006, TRAY_Z);
+}
+
+/* ---------- camera framing ---------- */
+
+const CAM_PITCH = 22 * Math.PI / 180;
+const camDir = new THREE.Vector3(0, -Math.sin(CAM_PITCH), -Math.cos(CAM_PITCH));
+const home = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
+const near = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
+let lensShift = { x: 0, y: 0 };
+let W = 0, H = 0, DPR = 1;
+let camT = 0;  // 0 = home, 1 = following the ball to the board
+
+const FIT_POINTS = [
+  V(-OUT, -0.06, -0.26), V(OUT, -0.06, -0.26),
+  V(-OUT, BACK_TOP + 0.16, BACK_Z), V(OUT, BACK_TOP + 0.16, BACK_Z)
+];
+const HUD_TOP = 64, HUD_BOT = 56;  // bottom strip holds the hint and mute button
+
+function applyLens() {
+  camera.updateProjectionMatrix();
+  camera.projectionMatrix.elements[8] -= lensShift.x;
+  camera.projectionMatrix.elements[9] -= lensShift.y;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+}
+function placeCamera(pos, look) {
+  camera.position.copy(pos);
+  camera.lookAt(look);
+  camera.updateMatrixWorld();
+}
+
+function frameMachine() {
+  camera.aspect = W / H;
+  lensShift = { x: 0, y: 0 };
+  applyLens();
+  const look = V(0, 0.25, 1.35);
+  const availX = 2 - 4 * 8 / W, availY = 2 - 2 * (HUD_TOP + HUD_BOT) / H;
+  let lo = 0.5, hi = 40, ext;
+  const measure = d => {
+    placeCamera(look.clone().addScaledVector(camDir, -d), look);
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    FIT_POINTS.forEach(p => {
+      const q = p.clone().project(camera);
+      minX = Math.min(minX, q.x); maxX = Math.max(maxX, q.x);
+      minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y);
     });
-
-    // Back wall + marquee
-    var w0 = P(-LANE_W - rail, BOARD_L * Math.sin(BOARD_TILT), BACK_Z);
-    var w1 = P(LANE_W + rail, BOARD_L * Math.sin(BOARD_TILT), BACK_Z);
-    var w2 = P(LANE_W + rail, BACK_TOP, BACK_Z), w3 = P(-LANE_W - rail, BACK_TOP, BACK_Z);
-    var wg = c.createLinearGradient(0, w3.y, 0, w0.y);
-    wg.addColorStop(0, '#ff5edb');
-    wg.addColorStop(1, '#8a2bd1');
-    c.fillStyle = wg;
-    poly(c, [w0, w1, w2, w3]); c.fill();
-    var mh = w0.y - w3.y;
-    c.fillStyle = '#fff';
-    var mw = w1.x - w0.x;
-    c.font = 'bold ' + Math.round(Math.min(mh * 0.34, mw * 0.11)) + 'px "Trebuchet MS", Tahoma, sans-serif';
-    c.textAlign = 'center';
-    c.fillText('ROLL & SCORE', (w0.x + w1.x) / 2, w3.y + mh * 0.5);
+    return { minX, maxX, minY, maxY };
+  };
+  for (let i = 0; i < 40; i++) {
+    const d = (lo + hi) / 2;
+    ext = measure(d);
+    if (ext.maxX - ext.minX <= availX && ext.maxY - ext.minY <= availY) hi = d; else lo = d;
   }
+  ext = measure(hi);
+  const ty = (HUD_BOT - HUD_TOP) / H;
+  lensShift = { x: -(ext.minX + ext.maxX) / 2, y: ty - (ext.minY + ext.maxY) / 2 };
+  home.pos.copy(camera.position);
+  home.look.copy(look);
+  // Follow pose: dolly in toward the board, aiming at the rings.
+  const boardMid = V(0, BOARD_TOP * 0.6, BOARD_Z + 0.3);
+  near.look.copy(home.look).lerp(boardMid, 0.75);
+  near.pos.copy(home.pos).lerp(boardMid, 0.38);
+  near.pos.y = lerp(home.pos.y, boardMid.y, 0.3);
+  applyLens();
+}
 
-  function labelText(c, s, x, y, size) {
-    c.font = 'bold ' + Math.round(size) + 'px "Trebuchet MS", Tahoma, sans-serif';
-    c.lineWidth = Math.max(2, size * 0.22);
-    c.strokeStyle = 'rgba(0,0,0,0.55)';
-    c.strokeText(s, x, y);
-    c.fillStyle = '#fff';
-    c.fillText(s, x, y);
-  }
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = Math.max(1, canvas.clientWidth);
+  H = Math.max(1, canvas.clientHeight);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(W, H, false);
+  fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR);
+  frameMachine();
+}
 
-  function drawBall() {
-    var b = ball;
-    if (b.phase === 'done') return;
-    var alpha = 1, scale = 1;
-    if (b.phase === 'sink') {
-      var e = Math.min(1, b.t / 0.3);
-      alpha = 1 - e; scale = 1 - e * 0.6;
-      if (alpha <= 0) return;
-    }
-    // shadow on lane / board
-    var groundY = 0;
-    if (b.z >= BOARD_Z) groundY = (b.z - BOARD_Z) * Math.tan(BOARD_TILT);
-    else if (b.z >= RAMP_Z0 && b.z <= RAMP_Z1) groundY = (b.z - RAMP_Z0) * Math.tan(RAMP_ANGLE);
-    else if (b.z > RAMP_Z1) groundY = -0.05;
-    var sp = P(b.x, groundY, b.z);
-    var lift = Math.max(0, b.y - groundY);
-    ctx.globalAlpha = alpha * Math.max(0.1, 0.35 - lift);
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.ellipse(sp.x, sp.y, BALL_R * sp.k * 1.1, BALL_R * sp.k * 0.45, 0, 0, Math.PI * 2);
-    ctx.fill();
+const tmpPos = new THREE.Vector3(), tmpLook = new THREE.Vector3();
+function updateCamera(dt) {
+  const following = ['lane', 'ramp', 'air', 'settle', 'sink'].includes(ball.phase) && ball.z > 0.9 || ball.phase === 'settle' || (ball.phase === 'sink' && ball.onBoard);
+  const target = following ? 1 : 0;
+  camT += (target - camT) * Math.min(1, dt * (following ? 2.2 : 3));
+  const e = camT * camT * (3 - 2 * camT);
+  tmpPos.copy(home.pos).lerp(near.pos, e);
+  tmpLook.copy(home.look).lerp(near.look, e);
+  placeCamera(tmpPos, tmpLook);
+}
 
-    var p = P(b.x, b.y + BALL_R, b.z);
-    var r = BALL_R * p.k * scale;
-    ctx.globalAlpha = alpha;
-    var g = ctx.createRadialGradient(p.x - r * 0.35, p.y - r * 0.4, r * 0.1, p.x, p.y, r);
-    g.addColorStop(0, '#ffd2a8');
-    g.addColorStop(0.5, '#ff7a3d');
-    g.addColorStop(1, '#a8360b');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
-    // a stripe that turns as it rolls
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = Math.max(1, r * 0.18);
-    var off = Math.cos(b.spin) * r * 0.75;
-    ctx.beginPath();
-    ctx.ellipse(p.x, p.y + off * 0.3, r * 0.82, Math.abs(Math.sin(b.spin)) * r * 0.5 + 0.5, 0, 0, Math.PI);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
+/* ---------- game state ---------- */
 
-  function drawAim() {
-    if (ball.phase !== 'ready' || gameOver) return;
-    // A soft guide down the lane from the ball, brighter while charging.
-    var a = P(ball.x, 0, START_Z + 0.12), b = P(ball.x + aimDrift() * 1.8, 0, 1.6);
-    var grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-    var on = drag || keyCharge ? 0.5 : 0.22;
-    grad.addColorStop(0, 'rgba(255,255,255,' + on + ')');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = Math.max(2, a.k * 0.02);
-    ctx.setLineDash([a.k * 0.04, a.k * 0.04]);
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    ctx.setLineDash([]);
+let score = 0, ballsLeft = BALLS_PER_GAME, best = 0, gameOver = false, results = [];
+try { best = +localStorage.getItem('skeeball-best') || 0; } catch (e) {}
 
-    if (keyCharge) {
-      // Power meter beside the lane
-      var m0 = P(LANE_W + 0.1, 0, 0.2), m1 = P(LANE_W + 0.1, 0, 1.0);
-      var x = Math.min(W - 14, m0.x + 6);
-      var h = Math.max(60, m0.y - m1.y);
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(x, m0.y - h, 10, h);
-      ctx.fillStyle = keyPower > 0.8 ? '#e8483f' : '#ffe27a';
-      ctx.fillRect(x, m0.y - h * keyPower, 10, h * keyPower);
-    }
-  }
-  function aimDrift() { return drag ? clamp((drag.lastX - drag.x0) / Math.max(1, S) * 0.6, -0.4, 0.4) : 0; }
+// phase: return | ready | lane | ramp | air | settle | sink | done
+const ball = { x: 0, y: 0, z: START_Z, vx: 0, vy: 0, vz: 0, phase: 'ready', t: 0, aimX: 0, hitBack: false, onBoard: false };
+let settle = null;
+const popups = [];
+let flash = 0, flashRing = -1, flashCorner = -1;
+let pending = null;   // { pts, label } shown on the HUD when the ball finishes
 
-  function drawPopups(dt) {
-    for (var i = popups.length - 1; i >= 0; i--) {
-      var p = popups[i];
-      p.t += dt;
-      if (p.t > 1.2) { popups.splice(i, 1); continue; }
-      var e = p.t / 1.2;
-      var size = (p.big ? 30 : 22) * (1 + (p.t < 0.15 ? (0.15 - p.t) * 3 : 0));
-      ctx.globalAlpha = 1 - e * e;
-      ctx.font = 'bold ' + Math.round(size) + 'px "Trebuchet MS", Tahoma, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = 'rgba(20,8,40,0.85)';
-      var y = p.y - 20 - e * 40;
-      ctx.strokeText(p.text, p.x, y);
-      ctx.fillStyle = p.color;
-      ctx.fillText(p.text, p.x, y);
-    }
-    ctx.globalAlpha = 1;
-  }
+const elScore = document.getElementById('score');
+const elBalls = document.getElementById('ballsLeft');
+const elDots = document.getElementById('ballDots');
+const elBest = document.getElementById('best');
+const elHint = document.getElementById('hint');
+const elOver = document.getElementById('over');
+const elLive = document.getElementById('live');
 
-  function draw(dt) {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(bg, 0, 0);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+function bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
 
-    if (flash > 0) {
-      flash = Math.max(0, flash - dt * 1.5);
-      var b00 = boardPoint(-LANE_W, 0), b10 = boardPoint(LANE_W, 0);
-      var b11 = boardPoint(LANE_W, BOARD_L), b01 = boardPoint(-LANE_W, BOARD_L);
-      ctx.globalAlpha = 0.35 * flash * (0.6 + 0.4 * Math.sin(flash * 30));
-      ctx.fillStyle = '#fff';
-      poly(ctx, [b00, b10, b11, b01]); ctx.fill();
-      ctx.globalAlpha = 1;
-    }
+function updateHud() {
+  elScore.textContent = score;
+  elBest.textContent = best;
+  elBalls.textContent = ballsLeft;
+  let html = '';
+  for (let i = 0; i < BALLS_PER_GAME; i++) html += '<i' + (i >= ballsLeft ? ' class="used"' : '') + '></i>';
+  elDots.innerHTML = html;
+}
 
-    drawAim();
-    drawBall();
-    drawPopups(dt);
-  }
+function inHand() { return ball.phase === 'ready' || ball.phase === 'return'; }
 
-  /* ---------- input ---------- */
+function nextBall() {
+  ball.vx = ball.vy = ball.vz = 0;
+  ball.hitBack = false; ball.onBoard = false;
+  ball.t = 0;
+  if (ballsLeft <= 0) { ball.phase = 'done'; endGame(); return; }
+  ball.phase = 'return';
+  ball.from = trayPos(ballsLeft - 1);
+}
 
-  var drag = null;      // { id, x0, y0, lastX, samples: [{x, y, t}] }
-
-  function laneXAtStart(clientX) {
-    var rect = canvas.getBoundingClientRect();
-    var p = P(0, 0, START_Z);
-    return (clientX - rect.left - p.x) / p.k;
-  }
-
-  canvas.addEventListener('pointerdown', function (e) {
-    if (ball.phase !== 'ready' || gameOver) return;
-    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lastX: e.clientX, samples: [] };
-    drag.samples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
-    ball.aimX = clamp(laneXAtStart(e.clientX), -LANE_W + BALL_R, LANE_W - BALL_R);
-    ball.x = ball.aimX;
-    canvas.classList.add('holding');
-    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
-  });
-
-  canvas.addEventListener('pointermove', function (e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    var now = performance.now();
-    drag.samples.push({ x: e.clientX, y: e.clientY, t: now });
-    while (drag.samples.length > 2 && now - drag.samples[0].t > 120) drag.samples.shift();
-    drag.lastX = e.clientX;
-    // Before the swipe really starts going up, slide the ball sideways.
-    if (drag.y0 - e.clientY < 25) {
-      ball.aimX = clamp(laneXAtStart(e.clientX), -LANE_W + BALL_R, LANE_W - BALL_R);
-      ball.x = ball.aimX;
-      drag.x0 = e.clientX;
-    }
-  });
-
-  function endDrag(e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    canvas.classList.remove('holding');
-    var s = drag.samples, now = performance.now();
-    s.push({ x: e.clientX, y: e.clientY, t: now });
-    var first = s[0], last = s[s.length - 1];
-    var dt = Math.max(0.016, (last.t - first.t) / 1000);
-    var up = (first.y - last.y) / dt;      // px/s, positive = up the screen
-    var side = (last.x - first.x) / dt;
-    var total = drag.y0 - e.clientY;
-    drag = null;
-    if (up < 80 || total < 30) return;     // a tap or a downward drag: no roll
-    var flick = up / Math.max(H, 320);     // screen heights per second
-    var speed = 1.4 + flick * 0.45;
-    var vx = (side / up) * speed * 0.3;
-    roll(speed, vx);
-  }
-  canvas.addEventListener('pointerup', endDrag);
-  canvas.addEventListener('pointercancel', function (e) { if (drag && e.pointerId === drag.id) { drag = null; canvas.classList.remove('holding'); } });
-
-  // Keyboard: arrows aim, hold space to charge a bouncing power meter.
-  var keyCharge = false, keyPower = 0, keyDir = 1, keys = {};
-  window.addEventListener('keydown', function (e) {
-    if (e.target && e.target.tagName === 'BUTTON') return;
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { keys[e.key] = true; e.preventDefault(); }
-    if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && ball.phase === 'ready' && !gameOver) {
-      keyCharge = true; keyPower = 0; keyDir = 1; e.preventDefault();
-    }
-  });
-  window.addEventListener('keyup', function (e) {
-    keys[e.key] = false;
-    if ((e.key === ' ' || e.key === 'Enter') && keyCharge) {
-      keyCharge = false;
-      roll(1.8 + keyPower * 2.6, 0);
-      e.preventDefault();
-    }
-  });
-
-  /* ---------- loop ---------- */
-
-  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
-
-  var last = performance.now();
-  function frame(now) {
-    var dt = Math.min((now - last) / 1000, 1 / 20);
-    last = now;
-    if (ball.phase === 'ready') {
-      var dir = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
-      if (dir) {
-        ball.aimX = clamp((ball.aimX || 0) + dir * dt * 0.5, -LANE_W + BALL_R, LANE_W - BALL_R);
-        ball.x = ball.aimX;
-      }
-    }
-    if (keyCharge) {
-      keyPower += keyDir * dt * 0.9;
-      if (keyPower >= 1) { keyPower = 1; keyDir = -1; }
-      if (keyPower <= 0) { keyPower = 0; keyDir = 1; }
-    }
-    var n = 8, sub = dt / n;
-    for (var i = 0; i < n; i++) step(sub);
-    draw(dt);
-    requestAnimationFrame(frame);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
+function newGame() {
+  score = 0; ballsLeft = BALLS_PER_GAME; gameOver = false; results = [];
+  popups.length = 0;
+  elOver.classList.remove('show');
+  ball.aimX = 0;
+  nextBall();
   updateHud();
-  requestAnimationFrame(frame);
+  canvas.focus({ preventScroll: true });
+}
 
-  // Test hook: lets an automated check roll a ball at a given speed.
-  window.__skeeRoll = function (speed, vx) { roll(speed, vx || 0); };
+function endGame() {
+  if (gameOver) return;
+  gameOver = true;
+  const isBest = score > best;
+  if (isBest) {
+    best = score;
+    try { localStorage.setItem('skeeball-best', best); } catch (e) {}
+  }
+  updateHud();
+  document.getElementById('final').textContent = score;
+  document.getElementById('finalNote').textContent = (isBest && score > 0 ? 'New best! ' : '') + 'points in ' + BALLS_PER_GAME + ' balls';
+  document.getElementById('rolls').innerHTML = results.map(p =>
+    '<i class="' + (p >= 50 ? 'hi' : p === 0 ? 'zero' : '') + '">' + p + '</i>').join('');
+  const tickets = Math.floor(score / 30);
+  const elT = document.getElementById('tickets');
+  elT.textContent = '0 tickets';
+  setTimeout(() => {
+    elOver.classList.add('show');
+    document.getElementById('again').focus({ preventScroll: true });
+    if (isBest && score > 0) sfx.fanfare();
+    // count the tickets up
+    let n = 0;
+    const tick = () => {
+      elT.textContent = n + ' ticket' + (n === 1 ? '' : 's');
+      if (n < tickets) { n++; sfx.tick(); setTimeout(tick, Math.max(30, 400 / Math.max(1, tickets))); }
+    };
+    tick();
+  }, 700);
+  elLive.textContent = 'Game over. ' + score + ' points, ' + tickets + ' tickets.';
+}
+
+document.getElementById('again').addEventListener('click', newGame);
+
+function roll(speed, vx) {
+  if (ball.phase !== 'ready' || gameOver) return;
+  ball.vz = clamp(speed, 0, 7.5);
+  ball.vx = clamp(vx, -1.2, 1.2);
+  ball.phase = 'lane';
+  ballsLeft--;
+  updateHud();
+  elHint.classList.add('gone');
+  sfx.release(speed);
+}
+
+/* ---------- physics ---------- */
+
+function step(dt) {
+  const b = ball;
+  b.t += dt;
+  if (b.phase === 'lane' || b.phase === 'ramp' || b.phase === 'air') {
+    b.x += b.vx * dt;
+    // side rails
+    if (b.x < -LANE_W + BALL_R) { b.x = -LANE_W + BALL_R; b.vx = Math.abs(b.vx) * 0.55; sfx.knock(0.5); }
+    if (b.x > LANE_W - BALL_R) { b.x = LANE_W - BALL_R; b.vx = -Math.abs(b.vx) * 0.55; sfx.knock(0.5); }
+  }
+
+  if (b.phase === 'return') {
+    if (b.t > 0.45) { b.phase = 'ready'; b.t = 0; }
+  } else if (b.phase === 'lane') {
+    b.vz -= (b.vz > 0 ? 1 : -1) * LANE_DRAG * dt;
+    b.z += b.vz * dt;
+    b.y = 0;
+    if (b.vz > 0 && b.z >= RAMP_Z0) b.phase = 'ramp';
+    if (b.vz <= 0 && b.z <= START_Z + 0.3) softRoll();
+  } else if (b.phase === 'ramp') {
+    // Speed along the ramp, losing some to gravity on the way up.
+    let sp = b.vz / Math.cos(RAMP_ANGLE);
+    sp -= GRAVITY * Math.sin(RAMP_ANGLE) * dt;
+    b.vz = sp * Math.cos(RAMP_ANGLE);
+    b.z += b.vz * dt;
+    if (b.z < RAMP_Z0) { b.phase = 'lane'; b.y = 0; return; } // rolled back down
+    b.y = (b.z - RAMP_Z0) * Math.tan(RAMP_ANGLE);
+    if (b.z >= RAMP_Z1) {
+      b.phase = 'air';
+      b.vy = sp * Math.sin(RAMP_ANGLE);
+      b.vz = sp * Math.cos(RAMP_ANGLE);
+      b.y = RAMP_H;
+      sfx.knock(0.35);
+    }
+  } else if (b.phase === 'air') {
+    b.vy -= GRAVITY * dt;
+    b.z += b.vz * dt;
+    b.y += b.vy * dt;
+    if (b.z > BACK_Z - BALL_R) {
+      // Off the back wall: a dead, slightly random bounce.
+      b.z = BACK_Z - BALL_R;
+      b.vz = -Math.abs(b.vz) * (0.08 + Math.random() * 0.22);
+      b.vx = b.vx * 0.5 + (Math.random() - 0.5) * 0.6;
+      b.hitBack = true;
+      sfx.knock(1);
+    }
+    if (b.z < RAMP_Z1 && b.vz < 0) b.vz = 0.2; // the cage stops it bouncing back down the lane
+    if (b.z >= BOARD_Z) {
+      const by = (b.z - BOARD_Z) * Math.tan(BOARD_TILT);
+      if (b.y - BALL_R <= by) land();
+    } else if (b.y < -0.03) {
+      score0(b.hitBack ? 'Too hard!' : 'Short!');
+    }
+  } else if (b.phase === 'settle') {
+    settle.t += dt / 0.32;
+    const e = Math.min(1, settle.t), s = 1 - Math.pow(1 - e, 3);
+    b.u = lerp(settle.u0, settle.u1, s);
+    b.v = lerp(settle.v0, settle.v1, s);
+    b.hop = Math.sin(e * Math.PI) * 0.6;
+    if (e >= 1) { b.phase = 'sink'; b.t = 0; award(settle.pts, settle.u1, settle.v1); }
+  } else if (b.phase === 'sink') {
+    if (b.t > 0.8) nextBall();
+  }
+}
+
+function softRoll() {
+  // Didn't make it up the ramp: it rolls back to you and the ball is gone.
+  ball.phase = 'sink';
+  ball.t = 0.2;
+  ball.onBoard = false;
+  popup('Too soft!', V(ball.x, 0.15, ball.z + 0.3), '#ffffff');
+  results.push(0);
+  elLive.textContent = 'Too soft. No points.';
+  sfx.buzz();
+}
+
+function score0(label) {
+  ball.phase = 'sink'; ball.t = 0; ball.onBoard = false;
+  popup(label, V(ball.x, 0.1, BOARD_Z), '#cfc6ff');
+  results.push(0);
+  elLive.textContent = label + ' No points.';
+  sfx.buzz();
+}
+
+function land() {
+  const b = ball;
+  const u = b.x;
+  const v = (b.z - BOARD_Z) / Math.cos(BOARD_TILT);
+  // A little bounce on impact: some of the momentum carries on up the
+  // slope, plus a touch of rattle.
+  const along = b.vz * Math.cos(BOARD_TILT) + b.vy * Math.sin(BOARD_TILT);
+  let u1 = u + b.vx * 0.05 + (Math.random() - 0.5) * 0.03;
+  let v1 = v + along * 0.025 + (Math.random() - 0.5) * 0.03;
+  u1 = clamp(u1, -LANE_W + BALL_R, LANE_W - BALL_R);
+  v1 = clamp(v1, 0, BOARD_L - BALL_R);
+  const pts = pointsAt(u1, v1);
+  settle = { u0: u, v0: v, u1, v1, pts, t: 0 };
+  b.u = u; b.v = v; b.hop = 0;
+  b.phase = 'settle';
+  b.onBoard = true;
+  sfx.knock(0.8);
+}
+
+function pointsAt(u, v) {
+  const cu = Math.abs(u) - CORNER.u, cv = v - CORNER.v;
+  if (cu * cu + cv * cv < Math.pow(CORNER.r + 0.01, 2)) return CORNER.pts;
+  const d = Math.hypot(u, v - RING_V);
+  for (let i = 0; i < RINGS.length; i++) if (d < RINGS[i][0]) return RINGS[i][1];
+  return 0;
+}
+
+function award(pts, u, v) {
+  score += pts;
+  results.push(pts);
+  updateHud();
+  if (pts) bump(elScore);
+  const p = boardWorld(u, v, 0.05);
+  const col = pts >= 100 ? '#ff5edb' : pts >= 50 ? '#ffe27a' : pts > 0 ? '#ffffff' : '#cfc6ff';
+  popup(pts ? '+' + pts : '0', p, col, pts >= 50);
+  flashRing = RINGS.findIndex(r => r[1] === pts);
+  flashCorner = pts === CORNER.pts ? (u < 0 ? 0 : 1) : -1;
+  if (pts) flash = 1;
+  if (pts >= 50) burst(p, pts >= 100 ? 60 : 36);
+  elLive.textContent = pts + ' points. Score ' + score + '.';
+  if (pts) sfx.ding(pts); else sfx.buzz();
+}
+
+function boardWorld(u, v, lift) {
+  // a point on the board face, raised along its normal
+  const p = new THREE.Vector3(u, v, lift || 0);
+  board.localToWorld(p);
+  return p;
+}
+
+/* ---------- sound (synthesized, no files) ---------- */
+
+const sfx = (() => {
+  let ac = null, master = null, rollGain = null, rollFilter = null;
+  let muted = false;
+  try { muted = localStorage.getItem('arcade-muted') === '1'; } catch (e) {}
+  function wake() {
+    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+    try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+    master = ac.createGain();
+    master.gain.value = muted ? 0 : 0.9;
+    master.connect(ac.destination);
+    // looping rumble for the roll
+    const len = ac.sampleRate * 2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { last = last * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = last * 6; }
+    const src = ac.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    rollFilter = ac.createBiquadFilter();
+    rollFilter.type = 'lowpass'; rollFilter.frequency.value = 400;
+    rollGain = ac.createGain(); rollGain.gain.value = 0;
+    src.connect(rollFilter); rollFilter.connect(rollGain); rollGain.connect(master);
+    src.start();
+  }
+  function tone(freq, dur, type, vol, when = 0, slide) {
+    if (!ac) return;
+    const t = ac.currentTime + when;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  return {
+    wake,
+    get muted() { return muted; },
+    setMuted(m) {
+      muted = m;
+      try { localStorage.setItem('arcade-muted', m ? '1' : '0'); } catch (e) {}
+      if (master) master.gain.value = m ? 0 : 0.9;
+    },
+    rolling(speed) {
+      if (!ac) return;
+      rollGain.gain.setTargetAtTime(Math.min(0.35, speed * 0.09), ac.currentTime, 0.05);
+      rollFilter.frequency.setTargetAtTime(200 + speed * 160, ac.currentTime, 0.05);
+    },
+    release(speed) { tone(140, 0.12, 'sine', 0.25, 0, 70); },
+    knock(v) { tone(180 + Math.random() * 60, 0.09, 'triangle', 0.3 * v, 0, 90); },
+    ding(pts) {
+      const base = pts >= 100 ? 880 : 440 + pts * 6;
+      tone(base, 0.35, 'triangle', 0.18);
+      tone(base * 1.5, 0.35, 'triangle', 0.12, 0.08);
+      if (pts >= 50) tone(base * 2, 0.5, 'triangle', 0.12, 0.16);
+    },
+    buzz() { tone(110, 0.28, 'sawtooth', 0.06, 0, 80); },
+    tick() { tone(1800, 0.03, 'square', 0.03); },
+    fanfare() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.3, 'triangle', 0.14, i * 0.11)); }
+  };
 })();
+
+const elMute = document.getElementById('mute');
+function syncMute() {
+  elMute.setAttribute('aria-pressed', sfx.muted ? 'true' : 'false');
+  elMute.setAttribute('aria-label', sfx.muted ? 'Unmute sound' : 'Mute sound');
+}
+elMute.addEventListener('click', () => { sfx.wake(); sfx.setMuted(!sfx.muted); syncMute(); canvas.focus({ preventScroll: true }); });
+syncMute();
+
+/* ---------- effects overlay (popups, confetti, aim, power meter) ---------- */
+
+function popup(text, world, color, big) {
+  popups.push({ text, world: world.clone(), color, big: !!big, t: 0 });
+}
+const confetti = [];
+function burst(world, n) {
+  const p = toScreen(world);
+  const cols = ['#ff5edb', '#3fd0ff', '#ffe27a', '#7dff8a', '#ffffff'];
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = 120 + Math.random() * 260;
+    confetti.push({ x: p.x, y: p.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 160, t: 0, life: 0.9 + Math.random() * 0.6,
+      c: cols[i % cols.length], r: Math.random() * 6, w: 3 + Math.random() * 4 });
+  }
+}
+const _v = new THREE.Vector3();
+function toScreen(world) {
+  _v.copy(world).project(camera);
+  return { x: (_v.x * 0.5 + 0.5) * W, y: (-_v.y * 0.5 + 0.5) * H };
+}
+
+function drawFx(dt) {
+  fctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  fctx.clearRect(0, 0, W, H);
+
+  // aim guide + power meter
+  if (ball.phase === 'ready' && !gameOver) {
+    const a = toScreen(V(ball.x, 0.002, START_Z + 0.1));
+    const b = toScreen(V(ball.x + aimDrift() * 1.8, 0.002, 1.7));
+    const grad = fctx.createLinearGradient(a.x, a.y, b.x, b.y);
+    const on = drag || keyCharge ? 0.75 : 0.35;
+    grad.addColorStop(0, `rgba(255,255,255,${on})`);
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    fctx.strokeStyle = grad;
+    fctx.lineWidth = 3;
+    fctx.lineCap = 'round';
+    fctx.setLineDash([6, 9]);
+    fctx.lineDashOffset = -performance.now() / 40;
+    fctx.beginPath(); fctx.moveTo(a.x, a.y); fctx.lineTo(b.x, b.y); fctx.stroke();
+    fctx.setLineDash([]);
+
+    const power = keyCharge ? keyPower : drag ? dragPower() : -1;
+    if (power >= 0) {
+      const base = toScreen(V(OUT + 0.06, 0, START_Z));
+      const top = toScreen(V(OUT + 0.06, 0, 1.2));
+      const h = clamp(base.y - top.y, 80, 220), w = 12;
+      const x = Math.min(W - w - 6, base.x + 4), y = base.y - h;
+      fctx.fillStyle = 'rgba(10,4,30,0.7)';
+      roundRect(fctx, x - 3, y - 3, w + 6, h + 6, 7); fctx.fill();
+      const pg = fctx.createLinearGradient(0, y + h, 0, y);
+      pg.addColorStop(0, '#7dff8a'); pg.addColorStop(0.55, '#ffe27a'); pg.addColorStop(1, '#e8483f');
+      fctx.fillStyle = pg;
+      roundRect(fctx, x, y + h * (1 - power), w, h * power, 4); fctx.fill();
+      fctx.strokeStyle = 'rgba(255,255,255,0.8)'; fctx.lineWidth = 1.5;
+      roundRect(fctx, x - 3, y - 3, w + 6, h + 6, 7); fctx.stroke();
+    }
+  }
+
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const c = confetti[i];
+    c.t += dt;
+    if (c.t > c.life) { confetti.splice(i, 1); continue; }
+    c.vy += 520 * dt; c.vx *= 0.985;
+    c.x += c.vx * dt; c.y += c.vy * dt; c.r += dt * 9;
+    fctx.globalAlpha = 1 - Math.pow(c.t / c.life, 2);
+    fctx.save(); fctx.translate(c.x, c.y); fctx.rotate(c.r);
+    fctx.fillStyle = c.c; fctx.fillRect(-c.w / 2, -c.w / 4, c.w, c.w / 2);
+    fctx.restore();
+  }
+  fctx.globalAlpha = 1;
+
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const p = popups[i];
+    p.t += dt;
+    if (p.t > 1.3) { popups.splice(i, 1); continue; }
+    const e = p.t / 1.3;
+    const s = toScreen(p.world);
+    const size = (p.big ? 34 : 24) * (1 + (p.t < 0.15 ? (0.15 - p.t) * 4 : 0));
+    fctx.globalAlpha = 1 - e * e;
+    fctx.font = `bold ${Math.round(size)}px "Trebuchet MS", Tahoma, sans-serif`;
+    fctx.textAlign = 'center'; fctx.textBaseline = 'middle';
+    fctx.lineJoin = 'round';
+    fctx.lineWidth = 5;
+    fctx.strokeStyle = 'rgba(20,8,40,0.9)';
+    const y = s.y - 24 - e * 44;
+    fctx.strokeText(p.text, s.x, y);
+    fctx.fillStyle = p.color;
+    fctx.fillText(p.text, s.x, y);
+  }
+  fctx.globalAlpha = 1;
+}
+function roundRect(c, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  c.beginPath();
+  c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+
+/* ---------- drawing the 3D frame ---------- */
+
+const spin = new THREE.Quaternion(), axis = new THREE.Vector3();
+let chase = 0;
+
+function updateBallMesh(dt) {
+  const b = ball;
+  let pos, vel = null, scale = 1, visible = b.phase !== 'done';
+  if (b.phase === 'return') {
+    const e = Math.min(1, b.t / 0.45), s = e * e * (3 - 2 * e);
+    const to = V(b.aimX, BALL_R, START_Z);
+    b.x = b.aimX; b.y = 0; b.z = START_Z;
+    pos = b.from.clone().lerp(to, s);
+    pos.y += Math.sin(e * Math.PI) * 0.08;
+    vel = { x: (to.x - b.from.x) * 2, z: 2 };
+  } else if (b.phase === 'settle' || (b.phase === 'sink' && b.onBoard)) {
+    let lift = BALL_R * (1 + (b.hop || 0));
+    if (b.phase === 'sink') {
+      const e = Math.min(1, b.t / 0.35);
+      lift = BALL_R * (1 - 2.4 * e * e);
+      if (e >= 1) visible = false;
+    }
+    pos = boardWorld(b.u, b.v, lift);
+  } else {
+    pos = V(b.x, b.y + BALL_R, b.z);
+    if (b.phase === 'lane' || b.phase === 'ramp' || b.phase === 'air') vel = { x: b.vx, z: b.vz };
+    if (b.phase === 'sink') {
+      const e = Math.min(1, b.t / 0.4);
+      pos.y -= e * e * 0.12;
+      scale = 1 - e * 0.5;
+      if (e >= 1) visible = false;
+    }
+  }
+  ballMesh.visible = visible;
+  if (!visible) return;
+  ballMesh.position.copy(pos);
+  ballMesh.scale.setScalar(scale);
+  if (vel) {
+    const sp = Math.hypot(vel.x, vel.z);
+    if (sp > 1e-4) {
+      axis.set(-vel.z, 0, -vel.x).normalize(); // up × velocity, in Three's axes (z flipped)
+      spin.setFromAxisAngle(axis, sp * dt / BALL_R);
+      ballMesh.quaternion.premultiply(spin);
+    }
+  }
+}
+
+function render(dt, now) {
+  updateBallMesh(dt);
+
+  // spares in the trough
+  const inTray = ballsLeft - (inHand() ? 1 : 0);
+  spares.forEach((m, i) => {
+    m.visible = i < inTray && !gameOver;
+    if (m.visible) m.position.copy(trayPos(i));
+  });
+
+  // chase lights: a slow chase normally, a fast flashing chase after a score
+  chase += dt * (flash > 0 ? 26 : 6);
+  bulbs.forEach(b => {
+    const on = flash > 0 ? (Math.floor(chase / 2) % 2 === 0) : ((Math.floor(chase) + b.order) % 4 === 0);
+    b.m.material = on ? M.bulbOn : M.bulbOff;
+  });
+
+  // light up whichever ring scored
+  if (flash > 0) flash = Math.max(0, flash - dt * 0.9);
+  ringLips.forEach((m, i) => {
+    m.material.emissiveIntensity = i === flashRing ? flash * (0.6 + 0.4 * Math.sin(now / 50)) * 1.6 : 0;
+    m.material.emissive.set(RING_COLS[i]);
+  });
+  cornerLips.forEach((m, i) => {
+    m.material.emissiveIntensity = 0.25 + (i === flashCorner ? flash * 2.5 * (0.6 + 0.4 * Math.sin(now / 40)) : 0);
+  });
+  boardLight.intensity = 0.9 + flash * 1.5;
+
+  updateCamera(dt);
+  applyLens();
+  renderer.render(scene, camera);
+  drawFx(dt);
+}
+
+/* ---------- input ---------- */
+
+let drag = null;  // { id, x0, y0, lastX, samples: [{x, y, t}] }
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+const lanePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -BALL_R);
+const hit = new THREE.Vector3();
+
+function laneXAt(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  ndc.set((clientX - rect.left) / rect.width * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  if (!ray.ray.intersectPlane(lanePlane, hit)) return ball.aimX;
+  return hit.x;
+}
+function setAim(x) {
+  ball.aimX = clamp(x, -LANE_W + BALL_R, LANE_W - BALL_R);
+  if (ball.phase === 'ready') ball.x = ball.aimX;
+}
+
+canvas.addEventListener('pointerdown', e => {
+  sfx.wake();
+  if (ball.phase !== 'ready' || gameOver) return;
+  drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lastX: e.clientX, samples: [{ x: e.clientX, y: e.clientY, t: performance.now() }] };
+  setAim(laneXAt(e.clientX, e.clientY));
+  canvas.classList.add('holding');
+  if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+});
+
+canvas.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const now = performance.now();
+  drag.samples.push({ x: e.clientX, y: e.clientY, t: now });
+  while (drag.samples.length > 2 && now - drag.samples[0].t > 120) drag.samples.shift();
+  drag.lastX = e.clientX;
+  // Before the swipe really starts going up, slide the ball sideways.
+  if (drag.y0 - e.clientY < 25) {
+    setAim(laneXAt(e.clientX, e.clientY));
+    drag.x0 = e.clientX;
+  }
+});
+
+function flickSpeed(s, endT) {
+  const first = s[0], last = s[s.length - 1];
+  const dt = Math.max(0.016, ((endT || last.t) - first.t) / 1000);
+  const up = (first.y - last.y) / dt;
+  const side = (last.x - first.x) / dt;
+  return { up, side, speed: 1.4 + up / Math.max(H, 320) * 0.45 };
+}
+function dragPower() {
+  const s = drag.samples.filter(p => performance.now() - p.t < 140);
+  if (s.length < 2) return 0;
+  const f = flickSpeed(s, performance.now());
+  return f.up < 40 ? 0 : clamp((f.speed - 1.4) / (6 - 1.4), 0, 1);
+}
+
+function endDrag(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  canvas.classList.remove('holding');
+  const s = drag.samples, now = performance.now();
+  s.push({ x: e.clientX, y: e.clientY, t: now });
+  const f = flickSpeed(s);
+  const total = drag.y0 - e.clientY;
+  drag = null;
+  if (f.up < 80 || total < 30) return;     // a tap or a downward drag: no roll
+  roll(f.speed, (f.side / f.up) * f.speed * 0.3);
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', e => { if (drag && e.pointerId === drag.id) { drag = null; canvas.classList.remove('holding'); } });
+function aimDrift() { return drag ? clamp((drag.lastX - drag.x0) / Math.max(1, W) * 1.2, -0.4, 0.4) : 0; }
+
+// Keyboard: arrows aim, hold space to charge a bouncing power meter.
+let keyCharge = false, keyPower = 0, keyDir = 1;
+const keys = {};
+window.addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'BUTTON') return;
+  sfx.wake();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { keys[e.key] = true; e.preventDefault(); }
+  if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && ball.phase === 'ready' && !gameOver) {
+    keyCharge = true; keyPower = 0; keyDir = 1; e.preventDefault();
+  }
+});
+window.addEventListener('keyup', e => {
+  keys[e.key] = false;
+  if ((e.key === ' ' || e.key === 'Enter') && keyCharge) {
+    keyCharge = false;
+    roll(1.8 + keyPower * 2.6, 0);
+    e.preventDefault();
+  }
+});
+window.addEventListener('blur', () => { keyCharge = false; keys.ArrowLeft = keys.ArrowRight = false; });
+
+/* ---------- loop ---------- */
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 1 / 20);
+  last = now;
+  if (ball.phase === 'ready' || ball.phase === 'return') {
+    const dir = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
+    if (dir) setAim(ball.aimX + dir * dt * 0.5);
+  }
+  if (keyCharge) {
+    keyPower += keyDir * dt * 0.9;
+    if (keyPower >= 1) { keyPower = 1; keyDir = -1; }
+    if (keyPower <= 0) { keyPower = 0; keyDir = 1; }
+  }
+  const n = 8, sub = dt / n;
+  for (let i = 0; i < n; i++) step(sub);
+  const rollingNow = ball.phase === 'lane' || ball.phase === 'ramp';
+  sfx.rolling(rollingNow ? Math.abs(ball.vz) : 0);
+  render(dt, now);
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener('resize', resize);
+resize();
+ball.phase = 'ready';
+updateHud();
+requestAnimationFrame(frame);
+
+// Test hooks: let an automated check roll a ball, or read the state.
+window.__skeeRoll = (speed, vx) => roll(speed, vx || 0);
+window.__skeeState = () => ({ phase: ball.phase, score, ballsLeft, results: results.slice() });
 </script>
 </body>
 </html>
