@@ -16,13 +16,17 @@
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
-  canvas {
-    display: block;
+  #game {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
+    display: block;
     cursor: pointer;
     touch-action: none; /* taps and holds drop coins instead of scrolling */
+    outline: none;
   }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
   .hud {
     position: absolute;
@@ -46,6 +50,9 @@
   }
   .panel b { display: block; font-size: 20px; line-height: 1.1; color: #ffe27a; font-variant-numeric: tabular-nums; }
   .panel span { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; }
+  .panel b.bump { animation: bump 0.35s ease-out; }
+  .panel.low { border-color: #e8483f; }
+  @keyframes bump { 0% { transform: scale(1.4); color: #fff; } 100% { transform: scale(1); } }
 
   .refill {
     pointer-events: auto;
@@ -61,24 +68,47 @@
     box-shadow: 0 2px 0 rgba(0,0,0,0.3);
     touch-action: manipulation;
     align-self: center;
+    animation: pulse 1.2s ease-in-out infinite;
   }
+  @keyframes pulse { 50% { transform: scale(1.06); } }
   .refill.show { display: block; }
   .refill:active { transform: translateY(1px); box-shadow: none; }
   .refill:focus-visible { outline: 2px dashed #fff; outline-offset: 2px; }
 
+  .mute {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(246, 194, 28, 0.8);
+    background: rgba(4, 20, 30, 0.75);
+    color: #ffe27a;
+    cursor: pointer;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    touch-action: manipulation;
+  }
+  .mute svg { width: 20px; height: 20px; }
+  .mute .off { display: none; }
+  .mute[aria-pressed="true"] .on { display: none; }
+  .mute[aria-pressed="true"] .off { display: block; }
+  .mute:focus-visible { outline: 2px dashed #fff; outline-offset: 2px; }
+
   .hint {
     position: absolute;
-    bottom: 12px;
-    left: 0;
-    right: 0;
+    bottom: 10px;
+    left: 54px;
+    right: 54px;
     text-align: center;
     color: #fff;
     font-size: 15px;
     font-weight: bold;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     pointer-events: none;
     transition: opacity 0.6s;
-    padding: 0 12px;
   }
   .hint small { display: block; font-weight: normal; font-size: 12px; margin-top: 2px; opacity: 0.9; }
   .hint.gone { opacity: 0; }
@@ -88,587 +118,1061 @@
     .hint .touch { display: block; }
   }
 
+  .fail {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+    font-size: 15px;
+  }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>
 <body>
-<canvas id="game" tabindex="0" aria-label="Coin pusher. Tap or click above the machine to drop a coin at that spot; hold to keep dropping. Keyboard: arrow keys to aim, space to drop."></canvas>
+<canvas id="game" tabindex="0" aria-label="Coin pusher. Tap or click to drop a coin from the chute at that spot; hold to keep dropping. Keyboard: arrow keys to move the chute, space to drop."></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <div class="hud">
-  <div class="panel"><b id="bank">30</b><span>Coins</span></div>
+  <div class="panel" id="bankPanel"><b id="bank">30</b><span>Coins</span></div>
   <button class="refill" id="refill" type="button">+20 coins</button>
   <div class="panel"><b id="won">0</b><span>Won</span></div>
 </div>
 
+<button class="mute" id="mute" type="button" aria-pressed="false" aria-label="Mute sound">
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>
+</button>
+
 <div class="hint" id="hint">Drop coins, push coins!<small class="mouse">click where to drop &middot; hold to keep dropping &middot; or &larr; &rarr; and space</small><small class="touch">tap where to drop &middot; hold to keep dropping</small></div>
+
+<div class="fail" id="fail">This toy needs WebGL, which isn't available in this browser.</div>
 
 <div class="sr" aria-live="polite" id="live"></div>
 
-<script>
-(function () {
-  'use strict';
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-  /* ------------------------------------------------------------------
-     Coin pusher on a 2D canvas with a small perspective camera.
+/* ------------------------------------------------------------------
+   Coin pusher, rendered with Three.js.
 
-     The world is in metres-ish units: x across the machine, y up, z from
-     the front edge (z = 0) back to the rear wall (z = DEPTH). Coins live
-     on one of two flat layers:
+   The simulation is in metres-ish units: x across the machine, y up,
+   z from the front edge (z = 0) back to the rear wall (z = DEPTH).
+   Three.js points z the other way, so V() flips it. Coins live on one
+   of two flat layers:
 
-       shelf  the playfield. The pusher's front face sweeps back and
-              forth across it and shoves coins toward the front edge.
-       top    the pusher's own top surface. Coins land here from the
-              slot, ride along with it, and get scraped forward by the
-              fixed back wall each time it pulls back, until they spill
-              over its front lip onto the shelf.
+     shelf  the playfield. The pusher's front face sweeps back and
+            forth across it and shoves coins toward the front edge.
+     top    the pusher's own top surface. Coins land here from the
+            chute, ride along with it, and get scraped forward by the
+            fixed back wall each time it pulls back, until they spill
+            over its front lip onto the shelf.
 
-     Coins have no velocity: they only move when something pushes them
-     (they're heavy and sit flat). Each frame we move the pusher, then
-     relax all the overlaps a few times. A coin whose centre crosses
-     the front edge falls into the tray and pays out. Near the front,
-     the side walls stop, and coins pushed off there are lost.
-     ------------------------------------------------------------------ */
+   Coins have no velocity: they only move when something pushes them
+   (they're heavy and sit flat). Each frame we move the pusher, then
+   relax all the overlaps a few times. A coin whose centre crosses
+   the front edge falls into the prize tray and pays out. Near the
+   front the side walls stop, and coins pushed off there are lost.
 
-  var canvas = document.getElementById('game');
-  var ctx = canvas.getContext('2d');
+   The pile is saved, so a reload doesn't hand out a fresh one.
+   ------------------------------------------------------------------ */
 
-  var HALF_W = 0.5;
-  var DEPTH = 1.0;
-  var COIN_R = 0.05;
-  var COIN_T = 0.012;               // thickness
-  var PUSH_MIN = 0.5, PUSH_MAX = 0.82;
-  var PUSH_PERIOD = 3.2;            // seconds per full stroke
-  var PUSH_H = 0.09;                // pusher block height
-  var WALL_START = 0.28;            // side walls only exist behind this z: the front corners are gutters
-  var WALL_H = 0.55;
+const canvas = document.getElementById('game');
+const fx = document.getElementById('fx');
+const fctx = fx.getContext('2d');
 
-  var TYPES = {
-    coin: { value: 1 },
-    gold: { value: 5 },
-    star: { value: 20 }
-  };
+const HALF_W = 0.5;
+const DEPTH = 1.0;
+const COIN_R = 0.05;
+const COIN_T = 0.012;               // thickness
+const PUSH_MIN = 0.5, PUSH_MAX = 0.82;
+const PUSH_PERIOD = 3.2;            // seconds per full stroke
+const PUSH_H = 0.09;                // pusher block height
+const WALL_START = 0.28;            // side walls only exist behind this z: the front corners are gutters
+const WALL_H = 0.55;
+const TRAY_FLOOR = -0.24, TRAY_Z0 = -0.24, TRAY_Z1 = -0.03;
+const BASE_Y = -0.75;
+const CHUTE_Z = DEPTH - 0.09;
 
-  // ---- camera ----
-  var CAM = { y: 1.9, z: -1.25, pitch: 47 * Math.PI / 180 };
-  var cosP = Math.cos(CAM.pitch), sinP = Math.sin(CAM.pitch);
-  var W = 0, H = 0, DPR = 1, S = 1, OX = 0, OY = 0;
+const TYPES = {
+  coin: { value: 1 },
+  gold: { value: 5 },
+  star: { value: 20 }
+};
+const TYPE_KEYS = ['coin', 'gold', 'star'];
 
-  function rawProject(x, y, z) {
-    var dy = y - CAM.y, dz = z - CAM.z;
-    var yc = dy * cosP + dz * sinP;
-    var zc = dz * cosP - dy * sinP;
-    return { x: x / zc, y: -yc / zc, d: zc };
+const V = (x, y, z) => new THREE.Vector3(x, y, -z);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+/* ---------- renderer ---------- */
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e) {
+  document.getElementById('fail').style.display = 'flex';
+  throw e;
+}
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0e2a3a');
+scene.fog = new THREE.Fog('#0e2a3a', 4, 10);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envMap = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 30);
+
+scene.add(new THREE.HemisphereLight('#bfe6ff', '#1a2a33', 0.8));
+const key = new THREE.DirectionalLight('#fff6e8', 1.5);
+key.position.set(0.6, 2.4, 0.8);
+key.target.position.copy(V(0, 0, 0.5));
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -0.8; key.shadow.camera.right = 0.8;
+key.shadow.camera.top = 0.9; key.shadow.camera.bottom = -0.9;
+key.shadow.camera.near = 0.5; key.shadow.camera.far = 5;
+key.shadow.bias = -0.0006;
+key.shadow.normalBias = 0.004;
+scene.add(key, key.target);
+const pinkLight = new THREE.PointLight('#ff6ad8', 0.45, 1.4, 2);
+pinkLight.position.copy(V(-0.5, 0.5, 0.75));
+const cyanLight = new THREE.PointLight('#5fd6ff', 0.45, 1.4, 2);
+cyanLight.position.copy(V(0.5, 0.5, 0.75));
+scene.add(pinkLight, cyanLight);
+
+/* ---------- textures ---------- */
+
+function canvasTex(w, h, draw, srgb = true) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+function starPath(c, cx, cy, R, r) {
+  c.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R;
+    if (i) c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); else c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
   }
-  function P(x, y, z) {
-    var p = rawProject(x, y, z);
-    return { x: OX + p.x * S, y: OY + p.y * S, k: S / p.d };
-  }
-
-  function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.clientWidth;
-    H = canvas.clientHeight;
-    canvas.width = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-    var pts = [
-      rawProject(-HALF_W - 0.05, -0.28, -0.08), rawProject(HALF_W + 0.05, -0.28, -0.08),
-      rawProject(-HALF_W - 0.05, WALL_H + 0.12, DEPTH), rawProject(HALF_W + 0.05, WALL_H + 0.12, DEPTH)
-    ];
-    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    pts.forEach(function (p) {
-      minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
-      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
-    });
-    var topPad = 58, botPad = 8;
-    S = Math.min((W - 12) / (maxX - minX), (H - topPad - botPad) / (maxY - minY));
-    OX = W / 2 - (minX + maxX) / 2 * S;
-    OY = topPad + (H - topPad - botPad - (maxY - minY) * S) / 2 - minY * S;
-  }
-
-  /* ---------- state ---------- */
-
-  var shelf = [], top = [], dropping = [], falling = [], popups = [];
-  var bank = 30, won = 0, dropsSinceStar = 0;
-  var pushT = 0, face = PUSH_MIN, lastFace = PUSH_MIN;
-  var aimX = 0, aimShown = false;
-
-  try {
-    var saved = JSON.parse(localStorage.getItem('coinpusher-bank') || 'null');
-    if (saved && typeof saved.bank === 'number') { bank = saved.bank; won = saved.won || 0; }
-  } catch (e) {}
-
-  var elBank = document.getElementById('bank');
-  var elWon = document.getElementById('won');
-  var elRefill = document.getElementById('refill');
-  var elHint = document.getElementById('hint');
-  var elLive = document.getElementById('live');
-
-  function save() {
-    try { localStorage.setItem('coinpusher-bank', JSON.stringify({ bank: bank, won: won })); } catch (e) {}
-  }
-  function updateHud() {
-    elBank.textContent = bank;
-    elWon.textContent = won;
-    elRefill.classList.toggle('show', bank <= 0);
-  }
-
-  function makeCoin(x, z, type) {
-    return { x: x, z: z, type: type || 'coin', rot: Math.random() * Math.PI * 2 };
-  }
-
-  function fillMachine() {
-    var i, t;
-    for (i = 0; i < 46; i++) {
-      t = i % 13 === 5 ? 'gold' : 'coin';
-      shelf.push(makeCoin((Math.random() * 2 - 1) * (HALF_W - COIN_R), 0.06 + Math.random() * (PUSH_MIN - 0.1), t));
+  c.closePath();
+}
+function faceTex(face, rim, mark, kind) {
+  return canvasTex(256, 256, (c, w) => {
+    const m = w / 2;
+    c.fillStyle = rim; c.fillRect(0, 0, w, w);
+    const g = c.createRadialGradient(m * 0.8, m * 0.7, 10, m, m, m * 0.86);
+    g.addColorStop(0, face); g.addColorStop(1, rim);
+    c.fillStyle = g;
+    c.beginPath(); c.arc(m, m, m * 0.86, 0, Math.PI * 2); c.fill();
+    // raised rim and beads
+    c.strokeStyle = mark; c.lineWidth = 6;
+    c.beginPath(); c.arc(m, m, m * 0.8, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = mark;
+    for (let i = 0; i < 36; i++) {
+      const a = i / 36 * Math.PI * 2;
+      c.beginPath(); c.arc(m + Math.cos(a) * m * 0.7, m + Math.sin(a) * m * 0.7, 3, 0, Math.PI * 2); c.fill();
     }
-    shelf.push(makeCoin(0.05, 0.16, 'star'));
-    for (i = 0; i < 12; i++) top.push(makeCoin((Math.random() * 2 - 1) * (HALF_W - COIN_R), PUSH_MIN + Math.random() * (DEPTH - PUSH_MIN), 'coin'));
-    // Settle the random scatter so nothing starts overlapping.
-    for (i = 0; i < 60; i++) {
-      relax(shelf, 'shelf'); relax(top, 'top');
-      // While setting up, the front edge acts as a wall so nothing pays out for free.
-      shelf.forEach(function (c) { c.z = Math.max(c.z, COIN_R * 0.6); c.x = clamp(c.x, -HALF_W + COIN_R, HALF_W - COIN_R); });
-    }
-  }
-
-  /* ---------- physics ---------- */
-
-  function relax(list, layer) {
-    var n = list.length, i, j, a, b, dx, dz, d2, d, push, wa, wb;
-    var min = COIN_R * 2, min2 = min * min;
-    for (i = 0; i < n; i++) {
-      a = list[i];
-      for (j = i + 1; j < n; j++) {
-        b = list[j];
-        dx = b.x - a.x;
-        if (dx > min || dx < -min) continue;
-        dz = b.z - a.z;
-        if (dz > min || dz < -min) continue;
-        d2 = dx * dx + dz * dz;
-        if (d2 >= min2) continue;
-        d = Math.sqrt(d2) || 1e-4;
-        // A coin pinned against the pusher (or the back wall) can't give way.
-        wa = pinned(a, layer) ? 0 : 1;
-        wb = pinned(b, layer) ? 0 : 1;
-        if (!wa && !wb) { wa = wb = 1; }
-        push = (min - d) / d / (wa + wb);
-        a.x -= dx * push * wa; a.z -= dz * push * wa;
-        b.x += dx * push * wb; b.z += dz * push * wb;
-      }
-    }
-    for (i = 0; i < n; i++) bounds(list[i], layer);
-  }
-
-  function pinned(c, layer) {
-    return layer === 'shelf' ? c.z >= face - COIN_R - 0.002 : c.z >= DEPTH - COIN_R - 0.002;
-  }
-
-  function bounds(c, layer) {
-    if (layer === 'shelf') {
-      if (c.z > face - COIN_R) c.z = face - COIN_R;
-      if (c.z >= WALL_START) {
-        if (c.x < -HALF_W + COIN_R) c.x = -HALF_W + COIN_R;
-        if (c.x > HALF_W - COIN_R) c.x = HALF_W - COIN_R;
-      }
+    if (kind === 'star') {
+      c.fillStyle = mark;
+      starPath(c, m, m + 4, m * 0.5, m * 0.22); c.fill();
+      c.strokeStyle = 'rgba(0,0,0,0.25)'; c.lineWidth = 4; c.stroke();
+    } else if (kind === 'gold') {
+      c.font = `bold ${Math.round(m * 0.95)}px "Trebuchet MS", Tahoma, sans-serif`;
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = 'rgba(0,0,0,0.25)'; c.fillText('5', m + 4, m + 8);
+      c.fillStyle = mark; c.fillText('5', m, m + 4);
     } else {
-      if (c.z > DEPTH - COIN_R) c.z = DEPTH - COIN_R;
+      c.fillStyle = mark;
+      starPath(c, m, m + 2, m * 0.28, m * 0.12); c.fill();
+      c.strokeStyle = mark; c.lineWidth = 4;
+      c.beginPath(); c.arc(m, m, m * 0.45, 0, Math.PI * 2); c.stroke();
+    }
+  });
+}
+function edgeTex(col, dark) {
+  const t = canvasTex(256, 8, (c, w, h) => {
+    c.fillStyle = col; c.fillRect(0, 0, w, h);
+    c.fillStyle = dark;
+    for (let x = 0; x < w; x += 4) c.fillRect(x, 0, 2, h);
+  });
+  return t;
+}
+
+const marqueeTex = canvasTex(1024, 300, (c, w, h) => {
+  const g = c.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#2f86d6');
+  g.addColorStop(1, '#123a66');
+  c.fillStyle = g;
+  c.fillRect(0, 0, w, h);
+  c.save();
+  c.translate(w / 2, h * 1.2);
+  for (let i = 0; i < 24; i++) {
+    c.rotate(Math.PI / 12);
+    c.fillStyle = i % 2 ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    c.beginPath(); c.moveTo(0, 0); c.lineTo(-80, -h * 1.8); c.lineTo(80, -h * 1.8); c.closePath(); c.fill();
+  }
+  c.restore();
+  c.font = 'italic bold 112px "Trebuchet MS", Tahoma, sans-serif';
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.lineJoin = 'round'; c.lineWidth = 16; c.strokeStyle = '#0b2240';
+  c.strokeText('PUSH YOUR LUCK', w / 2, h * 0.52);
+  const tg = c.createLinearGradient(0, h * 0.3, 0, h * 0.7);
+  tg.addColorStop(0, '#fff8c4'); tg.addColorStop(1, '#f6c21c');
+  c.fillStyle = tg;
+  c.fillText('PUSH YOUR LUCK', w / 2, h * 0.52);
+});
+
+const shelfTex = canvasTex(512, 512, (c, w, h) => {
+  const g = c.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#5a1660');
+  g.addColorStop(1, '#a8329a');
+  c.fillStyle = g; c.fillRect(0, 0, w, h);
+  c.strokeStyle = 'rgba(255,255,255,0.07)'; c.lineWidth = 2;
+  for (let i = -h; i < w; i += 36) { c.beginPath(); c.moveTo(i, h); c.lineTo(i + h, 0); c.stroke(); }
+  c.fillStyle = 'rgba(255,226,122,0.12)';
+  for (let i = 0; i < 40; i++) { starPath(c, Math.random() * w, Math.random() * h, 8, 3.5); c.fill(); }
+});
+
+const hazardTex = canvasTex(512, 64, (c, w, h) => {
+  c.fillStyle = '#f6c21c'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#1b1b1b';
+  for (let x = -h; x < w + h; x += 48) {
+    c.beginPath(); c.moveTo(x, h); c.lineTo(x + 24, h); c.lineTo(x + 24 + h, 0); c.lineTo(x + h, 0); c.closePath(); c.fill();
+  }
+});
+
+const plateTex = canvasTex(512, 512, (c, w, h) => {
+  c.fillStyle = '#b9c4cf'; c.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y++) {
+    c.fillStyle = `rgba(255,255,255,${Math.random() * 0.08})`;
+    c.fillRect(0, y, w, 1);
+  }
+  c.fillStyle = 'rgba(0,0,0,0.12)';
+  for (let i = 1; i < 6; i++) c.fillRect(0, i * h / 6, w, 3);
+});
+
+/* ---------- the machine ---------- */
+
+const M = {
+  cabinet: new THREE.MeshStandardMaterial({ color: '#1f6fb3', roughness: 0.3, metalness: 0.15, envMap, envMapIntensity: 0.4 }),
+  cabinetDark: new THREE.MeshStandardMaterial({ color: '#0c2640', roughness: 0.6 }),
+  chrome: new THREE.MeshStandardMaterial({ color: '#eef2f6', roughness: 0.18, metalness: 1, envMap, envMapIntensity: 1 }),
+  gold: new THREE.MeshStandardMaterial({ color: '#f6c21c', roughness: 0.3, metalness: 0.6, envMap, envMapIntensity: 0.6 }),
+  shelf: new THREE.MeshStandardMaterial({ map: shelfTex, roughness: 0.5, envMap, envMapIntensity: 0.2 }),
+  plate: new THREE.MeshStandardMaterial({ map: plateTex, roughness: 0.35, metalness: 0.7, envMap, envMapIntensity: 0.8 }),
+  hazard: new THREE.MeshStandardMaterial({ map: hazardTex, roughness: 0.45, metalness: 0.1 }),
+  pit: new THREE.MeshStandardMaterial({ color: '#03080c', roughness: 1 }),
+  tray: new THREE.MeshStandardMaterial({ color: '#2b3a45', roughness: 0.3, metalness: 0.8, envMap, envMapIntensity: 0.6 }),
+  glass: new THREE.MeshStandardMaterial({ color: '#d4f0ff', roughness: 0.05, envMap, envMapIntensity: 0.8, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide }),
+  bulbOn: new THREE.MeshStandardMaterial({ color: '#fff2a8', emissive: '#ffd84a', emissiveIntensity: 2.2 }),
+  bulbOff: new THREE.MeshStandardMaterial({ color: '#56677a', emissive: '#102030', emissiveIntensity: 0.3, roughness: 0.4 }),
+  floor: new THREE.MeshStandardMaterial({ color: '#0a1c26', roughness: 0.95 })
+};
+
+function box(w, h, d, mat, x, y, z, opts = {}) {
+  const geo = opts.round ? new RoundedBoxGeometry(w, h, d, 2, opts.round) : new THREE.BoxGeometry(w, h, d);
+  const m = new THREE.Mesh(geo, mat);
+  m.position.copy(V(x, y, z));
+  m.castShadow = opts.cast !== false;
+  m.receiveShadow = true;
+  (opts.parent || scene).add(m);
+  return m;
+}
+// box spanning [x0,x1] × [y0,y1] × [z0,z1] in simulation coordinates
+function slab(x0, x1, y0, y1, z0, z1, mat, opts) {
+  return box(x1 - x0, y1 - y0, z1 - z0, mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, opts);
+}
+
+{
+  const f = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), M.floor);
+  f.rotation.x = -Math.PI / 2; f.position.y = BASE_Y; f.receiveShadow = true;
+  scene.add(f);
+}
+
+const SIDE = 0.08;  // cabinet side thickness
+// Shelf (playfield) and the body under it
+{
+  const shelf = new THREE.Mesh(new THREE.PlaneGeometry(HALF_W * 2, DEPTH + 0.3), M.shelf);
+  shelf.rotation.x = -Math.PI / 2;
+  shelf.position.copy(V(0, 0, (DEPTH + 0.3) / 2));
+  shelf.receiveShadow = true;
+  scene.add(shelf);
+}
+slab(-HALF_W, HALF_W, BASE_Y, -0.001, 0, DEPTH + 0.3, M.cabinetDark, { cast: false });
+slab(-HALF_W - 0.004, HALF_W + 0.004, -0.03, 0.002, -0.012, 0.004, M.gold, { round: 0.004 });   // front edge trim
+// Prize tray in front of the edge
+slab(-HALF_W - SIDE, HALF_W + SIDE, BASE_Y, TRAY_FLOOR, TRAY_Z0 - 0.04, 0, M.cabinet, { round: 0.015 });
+slab(-HALF_W, HALF_W, TRAY_FLOOR, TRAY_FLOOR + 0.004, TRAY_Z0, TRAY_Z1, M.tray, { cast: false });
+slab(-HALF_W - SIDE, HALF_W + SIDE, TRAY_FLOOR, TRAY_FLOOR + 0.07, TRAY_Z0 - 0.04, TRAY_Z0, M.chrome, { round: 0.012 }); // front lip
+slab(-HALF_W, HALF_W, TRAY_FLOOR, -0.03, TRAY_Z1, 0, M.cabinetDark, { cast: false });   // back of the tray (under the edge)
+// Front panel art under the tray
+{
+  const art = canvasTex(512, 256, (c, w, h) => {
+    const g = c.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#1f6fb3'); g.addColorStop(1, '#0c2f57');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = 'rgba(255,255,255,0.08)';
+    for (let i = 0; i < 9; i++) { c.beginPath(); c.arc(w / 2, h * 1.3, 60 + i * 50, Math.PI, 0); c.lineWidth = 16; c.strokeStyle = i % 2 ? 'rgba(255,255,255,0.06)' : 'rgba(246,194,28,0.12)'; c.stroke(); }
+    c.font = 'italic bold 64px "Trebuchet MS", Tahoma, sans-serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.lineJoin = 'round'; c.lineWidth = 10; c.strokeStyle = '#0b2240';
+    c.strokeText('PRIZES!', w / 2, h * 0.36);
+    c.fillStyle = '#ffe27a'; c.fillText('PRIZES!', w / 2, h * 0.36);
+    c.font = 'bold 26px "Trebuchet MS", Tahoma, sans-serif';
+    c.fillStyle = 'rgba(255,255,255,0.85)';
+    c.fillText('SILVER 1  \u00b7  GOLD 5  \u00b7  STAR 20', w / 2, h * 0.68);
+  });
+  const ph = TRAY_FLOOR - 0.03 - (BASE_Y + 0.05);
+  const panel = new THREE.Mesh(new THREE.PlaneGeometry(HALF_W * 2 + SIDE, ph),
+    new THREE.MeshStandardMaterial({ map: art, roughness: 0.4, emissiveMap: art, emissive: '#ffffff', emissiveIntensity: 0.15 }));
+  panel.position.copy(V(0, BASE_Y + 0.05 + ph / 2, TRAY_Z0 - 0.041));
+  scene.add(panel);
+}
+// Cabinet sides: full height behind WALL_START, dropped low at the front corners (the gutters)
+[-1, 1].forEach(sx => {
+  const x0 = sx < 0 ? -HALF_W - SIDE : HALF_W, x1 = sx < 0 ? -HALF_W : HALF_W + SIDE;
+  slab(x0, x1, BASE_Y, 0.03, WALL_START, DEPTH + 0.3, M.cabinet, { round: 0.012 });
+  slab(x0, x1, BASE_Y, TRAY_FLOOR + 0.07, TRAY_Z0 - 0.04, WALL_START, M.cabinet, { round: 0.012 });
+  // the gutter hole between shelf and side
+  slab(sx < 0 ? x0 + 0.012 : x0, sx < 0 ? x1 : x1 - 0.012, TRAY_FLOOR + 0.071, TRAY_FLOOR + 0.072, 0, WALL_START, M.pit, { cast: false });
+  const tx = sx < 0 ? -HALF_W - 0.012 : HALF_W;
+  slab(tx, tx + 0.012, 0.03, 0.036, WALL_START, DEPTH + 0.3, M.chrome, { round: 0.003 });
+});
+// Glass side walls, tapering toward the front
+[-1, 1].forEach(sx => {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0); s.lineTo(DEPTH - WALL_START, 0); s.lineTo(DEPTH - WALL_START, WALL_H); s.lineTo(0, WALL_H * 0.7); s.closePath();
+  const g = new THREE.Mesh(new THREE.ShapeGeometry(s), M.glass);
+  g.rotation.y = -Math.PI / 2;
+  g.position.copy(V(sx * HALF_W, 0.03, WALL_START));
+  g.renderOrder = 2;
+  scene.add(g);
+  // chrome posts and top rail
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, WALL_H * 0.7, 10), M.chrome);
+  post.position.copy(V(sx * HALF_W, 0.03 + WALL_H * 0.35, WALL_START));
+  scene.add(post);
+  const len = Math.hypot(DEPTH - WALL_START, WALL_H * 0.3);
+  const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, len, 10), M.chrome);
+  rail.position.copy(V(sx * HALF_W, 0.03 + WALL_H * 0.85, (WALL_START + DEPTH) / 2));
+  rail.rotation.x = Math.PI / 2 - Math.atan2(WALL_H * 0.3, DEPTH - WALL_START);
+  scene.add(rail);
+});
+// Back wall (coins on the pusher get scraped against its bottom edge) and marquee
+slab(-HALF_W - SIDE, HALF_W + SIDE, PUSH_H + 0.002, WALL_H + 0.22, DEPTH, DEPTH + 0.08, M.cabinet, { round: 0.015 });
+{
+  const mq = new THREE.Mesh(new THREE.PlaneGeometry(HALF_W * 2 - 0.04, WALL_H * 0.62),
+    new THREE.MeshStandardMaterial({ map: marqueeTex, emissiveMap: marqueeTex, emissive: '#ffffff', emissiveIntensity: 0.5, roughness: 0.5 }));
+  mq.position.copy(V(0, PUSH_H + 0.04 + WALL_H * 0.31, DEPTH - 0.001));
+  scene.add(mq);
+}
+slab(-HALF_W, HALF_W, PUSH_H + 0.002, PUSH_H + 0.03, DEPTH - 0.012, DEPTH, M.chrome, { round: 0.006 }); // scraper bar
+
+// Chute rail across the top, and the dropper that rides on it
+const RAIL_Y = WALL_H + 0.08;
+{
+  const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, HALF_W * 2 + 0.06, 12), M.chrome);
+  rail.rotation.z = Math.PI / 2;
+  rail.position.copy(V(0, RAIL_Y + 0.05, CHUTE_Z));
+  scene.add(rail);
+  [-1, 1].forEach(sx => {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, DEPTH + 0.04 - CHUTE_Z), M.chrome);
+    arm.position.copy(V(sx * (HALF_W + 0.03), RAIL_Y + 0.05, (CHUTE_Z + DEPTH + 0.04) / 2));
+    scene.add(arm);
+  });
+}
+const dropper = new THREE.Group();
+{
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.045, 0.09, 24, 1, true), new THREE.MeshStandardMaterial({ color: '#f6c21c', roughness: 0.3, metalness: 0.6, envMap, envMapIntensity: 0.7, side: THREE.DoubleSide }));
+  body.castShadow = true;
+  dropper.add(body);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.008, 8, 32), M.chrome);
+  rim.rotation.x = Math.PI / 2; rim.position.y = 0.045;
+  dropper.add(rim);
+  const clamp1 = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.03), M.chrome);
+  clamp1.position.y = 0.06;
+  dropper.add(clamp1);
+  dropper.position.copy(V(0, RAIL_Y, CHUTE_Z));
+  scene.add(dropper);
+}
+
+// The pusher: a sliding block whose top is a second shelf
+const pusher = new THREE.Group();
+scene.add(pusher);
+const PUSH_LEN = DEPTH + 0.3 - PUSH_MIN;   // long enough to stay under the back wall at full stroke
+{
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(HALF_W * 2, PUSH_LEN), M.plate);
+  top.rotation.x = -Math.PI / 2;
+  top.position.set(0, PUSH_H, -PUSH_LEN / 2);
+  top.receiveShadow = true;
+  pusher.add(top);
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(HALF_W * 2, PUSH_H), M.hazard);
+  front.position.set(0, PUSH_H / 2, 0);
+  front.receiveShadow = true;
+  pusher.add(front);
+  const lip = new THREE.Mesh(new THREE.BoxGeometry(HALF_W * 2, 0.008, 0.012), M.chrome);
+  lip.position.set(0, PUSH_H, -0.006);
+  pusher.add(lip);
+  const sides = new THREE.Mesh(new THREE.BoxGeometry(HALF_W * 2, PUSH_H - 0.002, PUSH_LEN), M.cabinetDark);
+  sides.position.set(0, PUSH_H / 2, -PUSH_LEN / 2 - 0.001);
+  sides.castShadow = true;
+  pusher.add(sides);
+}
+
+// Chase lights across the top of the back wall and down the front corners
+const bulbs = [];
+{
+  const geo = new THREE.SphereGeometry(0.012, 12, 8);
+  const add = (p, order) => { const m = new THREE.Mesh(geo, M.bulbOff); m.position.copy(p); scene.add(m); bulbs.push({ m, order }); };
+  for (let i = 0; i < 13; i++) add(V(-HALF_W - 0.02 + i * (HALF_W * 2 + 0.04) / 12, WALL_H + 0.18, DEPTH - 0.003), i);
+  for (let i = 0; i < 7; i++) {
+    const x = -HALF_W + 0.04 + i * (HALF_W * 2 - 0.08) / 6;
+    add(V(x, TRAY_FLOOR + 0.035, TRAY_Z0 - 0.042), 20 + i);
+  }
+}
+
+/* ---------- coin meshes (one instanced mesh per coin type) ---------- */
+
+const COLORS = {
+  coin: { face: '#f4f7fa', rim: '#9aa3ad', mark: '#c7ced6', edge: '#b8c0c8', edgeDark: '#7d868f', metal: '#e2e7ec' },
+  gold: { face: '#fff0a0', rim: '#d39a10', mark: '#f6c21c', edge: '#e0a816', edgeDark: '#9a6a00', metal: '#ffd24a' },
+  star: { face: '#ffb8f0', rim: '#c42aa6', mark: '#ffe27a', edge: '#e04cc4', edgeDark: '#8a1470', metal: '#ff7ae0' }
+};
+const MAX_COINS = 320;
+const coinGeo = new THREE.CylinderGeometry(COIN_R, COIN_R, COIN_T, 40, 1);
+const coinMesh = {};
+TYPE_KEYS.forEach(t => {
+  const col = COLORS[t];
+  const faceMat = new THREE.MeshStandardMaterial({ map: faceTex(col.face, col.rim, col.mark, t), color: '#ffffff', metalness: t === 'star' ? 0.3 : 0.7, roughness: 0.38, envMap, envMapIntensity: 0.6 });
+  const edgeMat = new THREE.MeshStandardMaterial({ map: edgeTex(col.edge, col.edgeDark), metalness: 0.8, roughness: 0.35, envMap, envMapIntensity: 0.7 });
+  const im = new THREE.InstancedMesh(coinGeo, [edgeMat, faceMat, faceMat], MAX_COINS);
+  im.castShadow = true; im.receiveShadow = true;
+  im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  im.frustumCulled = false;
+  scene.add(im);
+  coinMesh[t] = im;
+});
+
+/* ---------- camera framing ---------- */
+
+const CAM_PITCH = 47 * Math.PI / 180;
+const camDir = new THREE.Vector3(0, -Math.sin(CAM_PITCH), -Math.cos(CAM_PITCH));
+let lensShift = { x: 0, y: 0 };
+let W = 0, H = 0, DPR = 1;
+const FIT_POINTS = [
+  V(-HALF_W - SIDE, TRAY_FLOOR, TRAY_Z0 - 0.05), V(HALF_W + SIDE, TRAY_FLOOR, TRAY_Z0 - 0.05),
+  V(-HALF_W - SIDE, RAIL_Y + 0.08, DEPTH), V(HALF_W + SIDE, RAIL_Y + 0.08, DEPTH),
+  V(-HALF_W - SIDE, -0.1, TRAY_Z0 - 0.05), V(HALF_W + SIDE, -0.1, TRAY_Z0 - 0.05)
+];
+const HUD_TOP = 58, HUD_BOT = 54;
+
+function applyLens() {
+  camera.updateProjectionMatrix();
+  camera.projectionMatrix.elements[8] -= lensShift.x;
+  camera.projectionMatrix.elements[9] -= lensShift.y;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+}
+function frameMachine() {
+  camera.aspect = W / H;
+  lensShift = { x: 0, y: 0 };
+  applyLens();
+  const look = V(0, 0.05, 0.4);
+  const availX = 2 - 4 * 6 / W, availY = 2 - 2 * (HUD_TOP + HUD_BOT) / H;
+  const measure = d => {
+    camera.position.copy(look).addScaledVector(camDir, -d);
+    camera.lookAt(look);
+    camera.updateMatrixWorld();
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    FIT_POINTS.forEach(p => {
+      const q = p.clone().project(camera);
+      minX = Math.min(minX, q.x); maxX = Math.max(maxX, q.x);
+      minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y);
+    });
+    return { minX, maxX, minY, maxY };
+  };
+  let lo = 0.5, hi = 30;
+  for (let i = 0; i < 40; i++) {
+    const d = (lo + hi) / 2, e = measure(d);
+    if (e.maxX - e.minX <= availX && e.maxY - e.minY <= availY) hi = d; else lo = d;
+  }
+  const ext = measure(hi);
+  lensShift = { x: -(ext.minX + ext.maxX) / 2, y: (HUD_BOT - HUD_TOP) / H - (ext.minY + ext.maxY) / 2 };
+  applyLens();
+}
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = Math.max(1, canvas.clientWidth);
+  H = Math.max(1, canvas.clientHeight);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(W, H, false);
+  fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR);
+  frameMachine();
+}
+
+/* ---------- state ---------- */
+
+let shelf = [], top = [], dropping = [], falling = [], tray = [];
+const popups = [], confetti = [];
+let bank = 30, won = 0, dropsSinceStar = 0;
+let pushT = 0, face = PUSH_MIN, lastFace = PUSH_MIN;
+let aimX = 0, dropperX = 0, aimShown = false;
+let streak = { total: 0, count: 0, t: 0 };
+let celebrate = 0;
+
+const elBank = document.getElementById('bank');
+const elBankPanel = document.getElementById('bankPanel');
+const elWon = document.getElementById('won');
+const elRefill = document.getElementById('refill');
+const elHint = document.getElementById('hint');
+const elLive = document.getElementById('live');
+
+function makeCoin(x, z, type) {
+  return { x, z, type: type || 'coin', rot: Math.random() * Math.PI * 2 };
+}
+
+function save() {
+  try {
+    const pack = list => list.map(c => [+c.x.toFixed(4), +c.z.toFixed(4), TYPE_KEYS.indexOf(c.type)]);
+    // coins still in the air are saved where they'll land
+    const airTop = dropping.filter(c => c.drop.onTop), airShelf = dropping.filter(c => !c.drop.onTop);
+    localStorage.setItem('coinpusher-bank', JSON.stringify({
+      v: 2, bank, won, t: +(pushT % PUSH_PERIOD).toFixed(3),
+      shelf: pack(shelf.concat(airShelf)), top: pack(top.concat(airTop))
+    }));
+  } catch (e) {}
+}
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem('coinpusher-bank') || 'null');
+    if (!s || typeof s.bank !== 'number') return false;
+    bank = s.bank; won = s.won || 0;
+    if (s.v !== 2 || !Array.isArray(s.shelf)) return false;
+    const unpack = a => a.map(([x, z, t]) => makeCoin(x, z, TYPE_KEYS[t] || 'coin'));
+    shelf = unpack(s.shelf); top = unpack(s.top || []);
+    pushT = s.t || 0;
+    face = lastFace = pushFace(pushT);
+    return true;
+  } catch (e) { return false; }
+}
+
+function updateHud() {
+  elBank.textContent = bank;
+  elWon.textContent = won;
+  elRefill.classList.toggle('show', bank <= 0);
+  elBankPanel.classList.toggle('low', bank <= 0);
+}
+function bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+
+function fillMachine() {
+  let i, t;
+  for (i = 0; i < 46; i++) {
+    t = i % 13 === 5 ? 'gold' : 'coin';
+    shelf.push(makeCoin((Math.random() * 2 - 1) * (HALF_W - COIN_R), 0.06 + Math.random() * (PUSH_MIN - 0.1), t));
+  }
+  shelf.push(makeCoin(0.05, 0.16, 'star'));
+  for (i = 0; i < 12; i++) top.push(makeCoin((Math.random() * 2 - 1) * (HALF_W - COIN_R), PUSH_MIN + Math.random() * (DEPTH - PUSH_MIN), 'coin'));
+  // Settle the random scatter so nothing starts overlapping.
+  for (i = 0; i < 60; i++) {
+    relax(shelf, 'shelf'); relax(top, 'top');
+    // While setting up, the front edge acts as a wall so nothing pays out for free.
+    shelf.forEach(c => { c.z = Math.max(c.z, COIN_R * 0.6); c.x = clamp(c.x, -HALF_W + COIN_R, HALF_W - COIN_R); });
+  }
+}
+
+/* ---------- physics ---------- */
+
+function relax(list, layer) {
+  const n = list.length, min = COIN_R * 2, min2 = min * min;
+  for (let i = 0; i < n; i++) {
+    const a = list[i];
+    for (let j = i + 1; j < n; j++) {
+      const b = list[j];
+      const dx = b.x - a.x;
+      if (dx > min || dx < -min) continue;
+      const dz = b.z - a.z;
+      if (dz > min || dz < -min) continue;
+      const d2 = dx * dx + dz * dz;
+      if (d2 >= min2) continue;
+      const d = Math.sqrt(d2) || 1e-4;
+      // A coin pinned against the pusher (or the back wall) can't give way.
+      let wa = pinned(a, layer) ? 0 : 1, wb = pinned(b, layer) ? 0 : 1;
+      if (!wa && !wb) { wa = wb = 1; }
+      const push = (min - d) / d / (wa + wb);
+      a.x -= dx * push * wa; a.z -= dz * push * wa;
+      b.x += dx * push * wb; b.z += dz * push * wb;
+    }
+  }
+  for (let i = 0; i < n; i++) bounds(list[i], layer);
+}
+
+function pinned(c, layer) {
+  return layer === 'shelf' ? c.z >= face - COIN_R - 0.002 : c.z >= DEPTH - COIN_R - 0.002;
+}
+
+function bounds(c, layer) {
+  if (layer === 'shelf') {
+    if (c.z > face - COIN_R) c.z = face - COIN_R;
+    if (c.z >= WALL_START) {
       if (c.x < -HALF_W + COIN_R) c.x = -HALF_W + COIN_R;
       if (c.x > HALF_W - COIN_R) c.x = HALF_W - COIN_R;
     }
+  } else {
+    if (c.z > DEPTH - COIN_R) c.z = DEPTH - COIN_R;
+    if (c.x < -HALF_W + COIN_R) c.x = -HALF_W + COIN_R;
+    if (c.x > HALF_W - COIN_R) c.x = HALF_W - COIN_R;
+  }
+}
+
+function pushFace(t) { return PUSH_MIN + (PUSH_MAX - PUSH_MIN) * (0.5 - 0.5 * Math.cos(t / PUSH_PERIOD * Math.PI * 2)); }
+
+function step(dt) {
+  pushT += dt;
+  lastFace = face;
+  face = pushFace(pushT);
+  const dFace = face - lastFace;
+  let i, c;
+
+  // Coins on top ride with the pusher; the back wall then scrapes them.
+  for (i = 0; i < top.length; i++) top[i].z += dFace;
+
+  for (let it = 0; it < 4; it++) { relax(shelf, 'shelf'); relax(top, 'top'); }
+
+  // Spill off the pusher's front lip onto the shelf.
+  for (i = top.length - 1; i >= 0; i--) {
+    c = top[i];
+    if (c.z < face) {
+      top.splice(i, 1);
+      c.z = face - COIN_R - 0.005;
+      c.drop = { y: PUSH_H, vy: 0, spill: 1 };   // short fall to the shelf, tipping over the lip
+      dropping.push(c);
+    }
   }
 
-  function step(dt) {
-    pushT += dt;
-    lastFace = face;
-    face = PUSH_MIN + (PUSH_MAX - PUSH_MIN) * (0.5 - 0.5 * Math.cos(pushT / PUSH_PERIOD * Math.PI * 2));
-    var dFace = face - lastFace;
-    var i, c;
+  // Coins falling from the chute or off the lip.
+  for (i = dropping.length - 1; i >= 0; i--) {
+    c = dropping[i];
+    c.drop.vy -= 9.8 * dt;
+    c.drop.y += c.drop.vy * dt;
+    let floor = c.drop.onTop ? PUSH_H : 0;
+    if (c.drop.onTop) c.z += dFace; // falling onto the moving top
+    if (c.drop.y <= floor) {
+      dropping.splice(i, 1);
+      if (c.drop.onTop && c.z < face) { c.z = face - COIN_R - 0.005; c.drop.onTop = false; c.drop.y = PUSH_H; c.drop.spill = 1; dropping.push(c); continue; }
+      const onTop = !!floor;
+      delete c.drop;
+      c.wobble = 1;
+      (onTop ? top : shelf).push(c);
+      sfx.clink(onTop ? 0.5 : 0.35);
+    }
+  }
 
-    // Coins on top ride with the pusher; the back wall then scrapes them.
-    for (i = 0; i < top.length; i++) top[i].z += dFace;
-
-    for (var it = 0; it < 4; it++) { relax(shelf, 'shelf'); relax(top, 'top'); }
-
-    // Spill off the pusher's front lip onto the shelf.
-    for (i = top.length - 1; i >= 0; i--) {
-      c = top[i];
-      if (c.z < face) {
-        top.splice(i, 1);
-        c.z = face - COIN_R - 0.005;
-        c.drop = { y: PUSH_H, vy: 0 };   // short fall to the shelf
-        dropping.push(c);
+  // Off the front edge, or out through a front corner.
+  for (i = shelf.length - 1; i >= 0; i--) {
+    c = shelf[i];
+    const offFront = c.z < 0;
+    const offSide = c.z < WALL_START && (c.x < -HALF_W || c.x > HALF_W);
+    if (offFront || offSide) {
+      shelf.splice(i, 1);
+      c.fall = {
+        y: 0, vy: 0.15, t: 0, win: offFront,
+        vz: offFront ? -0.25 - Math.random() * 0.2 : 0,
+        vx: offSide ? (c.x < 0 ? -0.3 : 0.3) : (Math.random() - 0.5) * 0.1,
+        tumble: 0, spinRate: 6 + Math.random() * 6, axis: offFront ? 0 : 1,
+        floor: offFront ? TRAY_FLOOR + 0.004 : -0.6
+      };
+      falling.push(c);
+      if (offFront) payout(c);
+      else { popup('lost', V(c.x, 0.05, c.z), '#9fb7c4', false); sfx.lost(); }
+    }
+  }
+  for (i = falling.length - 1; i >= 0; i--) {
+    c = falling[i];
+    const f = c.fall;
+    f.t += dt;
+    f.vy -= 9.8 * dt;
+    f.y += f.vy * dt;
+    c.z += f.vz * dt;
+    c.x += f.vx * dt;
+    f.tumble += f.spinRate * dt;
+    if (f.win) {
+      c.z = Math.max(c.z, TRAY_Z0 + COIN_R);
+      c.x = clamp(c.x, -HALF_W + COIN_R, HALF_W - COIN_R);
+    }
+    // Land in the tray (lying flat) or drop away down the gutter.
+    const landY = f.floor + (f.win ? trayHeight(c.x, c.z) : 0);
+    if (f.y <= landY) {
+      falling.splice(i, 1);
+      if (f.win) {
+        c.y = landY; c.tilt = (Math.random() - 0.5) * 0.25; c.tiltZ = (Math.random() - 0.5) * 0.25;
+        delete c.fall;
+        tray.push(c);
+        if (tray.length > 60) tray.shift();
+        sfx.clink(0.6);
       }
     }
-
-    // Coins falling from the slot or off the lip.
-    for (i = dropping.length - 1; i >= 0; i--) {
-      c = dropping[i];
-      c.drop.vy -= 9.8 * dt;
-      c.drop.y += c.drop.vy * dt;
-      var floor = c.drop.onTop ? PUSH_H : 0;
-      if (c.drop.onTop) c.z += dFace; // falling onto the moving top
-      if (c.drop.y <= floor) {
-        dropping.splice(i, 1);
-        if (c.drop.onTop && c.z < face) { c.z = face - COIN_R - 0.005; floor = 0; c.drop.onTop = false; c.drop.y = PUSH_H; dropping.push(c); continue; }
-        delete c.drop;
-        (floor ? top : shelf).push(c);
-        clink(floor ? 0.5 : 0.35);
-      }
-    }
-
-    // Off the front edge, or out through a front corner.
-    for (i = shelf.length - 1; i >= 0; i--) {
-      c = shelf[i];
-      var offFront = c.z < 0;
-      var offSide = c.z < WALL_START && (c.x < -HALF_W || c.x > HALF_W);
-      if (offFront || offSide) {
-        shelf.splice(i, 1);
-        c.fall = { y: 0, vy: 0.2, vz: offFront ? -0.25 : 0, vx: offSide ? (c.x < 0 ? -0.3 : 0.3) : 0, t: 0, win: offFront };
-        falling.push(c);
-        if (offFront) payout(c);
-        else popup('lost', P(c.x, 0.05, c.z), '#9fb7c4', false);
-      }
-    }
-    for (i = falling.length - 1; i >= 0; i--) {
-      c = falling[i];
-      c.fall.t += dt;
-      c.fall.vy -= 9.8 * dt;
-      c.fall.y += c.fall.vy * dt;
-      c.z += c.fall.vz * dt;
-      c.x += c.fall.vx * dt;
-      c.rot += dt * 8;
-      if (c.fall.y < -0.35) falling.splice(i, 1);
-    }
   }
+}
 
-  function payout(c) {
-    var v = TYPES[c.type].value;
-    bank += v; won += v;
-    updateHud(); save();
-    var big = v >= 5;
-    popup('+' + v, P(c.x, 0.05, 0), big ? '#ffe27a' : '#ffffff', big);
-    clink(1);
-    elLive.textContent = 'Won ' + v + (v === 1 ? ' coin' : ' coins') + '. You have ' + bank + '.';
+// Coins already in the tray make a little heap
+function trayHeight(x, z) {
+  let h = 0;
+  for (let i = 0; i < tray.length; i++) {
+    const t = tray[i], d2 = (t.x - x) ** 2 + (t.z - z) ** 2;
+    if (d2 < (COIN_R * 1.6) ** 2) h = Math.max(h, t.y - (TRAY_FLOOR + 0.004) + COIN_T);
   }
+  return Math.min(h, 0.06);
+}
 
-  /* ---------- dropping ---------- */
-
-  var lastDrop = 0;
-  function dropCoin() {
-    var now = performance.now();
-    if (now - lastDrop < 170) return;
-    if (bank <= 0) { elLive.textContent = 'Out of coins.'; return; }
-    lastDrop = now;
-    bank--;
-    updateHud(); save();
-    dropsSinceStar++;
-    var type = 'coin';
-    if (dropsSinceStar > 30 && Math.random() < 0.08) { type = 'star'; dropsSinceStar = 0; }
-    else if (Math.random() < 0.035) type = 'gold';
-    var x = clamp(aimX + (Math.random() - 0.5) * 0.02, -HALF_W + COIN_R, HALF_W - COIN_R);
-    var c = makeCoin(x, DEPTH - COIN_R - 0.02 - Math.random() * 0.12, type);
-    c.drop = { y: WALL_H, vy: 0, onTop: true };
-    dropping.push(c);
-    elHint.classList.add('gone');
+function payout(c) {
+  const v = TYPES[c.type].value;
+  bank += v; won += v;
+  updateHud(); save();
+  bump(elBank);
+  const big = v >= 5;
+  popup('+' + v, V(c.x, 0.04, 0), big ? '#ffe27a' : '#ffffff', big);
+  if (v >= 20) {
+    celebrate = 1;
+    burst(V(c.x, 0.05, 0), 70);
+    popup('JACKPOT!', V(0, 0.3, 0.3), '#ff7ae0', true, 1.8);
+    sfx.jackpot();
+  } else if (v >= 5) {
+    burst(V(c.x, 0.05, 0), 26);
+    sfx.chime();
   }
+  streak.total += v; streak.count++; streak.t = 0.9;
+  sfx.clink(1);
+  if (navigator.vibrate && lastPointerType === 'touch') { try { navigator.vibrate(v >= 5 ? 30 : 10); } catch (e) {} }
+  elLive.textContent = 'Won ' + v + (v === 1 ? ' coin' : ' coins') + '. You have ' + bank + '.';
+}
 
-  elRefill.addEventListener('click', function () {
-    bank += 20;
-    updateHud(); save();
-    canvas.focus({ preventScroll: true });
-  });
+/* ---------- dropping ---------- */
 
-  /* ---------- sound: a tiny synthesized clink ---------- */
-
-  var audio = null, lastClink = 0;
-  function clink(vol) {
-    if (!audio) return;
-    var now = audio.currentTime;
-    if (now - lastClink < 0.03) return;
-    lastClink = now;
-    var o = audio.createOscillator(), g = audio.createGain();
-    o.type = 'triangle';
-    o.frequency.value = 2400 + Math.random() * 1600;
-    g.gain.setValueAtTime(0.05 * vol, now);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
-    o.connect(g); g.connect(audio.destination);
-    o.start(now); o.stop(now + 0.13);
+let lastDrop = 0;
+function dropCoin() {
+  const now = performance.now();
+  if (now - lastDrop < 170) return;
+  if (bank <= 0) {
+    elLive.textContent = 'Out of coins.';
+    if (now - lastDrop > 900) { popup('Out of coins!', V(dropperX, RAIL_Y, CHUTE_Z), '#ff8a80', false); lastDrop = now; }
+    return;
   }
-  function wakeAudio() {
-    if (audio) return;
-    try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audio = null; }
+  lastDrop = now;
+  bank--;
+  updateHud(); save();
+  dropsSinceStar++;
+  let type = 'coin';
+  if (dropsSinceStar > 30 && Math.random() < 0.08) { type = 'star'; dropsSinceStar = 0; }
+  else if (Math.random() < 0.035) type = 'gold';
+  const x = clamp(dropperX + (Math.random() - 0.5) * 0.02, -HALF_W + COIN_R, HALF_W - COIN_R);
+  const c = makeCoin(x, DEPTH - COIN_R - 0.02 - Math.random() * 0.12, type);
+  c.drop = { y: RAIL_Y - 0.05, vy: 0, onTop: true, flip: Math.random() * Math.PI };
+  dropping.push(c);
+  dropperKick = 1;
+  elHint.classList.add('gone');
+  sfx.drop();
+}
+
+elRefill.addEventListener('click', () => {
+  sfx.wake();
+  bank += 20;
+  updateHud(); save();
+  bump(elBank);
+  canvas.focus({ preventScroll: true });
+});
+
+/* ---------- sound (synthesized) ---------- */
+
+const sfx = (() => {
+  let ac = null, master = null, lastClink = 0;
+  let muted = false;
+  try { muted = localStorage.getItem('arcade-muted') === '1'; } catch (e) {}
+  function tone(freq, dur, type, vol, when = 0, slide) {
+    if (!ac) return;
+    const t = ac.currentTime + when;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.02);
   }
-
-  /* ---------- drawing ---------- */
-
-  function poly(c, pts) {
-    c.beginPath();
-    c.moveTo(pts[0].x, pts[0].y);
-    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
-    c.closePath();
-  }
-
-  var COLORS = {
-    coin: { face: '#d9dee4', rim: '#8d969f', edge: '#6b737b', mark: '#a9b2bb' },
-    gold: { face: '#ffd23f', rim: '#c48a00', edge: '#946700', mark: '#e0a800' },
-    star: { face: '#ff5edb', rim: '#a8228e', edge: '#7c1468', mark: '#ffe27a' }
+  return {
+    wake() {
+      if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+      master = ac.createGain(); master.gain.value = muted ? 0 : 0.9; master.connect(ac.destination);
+    },
+    get muted() { return muted; },
+    setMuted(m) {
+      muted = m;
+      try { localStorage.setItem('arcade-muted', m ? '1' : '0'); } catch (e) {}
+      if (master) master.gain.value = m ? 0 : 0.9;
+    },
+    clink(vol) {
+      if (!ac) return;
+      if (ac.currentTime - lastClink < 0.03) return;
+      lastClink = ac.currentTime;
+      const f = 2400 + Math.random() * 1600;
+      tone(f, 0.12, 'triangle', 0.05 * vol);
+      tone(f * 1.48, 0.08, 'sine', 0.025 * vol);
+    },
+    drop() { tone(900, 0.06, 'square', 0.015, 0, 500); },
+    chime() { tone(1318, 0.25, 'triangle', 0.08); tone(1760, 0.3, 'triangle', 0.06, 0.07); },
+    jackpot() { [784, 988, 1175, 1568, 1976].forEach((f, i) => tone(f, 0.28, 'triangle', 0.1, i * 0.08)); },
+    lost() { tone(300, 0.2, 'sine', 0.05, 0, 120); }
   };
-
-  function drawCoin(c, y, alpha) {
-    var col = COLORS[c.type];
-    var p = P(c.x, y + COIN_T, c.z);
-    var pa = P(c.x, y + COIN_T, c.z - COIN_R), pb = P(c.x, y + COIN_T, c.z + COIN_R);
-    var rx = COIN_R * p.k, ry = Math.abs(pa.y - pb.y) / 2;
-    if (c.fall) ry *= Math.abs(Math.cos(c.rot)) * 0.8 + 0.2;
-    var th = COIN_T * p.k;
-    if (alpha !== undefined) ctx.globalAlpha = alpha;
-    // edge
-    ctx.fillStyle = col.edge;
-    ctx.beginPath(); ctx.ellipse(p.x, p.y + th, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillRect(p.x - rx, p.y, rx * 2, th);
-    // face
-    ctx.fillStyle = col.rim;
-    ctx.beginPath(); ctx.ellipse(p.x, p.y, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = col.face;
-    ctx.beginPath(); ctx.ellipse(p.x, p.y, rx * 0.84, ry * 0.84, 0, 0, Math.PI * 2); ctx.fill();
-    if (rx > 6) {
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.scale(1, ry / rx);
-      ctx.rotate(c.rot);
-      if (c.type === 'star') {
-        ctx.fillStyle = col.mark;
-        starPath(ctx, rx * 0.6, rx * 0.26);
-        ctx.fill();
-      } else {
-        ctx.strokeStyle = col.mark;
-        ctx.lineWidth = Math.max(1, rx * 0.1);
-        ctx.beginPath(); ctx.arc(0, 0, rx * 0.55, 0, Math.PI * 2); ctx.stroke();
-        if (c.type === 'gold') {
-          ctx.fillStyle = col.mark;
-          ctx.font = 'bold ' + Math.round(rx * 0.8) + 'px "Trebuchet MS", Tahoma, sans-serif';
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText('5', 0, rx * 0.04);
-        }
-      }
-      ctx.restore();
-      // glint
-      ctx.fillStyle = 'rgba(255,255,255,0.45)';
-      ctx.beginPath(); ctx.ellipse(p.x - rx * 0.35, p.y - ry * 0.35, rx * 0.22, ry * 0.12, -0.5, 0, Math.PI * 2); ctx.fill();
-    }
-    if (alpha !== undefined) ctx.globalAlpha = 1;
-  }
-
-  function starPath(c, R, r) {
-    c.beginPath();
-    for (var i = 0; i < 10; i++) {
-      var a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R;
-      if (i) c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); else c.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
-    }
-    c.closePath();
-  }
-
-  function byDepth(a, b) { return b.z - a.z; }
-
-  function draw(dt, now) {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    // Room
-    var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#13394d');
-    g.addColorStop(1, '#071821');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-
-    // Prize tray under the front edge
-    var t0 = P(-HALF_W - 0.04, -0.06, 0), t1 = P(HALF_W + 0.04, -0.06, 0);
-    var t2 = P(HALF_W + 0.04, -0.28, -0.08), t3 = P(-HALF_W - 0.04, -0.28, -0.08);
-    ctx.fillStyle = '#0a1f2b';
-    poly(ctx, [t0, t1, t2, t3]); ctx.fill();
-
-    // Back wall with lights
-    var bw = [P(-HALF_W, 0, DEPTH), P(HALF_W, 0, DEPTH), P(HALF_W, WALL_H, DEPTH), P(-HALF_W, WALL_H, DEPTH)];
-    var wg = ctx.createLinearGradient(0, bw[3].y, 0, bw[0].y);
-    wg.addColorStop(0, '#2f86d6');
-    wg.addColorStop(1, '#173f6b');
-    ctx.fillStyle = wg;
-    poly(ctx, bw); ctx.fill();
-    for (var i = 0; i < 9; i++) {
-      var lp = P(-HALF_W + 0.07 + i * (2 * HALF_W - 0.14) / 8, WALL_H - 0.05, DEPTH);
-      var on = ((now / 220 | 0) + i) % 3 === 0;
-      ctx.fillStyle = on ? '#ffe27a' : '#5b6f88';
-      ctx.beginPath(); ctx.arc(lp.x, lp.y, Math.max(2, lp.k * 0.018), 0, Math.PI * 2); ctx.fill();
-    }
-    var mp = P(0, WALL_H * 0.6, DEPTH);
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = 'bold ' + Math.round(mp.k * 0.09) + 'px "Trebuchet MS", Tahoma, sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('PUSH YOUR LUCK', mp.x, mp.y);
-
-    // Shelf floor
-    var fl = [P(-HALF_W, 0, 0), P(HALF_W, 0, 0), P(HALF_W, 0, DEPTH), P(-HALF_W, 0, DEPTH)];
-    var fg = ctx.createLinearGradient(0, fl[2].y, 0, fl[0].y);
-    fg.addColorStop(0, '#6b1d6e');
-    fg.addColorStop(1, '#b0359c');
-    ctx.fillStyle = fg;
-    poly(ctx, fl); ctx.fill();
-    // front edge strip
-    ctx.fillStyle = '#ffd23f';
-    poly(ctx, [P(-HALF_W, 0, 0), P(HALF_W, 0, 0), P(HALF_W, -0.035, 0), P(-HALF_W, -0.035, 0)]); ctx.fill();
-    // side gutters at the front corners
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    poly(ctx, [P(-HALF_W, 0, 0), P(-HALF_W + 0.02, 0, 0), P(-HALF_W + 0.02, 0, WALL_START), P(-HALF_W, 0, WALL_START)]); ctx.fill();
-    poly(ctx, [P(HALF_W - 0.02, 0, 0), P(HALF_W, 0, 0), P(HALF_W, 0, WALL_START), P(HALF_W - 0.02, 0, WALL_START)]); ctx.fill();
-
-    // Pusher top surface and the coins riding on it
-    var pt = [P(-HALF_W, PUSH_H, face), P(HALF_W, PUSH_H, face), P(HALF_W, PUSH_H, DEPTH), P(-HALF_W, PUSH_H, DEPTH)];
-    ctx.fillStyle = '#c9d3dc';
-    poly(ctx, pt); ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    for (i = 1; i < 6; i++) {
-      var zz = face + (DEPTH - face) * i / 6;
-      var s1 = P(-HALF_W, PUSH_H, zz), s2 = P(HALF_W, PUSH_H, zz);
-      ctx.fillRect(s1.x, s1.y, s2.x - s1.x, 1);
-    }
-    top.sort(byDepth);
-    for (i = 0; i < top.length; i++) drawCoin(top[i], PUSH_H);
-    dropping.sort(byDepth);
-    for (i = 0; i < dropping.length; i++) if (dropping[i].drop.onTop) drawCoin(dropping[i], dropping[i].drop.y);
-
-    // Pusher front face
-    var pf = [P(-HALF_W, 0, face), P(HALF_W, 0, face), P(HALF_W, PUSH_H, face), P(-HALF_W, PUSH_H, face)];
-    var pg = ctx.createLinearGradient(0, pf[2].y, 0, pf[0].y);
-    pg.addColorStop(0, '#f6c21c');
-    pg.addColorStop(1, '#c48a00');
-    ctx.fillStyle = pg;
-    poly(ctx, pf); ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    poly(ctx, [P(-HALF_W, 0, face), P(HALF_W, 0, face), P(HALF_W, 0, face - 0.03), P(-HALF_W, 0, face - 0.03)]); ctx.fill();
-
-    // Shelf coins (and ones dropping off the lip)
-    shelf.sort(byDepth);
-    for (i = 0; i < shelf.length; i++) drawCoin(shelf[i], 0);
-    for (i = 0; i < dropping.length; i++) if (!dropping[i].drop.onTop) drawCoin(dropping[i], dropping[i].drop.y);
-
-    // Glass side walls
-    ctx.fillStyle = 'rgba(160, 220, 255, 0.12)';
-    ctx.strokeStyle = 'rgba(200, 240, 255, 0.5)';
-    ctx.lineWidth = 1.5;
-    [-1, 1].forEach(function (sx) {
-      var wpts = [P(sx * HALF_W, 0, WALL_START), P(sx * HALF_W, 0, DEPTH), P(sx * HALF_W, WALL_H, DEPTH), P(sx * HALF_W, WALL_H * 0.7, WALL_START)];
-      poly(ctx, wpts); ctx.fill(); ctx.stroke();
-    });
-
-    // Coins falling into the tray / gutters
-    for (i = 0; i < falling.length; i++) {
-      var f = falling[i];
-      drawCoin(f, f.fall.y, Math.max(0, 1 - f.fall.t * 1.6));
-    }
-
-    // Drop aim marker
-    if (aimShown || keyAimed) {
-      var a = P(aimX, WALL_H + 0.06, DEPTH - 0.05), a2 = P(aimX, PUSH_H, DEPTH - 0.08);
-      ctx.strokeStyle = 'rgba(255, 226, 122, 0.55)';
-      ctx.setLineDash([4, 4]);
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#ffe27a';
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y + 2);
-      ctx.lineTo(a.x - 8, a.y - 10);
-      ctx.lineTo(a.x + 8, a.y - 10);
-      ctx.closePath(); ctx.fill();
-    }
-
-    drawPopups(dt);
-  }
-
-  function popup(text, p, color, big) {
-    popups.push({ text: text, x: p.x, y: p.y, color: color, big: !!big, t: 0 });
-  }
-  function drawPopups(dt) {
-    for (var i = popups.length - 1; i >= 0; i--) {
-      var p = popups[i];
-      p.t += dt;
-      if (p.t > 1.1) { popups.splice(i, 1); continue; }
-      var e = p.t / 1.1;
-      ctx.globalAlpha = 1 - e * e;
-      ctx.font = 'bold ' + (p.big ? 26 : 18) + 'px "Trebuchet MS", Tahoma, sans-serif';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = 'rgba(4,20,30,0.85)';
-      var y = p.y - 6 - e * 36;
-      ctx.strokeText(p.text, p.x, y);
-      ctx.fillStyle = p.color;
-      ctx.fillText(p.text, p.x, y);
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  /* ---------- input ---------- */
-
-  var holding = null, keyAimed = false, keys = {};
-
-  function aimFromClient(clientX) {
-    var rect = canvas.getBoundingClientRect();
-    var p = P(0, PUSH_H, DEPTH - 0.08);
-    aimX = clamp((clientX - rect.left - p.x) / p.k, -HALF_W + COIN_R, HALF_W - COIN_R);
-  }
-
-  canvas.addEventListener('pointermove', function (e) {
-    aimFromClient(e.clientX);
-    aimShown = true;
-    keyAimed = false;
-  });
-  canvas.addEventListener('pointerleave', function () { if (!holding) aimShown = false; });
-  canvas.addEventListener('pointerdown', function (e) {
-    wakeAudio();
-    aimFromClient(e.clientX);
-    aimShown = true;
-    holding = { id: e.pointerId, next: performance.now() + 380 };
-    lastDrop = 0;
-    dropCoin();
-    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
-  });
-  function release(e) {
-    if (holding && e.pointerId === holding.id) holding = null;
-    if (e.pointerType !== 'mouse') aimShown = false;
-  }
-  canvas.addEventListener('pointerup', release);
-  canvas.addEventListener('pointercancel', release);
-
-  window.addEventListener('keydown', function (e) {
-    if (e.target && e.target.tagName === 'BUTTON') return;
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { keys[e.key] = true; keyAimed = true; e.preventDefault(); }
-    if (e.key === ' ' || e.key === 'Enter') { wakeAudio(); keyAimed = true; dropCoin(); e.preventDefault(); }
-  });
-  window.addEventListener('keyup', function (e) { keys[e.key] = false; });
-
-  /* ---------- loop ---------- */
-
-  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
-
-  var last = performance.now();
-  function frame(now) {
-    var dt = Math.min((now - last) / 1000, 1 / 20);
-    last = now;
-    var dir = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
-    if (dir) aimX = clamp(aimX + dir * dt * 0.7, -HALF_W + COIN_R, HALF_W - COIN_R);
-    if (holding && now >= holding.next) { dropCoin(); holding.next = now + 220; }
-    var n = 2, sub = dt / n;
-    for (var i = 0; i < n; i++) step(sub);
-    draw(dt, now);
-    requestAnimationFrame(frame);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  fillMachine();
-  updateHud();
-  requestAnimationFrame(frame);
 })();
+
+const elMute = document.getElementById('mute');
+function syncMute() {
+  elMute.setAttribute('aria-pressed', sfx.muted ? 'true' : 'false');
+  elMute.setAttribute('aria-label', sfx.muted ? 'Unmute sound' : 'Mute sound');
+}
+elMute.addEventListener('click', () => { sfx.wake(); sfx.setMuted(!sfx.muted); syncMute(); canvas.focus({ preventScroll: true }); });
+syncMute();
+
+/* ---------- effects overlay ---------- */
+
+function popup(text, world, color, big, life) {
+  popups.push({ text, world: world.clone(), color, big: !!big, t: 0, life: life || 1.1 });
+}
+function burst(world, n) {
+  const p = toScreen(world);
+  const cols = ['#ff5edb', '#3fd0ff', '#ffe27a', '#7dff8a', '#ffffff'];
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.4, s = 140 + Math.random() * 280;
+    confetti.push({ x: p.x, y: p.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, t: 0, life: 0.9 + Math.random() * 0.7,
+      c: cols[i % cols.length], r: Math.random() * 6, w: 3 + Math.random() * 4 });
+  }
+}
+const _v = new THREE.Vector3();
+function toScreen(world) {
+  _v.copy(world).project(camera);
+  return { x: (_v.x * 0.5 + 0.5) * W, y: (-_v.y * 0.5 + 0.5) * H };
+}
+
+function drawFx(dt) {
+  fctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  fctx.clearRect(0, 0, W, H);
+
+  // where the next coin will land
+  if (aimShown || keyAimed) {
+    const a = toScreen(V(dropperX, RAIL_Y - 0.05, CHUTE_Z));
+    const b = toScreen(V(dropperX, PUSH_H + 0.002, CHUTE_Z));
+    fctx.strokeStyle = 'rgba(255, 226, 122, 0.6)';
+    fctx.setLineDash([4, 5]);
+    fctx.lineDashOffset = -performance.now() / 30;
+    fctx.lineWidth = 2;
+    fctx.beginPath(); fctx.moveTo(a.x, a.y); fctx.lineTo(b.x, b.y); fctx.stroke();
+    fctx.setLineDash([]);
+    const r = Math.abs(toScreen(V(dropperX + COIN_R, PUSH_H, CHUTE_Z)).x - b.x);
+    fctx.strokeStyle = 'rgba(255, 226, 122, 0.8)';
+    fctx.beginPath(); fctx.ellipse(b.x, b.y, r, r * 0.6, 0, 0, Math.PI * 2); fctx.stroke();
+  }
+
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const c = confetti[i];
+    c.t += dt;
+    if (c.t > c.life) { confetti.splice(i, 1); continue; }
+    c.vy += 520 * dt; c.vx *= 0.985;
+    c.x += c.vx * dt; c.y += c.vy * dt; c.r += dt * 9;
+    fctx.globalAlpha = 1 - Math.pow(c.t / c.life, 2);
+    fctx.save(); fctx.translate(c.x, c.y); fctx.rotate(c.r);
+    fctx.fillStyle = c.c; fctx.fillRect(-c.w / 2, -c.w / 4, c.w, c.w / 2);
+    fctx.restore();
+  }
+  fctx.globalAlpha = 1;
+
+  // a running total when several coins come over together
+  if (streak.t > 0) {
+    streak.t -= dt;
+    if (streak.t <= 0) {
+      if (streak.count >= 3) popup(streak.count + ' coins · +' + streak.total, V(0, 0.12, 0.05), '#7dff8a', true, 1.4);
+      streak = { total: 0, count: 0, t: 0 };
+    }
+  }
+
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const p = popups[i];
+    p.t += dt;
+    if (p.t > p.life) { popups.splice(i, 1); continue; }
+    const e = p.t / p.life;
+    const s = toScreen(p.world);
+    const size = (p.big ? 26 : 18) * (1 + (p.t < 0.15 ? (0.15 - p.t) * 4 : 0));
+    fctx.globalAlpha = 1 - e * e;
+    fctx.font = `bold ${Math.round(size)}px "Trebuchet MS", Tahoma, sans-serif`;
+    fctx.textAlign = 'center'; fctx.textBaseline = 'middle';
+    fctx.lineJoin = 'round'; fctx.lineWidth = 4;
+    fctx.strokeStyle = 'rgba(4,20,30,0.9)';
+    const y = s.y - 8 - e * 40;
+    fctx.strokeText(p.text, s.x, y);
+    fctx.fillStyle = p.color;
+    fctx.fillText(p.text, s.x, y);
+  }
+  fctx.globalAlpha = 1;
+}
+
+/* ---------- drawing the 3D frame ---------- */
+
+const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), eul = new THREE.Euler(), pos = new THREE.Vector3(), one = new THREE.Vector3(1, 1, 1);
+const counts = { coin: 0, gold: 0, star: 0 };
+let chase = 0, dropperKick = 0;
+
+function putCoin(c, y, rx, rz) {
+  const im = coinMesh[c.type];
+  const n = counts[c.type]++;
+  if (n >= MAX_COINS) return;
+  pos.set(c.x, y + COIN_T / 2, -c.z);
+  eul.set(rx || 0, c.rot, rz || 0, 'YXZ');
+  q.setFromEuler(eul);
+  mtx.compose(pos, q, one);
+  im.setMatrixAt(n, mtx);
+}
+
+function render(dt, now) {
+  counts.coin = counts.gold = counts.star = 0;
+  for (const c of shelf) {
+    // a coin hanging over the front edge tips forward a little
+    const over = c.z < COIN_R ? (COIN_R - c.z) / COIN_R : 0;
+    let wob = 0;
+    if (c.wobble) { c.wobble = Math.max(0, c.wobble - dt * 4); wob = Math.sin(c.wobble * 20) * 0.12 * c.wobble; }
+    putCoin(c, -over * over * 0.01, -over * over * 0.35 + wob, 0);
+  }
+  for (const c of top) {
+    let wob = 0;
+    if (c.wobble) { c.wobble = Math.max(0, c.wobble - dt * 4); wob = Math.sin(c.wobble * 20) * 0.12 * c.wobble; }
+    putCoin(c, PUSH_H, wob, 0);
+  }
+  for (const c of dropping) {
+    const d = c.drop;
+    if (d.spill) { d.spill = Math.max(0, d.spill - dt * 5); putCoin(c, d.y, -d.spill * 0.5, 0); }
+    else putCoin(c, d.y, Math.sin(d.flip + d.y * 25) * 0.6, Math.cos(d.flip + d.y * 18) * 0.4);
+  }
+  for (const c of falling) {
+    const f = c.fall;
+    putCoin(c, f.y, f.axis ? 0 : -f.tumble, f.axis ? f.tumble * (c.x < 0 ? 1 : -1) : 0);
+  }
+  for (const c of tray) putCoin(c, c.y, c.tilt, c.tiltZ);
+  TYPE_KEYS.forEach(t => {
+    const im = coinMesh[t];
+    im.count = Math.min(counts[t], MAX_COINS);
+    im.instanceMatrix.needsUpdate = true;
+  });
+
+  pusher.position.z = -face;
+
+  // dropper glides to the aim and bobs when it drops a coin
+  dropperX += (aimX - dropperX) * Math.min(1, dt * 14);
+  dropperKick = Math.max(0, dropperKick - dt * 6);
+  dropper.position.copy(V(dropperX, RAIL_Y + dropperKick * 0.012, CHUTE_Z));
+
+  chase += dt * (celebrate > 0 ? 24 : 5);
+  if (celebrate > 0) celebrate = Math.max(0, celebrate - dt * 0.4);
+  bulbs.forEach(b => {
+    const on = celebrate > 0 ? Math.floor(chase / 2) % 2 === 0 : (Math.floor(chase) + b.order) % 3 === 0;
+    b.m.material = on ? M.bulbOn : M.bulbOff;
+  });
+  pinkLight.intensity = 0.45 + celebrate * 2 * (0.5 + 0.5 * Math.sin(now / 60));
+  cyanLight.intensity = 0.45 + celebrate * 2 * (0.5 - 0.5 * Math.sin(now / 60));
+
+  renderer.render(scene, camera);
+  drawFx(dt);
+}
+
+/* ---------- input ---------- */
+
+let holding = null, keyAimed = false, lastPointerType = 'mouse';
+const keys = {};
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), hit = new THREE.Vector3();
+const aimPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), CHUTE_Z);  // the vertical plane the chute moves in
+
+function aimFromClient(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  ndc.set((clientX - rect.left) / rect.width * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  if (ray.ray.intersectPlane(aimPlane, hit)) aimX = clamp(hit.x, -HALF_W + COIN_R, HALF_W - COIN_R);
+}
+
+canvas.addEventListener('pointermove', e => {
+  aimFromClient(e.clientX, e.clientY);
+  if (e.pointerType === 'mouse' || holding) aimShown = true;
+  keyAimed = false;
+});
+canvas.addEventListener('pointerleave', () => { if (!holding) aimShown = false; });
+canvas.addEventListener('pointerdown', e => {
+  sfx.wake();
+  lastPointerType = e.pointerType;
+  aimFromClient(e.clientX, e.clientY);
+  if (e.pointerType !== 'mouse') dropperX = aimX;  // a tap drops right where you touched
+  aimShown = true;
+  holding = { id: e.pointerId, next: performance.now() + 380 };
+  lastDrop = 0;
+  dropCoin();
+  if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+});
+function release(e) {
+  if (holding && e.pointerId === holding.id) holding = null;
+  if (e.pointerType !== 'mouse') aimShown = false;
+}
+canvas.addEventListener('pointerup', release);
+canvas.addEventListener('pointercancel', release);
+
+window.addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'BUTTON') return;
+  sfx.wake();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { keys[e.key] = true; keyAimed = true; e.preventDefault(); }
+  if (e.key === ' ' || e.key === 'Enter') { keyAimed = true; dropCoin(); e.preventDefault(); }
+});
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+window.addEventListener('blur', () => { keys.ArrowLeft = keys.ArrowRight = false; holding = null; });
+
+/* ---------- loop ---------- */
+
+let last = performance.now(), saveT = 0;
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 1 / 20);
+  last = now;
+  const dir = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
+  if (dir) aimX = clamp(aimX + dir * dt * 0.7, -HALF_W + COIN_R, HALF_W - COIN_R);
+  if (holding && now >= holding.next) { dropCoin(); holding.next = now + 220; }
+  const n = 2, sub = dt / n;
+  for (let i = 0; i < n; i++) step(sub);
+  saveT += dt;
+  if (saveT > 2) { saveT = 0; save(); }
+  render(dt, now);
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('pagehide', save);
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+resize();
+if (!load()) fillMachine();
+updateHud();
+requestAnimationFrame(frame);
+
+// Test hooks for automated checks.
+window.__coinState = () => ({ bank, won, shelf: shelf.length, top: top.length, tray: tray.length, falling: falling.length, dropping: dropping.length });
+window.__coinDrop = x => { aimX = dropperX = clamp(x || 0, -HALF_W + COIN_R, HALF_W - COIN_R); lastDrop = 0; dropCoin(); };
 </script>
 </body>
 </html>
